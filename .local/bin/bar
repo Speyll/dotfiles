@@ -2,9 +2,9 @@
 pkill lemonbar
 
 # colors
-background='#163638'
+background='#274047'
 foreground='#D8DEE8'
-color1='#81A1C1'
+color1='#88C0D0'
 
 # format an icon
 icon() {
@@ -15,13 +15,9 @@ get_workspaces() {
 	desk=$(xdotool get_desktop)
     current_workspace=$(($desk + 1))
     case "$current_workspace" in
-        1) echo  "$(icon Br 0)  Te  Fi  En  Dr  Co  Ga";;
-        2) echo  "Br  $(icon Te 0)  Fi  En  Dr  Co  Ga";;
-        3) echo  "Br  Te  $(icon Fi 0)  En  Dr  Co  Ga";;
-        4) echo  "Br  Te  Fi  $(icon En 0)  Dr  Co  Ga";;
-        5) echo  "Br  Te  Fi  En  $(icon Dr 0)  Co  Ga";;
-        6) echo  "Br  Te  Fi  En  Dr  $(icon Co 0)  Ga";;
-        7) echo  "Br  Te  Fi  En  Dr  Co  $(icon Ga 0)";;
+        1) echo  "$(icon  0)    ";;
+        2) echo  "  $(icon  0)  ";;
+        3) echo  "    $(icon  0)";;
     esac
 }
 
@@ -40,8 +36,8 @@ get_network() {
 }
 
 get_battery() {
-    battery_status=$(cat /sys/class/power_supply/BAT0/status)
-    battery_percent=$(cat /sys/class/power_supply/BAT0/capacity)
+    battery_status=$(cat /sys/class/power_supply/BAT1/status)
+    battery_percent=$(cat /sys/class/power_supply/BAT1/capacity)
     case "$battery_status" in
         Charging)
             printf "%s%%\\n" "$(icon )${battery_percent}"
@@ -78,7 +74,7 @@ main() {
     done |\
     # lemonbar settings
     lemonbar -g 'x18'  \
-        -f 'cherry:size=10' -f 'Siji:size=10' \
+        -f 'kakwafont:size=10' -f 'Siji:size=10' \
         -B "${background}" -F "${foreground}" \
         -n 'bar'
 }
