@@ -1,7 +1,11 @@
 #! /bin/sh
 
-#  workspaces setup
+# Workspaces
 bspc monitor -d I II III
+
+# Compositor
+pkill compton
+compton &
 
 # Lemonbar
 #pkill lemonbar
@@ -10,10 +14,6 @@ bspc monitor -d I II III
 # Wallpaper settings
 hsetroot -fill ~/Images/Wallpapers/Wallpaper.jpg &
 #xwinwrap -ov -ni -fs -- mpv -vo x11 -wid WID --keepaspect=no --loop /home/lyes/Images/Wallpaper/wallpaper.gif &
-
-# Compositor
-pkill compton
-compton &
 
 # Border gaps settings
 bspc config border_width         4
@@ -38,4 +38,4 @@ bspc config split_ratio          0.52
 bspc config single_monocle       true
 bspc config borderless_monocle   false
 bspc config gapless_monocle      false
-bspc config focus_follow_pointer true
+bspc config focus_follows_pointer true
