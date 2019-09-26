@@ -13,7 +13,7 @@ hwdec-codecs=all
 
 # Subtitle 
 slang=fr
-sub-font="Inconsolata"
+sub-font="Hack"
 sub-font-size=14
 sub-color="#75ff00"
 sub-border-color="#000000"
@@ -32,7 +32,7 @@ osd-level=1
 # hide the osd after x ms          
 osd-duration=2500
   
-osd-font="Inconsolata"
+osd-font="Hack"
 osd-font-size=14
 osd-color="#ffffff"
 osd-border-color="#000000"
