@@ -1,0 +1,140 @@
+#
+# wm independent hotkeys
+#
+
+# terminal emulator
+super + {Return, + shift + Return}
+	{st, st -e tmux}
+
+# program launcher
+super + {d,n}
+	{dmenu_run -p 'uwu what`s this ?', dmenubar}
+
+# make sxhkd reload its configuration files:
+super + Escape
+	pkill -USR1 -x sxhkd
+
+# browser
+super + shift + b
+	tabbed surf -pe
+
+# pcmanfm
+super + shift + p
+	st -e nnn
+
+# lemonbar
+#super + shift + r
+#	pkill lemonbar | pkill bar | pkill sleep | bar
+
+# script launcher
+super + shift + s
+	scriptlaunch
+
+#
+# Special hotkeys
+#
+
+# Screenshot key
+Print
+	scrot -e 'mkdir -p ~/Images/Screenshots && mv $f ~/Images/Screenshots && xclip -selection clipboard -t image/png -i ~/Images/Screenshots/`ls -1 -t ~/Images/Screenshots | head -1`'
+
+# Multimedia keys
+XF86AudioRaiseVolume
+	amixer -q set Master 5%+ unmute
+
+XF86AudioLowerVolume
+	amixer -q set Master 5%- unmute
+
+XF86AudioMute
+amixer -q set Master mute
+
+#
+# bspwm hotkeys
+#
+
+# quit/restart bspwm
+super + alt + {q,r}
+	pkill lemonbar | pkill bar | pkill sleep | pkill xtitle | bspc {quit,wm -r}
+
+# close and kill
+super + {_,shift + }a
+	bspc node -{c,k}
+d
+## alternate between the tiled and monocle layout
+super + m
+	bspc desktop -l next
+
+# focus the next/previous node in the current desktop
+super + {_,shift + }c
+	bspc node -f {next,prev}.local
+
+## set the window state
+super + {t,p,s,f}
+	bspc node -t {tiled,pseudo_tiled,floating,fullscreen}
+
+## set the node flags
+super + ctrl + {m,x,y,z}
+	bspc node -g {marked,locked,sticky,private}
+	
+## spit horizontal & split vertical, like in i3-gaps :D
+super + {h,v}
+	bspc node -p {east,south}
+	
+## preselect the ratio
+super + ctrl + {ampersand,eacute,quotedbl,apostrophe,parenleft,minus,egrave,underscore}
+	bspc node -o 0.{1-8}
+
+## cancel it, I set it to super + r. like in my herbstluftwm config
+super + r
+	bspc node -p cancel
+
+## send the window in the given direction
+super + {_,shift + }{Left,Down,Up,Right}
+	bspc node -{f,s} {west,south,north,east}
+
+## focus the next node in the current desktop
+alt + Tab
+	bspc node -f next.local
+	
+## focus the previous node in the current desktop
+alt + shift + Tab
+	bspc node -f prev.local
+
+## focus the next/previous desktop in the current monitor
+ctrl + alt + Left
+	bspc desktop -f prev.local
+ctrl + alt + Right
+	bspc desktop -f next.local
+
+## focus the last node/desktop
+super + {Tab,grave}
+	bspc {node,desktop} -f last
+
+## focus or send to the given desktop
+super + {_,shift + }{ampersand,eacute,quotedbl}
+	bspc {desktop -f,node -d} '^{1-3}'
+	
+## jump to another workspace
+super + {ampersand,eacute,quotedbl}
+	bspc desktop --focus^{1-3}
+
+## expanding windows
+super + ctrl + {Left,Right,Up,Down}
+	bspc node -z {left -10 0,right 10 0,top 0 -10,bottom 0 10}
+	
+## shrinking windows
+super + alt + {Left,Right,Up,Down}
+	bspc node -z {left 10 0,right -10 0,top 0 10,bottom 0 -10}
+	
+## move floating windows
+alt + shift + {Left,Down,Up,Right}
+	bspc node -v {-10 0,0 10,0 -10,10 0}
+
+## hide window
+super + i
+	bspc node -g hidden
+
+## unhide window
+super shift + i
+	bspc node {,$(bspc query -N -n .hidden | tail -n1)} -g hidden=off
+

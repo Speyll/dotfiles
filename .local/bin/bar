@@ -1,0 +1,86 @@
+#!/bin/bash
+pkill lemonbar
+
+# colors
+background='#163638'
+foreground='#D8DEE8'
+color1='#81A1C1'
+
+# format an icon
+icon() {
+    printf "%s\\n" "%{F${color1}}${1}%{F-}"
+}
+
+get_workspaces() {
+	desk=$(xdotool get_desktop)
+    current_workspace=$(($desk + 1))
+    case "$current_workspace" in
+        1) echo  "$(icon Br 0)  Te  Fi  En  Dr  Co  Ga";;
+        2) echo  "Br  $(icon Te 0)  Fi  En  Dr  Co  Ga";;
+        3) echo  "Br  Te  $(icon Fi 0)  En  Dr  Co  Ga";;
+        4) echo  "Br  Te  Fi  $(icon En 0)  Dr  Co  Ga";;
+        5) echo  "Br  Te  Fi  En  $(icon Dr 0)  Co  Ga";;
+        6) echo  "Br  Te  Fi  En  Dr  $(icon Co 0)  Ga";;
+        7) echo  "Br  Te  Fi  En  Dr  Co  $(icon Ga 0)";;
+    esac
+}
+
+get_time() {
+    printf "%s\\n" "$(icon )$(date +'%H:%M')"
+}
+
+get_network() {
+    network_id=$(/sbin/iwgetid -r)
+    if [ -n "$network_id" ]
+    then
+        printf "%s\\n" " $(icon )${network_id} "
+    else
+        printf "%s\\n" " $(icon )offline"
+    fi
+}
+
+get_battery() {
+    battery_status=$(cat /sys/class/power_supply/BAT0/status)
+    battery_percent=$(cat /sys/class/power_supply/BAT0/capacity)
+    case "$battery_status" in
+        Charging)
+            printf "%s%%\\n" "$(icon )${battery_percent}"
+            ;;
+        Discharging)
+            if [ "$battery_percent" -gt 80 ]
+            then
+                printf "%s%%\\n" "$(icon )${battery_percent}"
+            elif [ "$battery_percent" -gt 30 ]
+            then
+                printf "%s%%\\n" "$(icon )${battery_percent}"
+            else
+                printf "%s%%\\n" "$(icon )${battery_percent}"
+            fi
+            ;;
+        Unknown|Full) printf "%s%%\\n" "$(icon )100";;
+    esac
+}
+
+get_window(){
+	printf "%s\\n" "$(icon )$(xtitle -t 70)"
+}
+
+# main
+main() {
+    # loop
+    while :
+    do
+       printf "%s%s%s\\n" \
+            "%{l} $(get_window)" \
+            "%{c}$(get_workspaces)" \
+            "%{r}$(get_network) $(get_battery) $(get_time) "
+        sleep 3s
+    done |\
+    # lemonbar settings
+    lemonbar -g 'x18'  \
+        -f 'cherry:size=10' -f 'Siji:size=10' \
+        -B "${background}" -F "${foreground}" \
+        -n 'bar'
+}
+
+main
