@@ -2,7 +2,7 @@
 pkill lemonbar
 
 # colors
-background='#274047'
+background='#161623'
 foreground='#D8DEE8'
 color1='#88C0D0'
 
