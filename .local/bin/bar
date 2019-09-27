@@ -74,7 +74,7 @@ main() {
     done |\
     # lemonbar settings
     lemonbar -g 'x18'  \
-        -f 'kakwafont:size=10' -f 'Siji:size=10' \
+        -f 'cherry:size=9' -f 'Siji:size=10' \
         -B "${background}" -F "${foreground}" \
         -n 'bar'
 }
