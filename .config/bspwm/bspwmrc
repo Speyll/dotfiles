@@ -8,7 +8,7 @@ pkill compton
 compton &
 
 # Lemonbar
-#pkill lemonbar
+pkill lemonbar | pkill bar | pkill xtitle | pkill sleep
 #bar &
 
 # Wallpaper settings
