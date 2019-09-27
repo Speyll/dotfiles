@@ -23,8 +23,8 @@ super + shift + p
 	st -e nnn
 
 # lemonbar
-#super + shift + r
-#	pkill lemonbar | pkill bar | pkill sleep | bar
+super + shift + r
+	pkill lemonbar | pkill bar | pkill sleep | bar
 
 # script launcher
 super + shift + s
