@@ -5,7 +5,7 @@
 export PATH="$(du $HOME/.local/bin/ | cut -f2 | tr '\n' ':')$PATH"
 export EDITOR="vim"
 export TERMINAL="st"
-export BROWSER="surf"
+export BROWSER="tabbed surf -pe"
 export READER="mupdf"
 export FILE="nnn"
 export SUDO_ASKPASS="$HOME/.local/bin/tools/dmenupass"
