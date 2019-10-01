@@ -6,6 +6,11 @@ autofit-larger=90%x90%
 keep-open
 pause
 
+# Cache
+cache=yes
+cache-default=8192
+cache-secs=4000
+
 # Youtube dl / hardware acceleration
 ytdl-format=best[height<=?480]+bestaudio/best
 hwdec=vdpau
