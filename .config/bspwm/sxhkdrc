@@ -24,7 +24,7 @@ super + shift + p
 
 # lemonbar
 super + shift + r
-	pkill lemonbar | pkill bar | pkill sleep | bar
+	pkill lemonbar | pkill sleep | pkill xtitle | bar
 
 # script launcher
 super + shift + s
@@ -54,7 +54,7 @@ amixer -q set Master mute
 
 # quit/restart bspwm
 super + alt + {q,r}
-	pkill lemonbar | pkill bar | pkill sleep | pkill xtitle | bspc {quit,wm -r}
+	pkill lemonbar | pkill bar | pkill sleep | pkill xtitle | pkill sxiv | pkill hsetroot | bspc {quit,wm -r}
 
 # close and kill
 super + {_,shift + }a
