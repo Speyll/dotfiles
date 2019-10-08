@@ -133,6 +133,10 @@ super + alt + {Left,Right,Up,Down}
 ## move floating windows
 alt + shift + {Left,Down,Up,Right}
 	bspc node -v {-50 0,0 50,0 -50,50 0}
+	
+## no gaps
+super + ctrl + equal
+	bspc config top_padding 0; bspc config bottom_padding 0; bspc config left_padding 0; bspc config right_padding 0; bspc config window_gap 0; bspc config border_width 1
 
 ## hide window
 super + i
