@@ -1,0 +1,9 @@
+#!/bin/bash
+choice=$(echo -e "shutdown\nreboot\nsuspend\nhibernate" | dmenu -i -p "what do?")
+
+case "$choice" in
+  shutdown) sudo shutdown -h now & ;;
+  reboot) sudo shutdown -r now & ;;
+  suspend) sudo pm-suspend & ;;
+  hibernate) sudo pm-hibernate & ;;
+esac

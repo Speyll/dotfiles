@@ -1,2 +1,10 @@
 #!/bin/bash
-$(find ~/.local/bin/scripts/* | dmenu -l 5 -i -p "Choose script:")
+choice=$(echo -e "dmenumount\ndmenuumount\nducksearch\nrecordmenu\nrecordkill" | dmenu -i -p "Choose what script launch:")
+
+case "$choice" in
+    dmenumount) dmenumount & ;;
+    dmenuumount) dmenuumount & ;;
+    ducksearch) ducksearch & ;;
+    recordmenu) recordmenu & ;;
+    recordkill) recordkill & ;;
+esac

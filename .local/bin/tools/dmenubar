@@ -6,8 +6,8 @@ get_time() {
 
 # Battery
 get_battery() {
-    battery_status=$(cat /sys/class/power_supply/BAT1/status)
-    battery_percent=$(cat /sys/class/power_supply/BAT1/capacity)
+    battery_status=$(cat /sys/class/power_supply/BAT0/status)
+    battery_percent=$(cat /sys/class/power_supply/BAT0/capacity)
     case "$battery_status" in
         Charging)
             printf "%s%%\\n" "${battery_percent}"
@@ -40,8 +40,8 @@ get_network() {
 
 # Get them all
 get_all() {
-printf "Time: $(get_time) | Wi-fi: $(get_network) | Battery: $(get_battery)"
+echo -e "Time: $(get_time) | Wi-fi: $(get_network) | Battery: $(get_battery)"
 }
 
 # Notify them
-dmenu_run -p "$(get_all)"
+echo -e "$(get_all)" | dmenu -i -p "you are doing good"
