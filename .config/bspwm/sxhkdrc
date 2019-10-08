@@ -16,7 +16,7 @@ super + Escape
 
 # browser
 super + shift + b
-	tabbed surf -pe
+	tabbed -c surf -e
 
 # pcmanfm
 super + shift + p
@@ -24,11 +24,15 @@ super + shift + p
 
 # lemonbar
 super + shift + r
-	pkill lemonbar | pkill sleep | pkill xtitle | bar
+	pkill lemonbar | pkill sleep | bar
 
 # script launcher
 super + shift + s
 	scriptlaunch
+
+# script shutdown
+super + alt + ctrl + s
+    dmenuout
 
 #
 # Special hotkeys
@@ -54,7 +58,7 @@ amixer -q set Master mute
 
 # quit/restart bspwm
 super + alt + {q,r}
-	pkill lemonbar | pkill bar | pkill sleep | pkill xtitle | pkill sxiv | pkill hsetroot | bspc {quit,wm -r}
+	pkill lemonbar | pkill bar | pkill sleep | pkill xtitle | pkill sxiv | pkill compton | pkill hsetroot | bspc {quit,wm -r}
 
 # close and kill
 super + {_,shift + }a
@@ -128,7 +132,7 @@ super + alt + {Left,Right,Up,Down}
 	
 ## move floating windows
 alt + shift + {Left,Down,Up,Right}
-	bspc node -v {-10 0,0 10,0 -10,10 0}
+	bspc node -v {-50 0,0 50,0 -50,50 0}
 
 ## hide window
 super + i
