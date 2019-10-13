@@ -1,0 +1,8 @@
+[Desktop Entry]
+Type=Application
+Name=text
+Exec=st -e vim %u
+Categories=Other;
+NoDisplay=false
+MimeType=text/plain;text/x-shellscript
+Terminal=true

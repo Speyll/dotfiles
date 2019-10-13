@@ -1,0 +1,8 @@
+[Desktop Entry]
+Type=Application
+Name=surf
+Comment=a minimal web browser
+Terminal=false
+Exec=surf
+Categories=Network;WebBrowser
+MimeType=x-scheme-handler/ftp;x-scheme-handler/http;x-scheme-handler/https;
