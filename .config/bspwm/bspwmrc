@@ -9,7 +9,7 @@ pkill lemonbar | pkill bar | pkill sleep | pkill xtitle
 
 # Wallpaper setting
 hsetroot -fill ~/Images/Wallpapers/Wallpaper.jpg &
-#xwinwrap -ov -ni -fs -- mpv -vo x11 -wid WID --keepaspect=no --pause=no --loop ~/Images/Wallpapers/Wallpaper.gif &
+#xwinwrap -ov -ni -fs -- mpv -vo x11 -wid WID --keepaspect=no --pause=no --loop ~/Images/Wallpapers/Wallpaper.mp4 &
 #xwinwrap -ov -ni -fs -- sxiv -a -e WID -f -b -g 1366x768  ~/Images/Wallpapers/29.gif &
 
 # Compositor
@@ -17,12 +17,12 @@ pkill compton
 compton &
 
 # Border gaps settings
-bspc config border_width         4
-bspc config window_gap           12
-bspc config top_padding          12
-bspc config bottom_padding       12
-bspc config left_padding         12
-bspc config right_padding        12
+bspc config border_width         3
+bspc config window_gap           10
+bspc config top_padding          10
+bspc config bottom_padding       10
+bspc config left_padding         10
+bspc config right_padding        10
 
 # Workspaces settings
 bspc rule -a 'tabbed surf -pe' desktop='^1'
