@@ -9,7 +9,7 @@ pause
 # Cache
 cache=yes
 cache-default=8192
-cache-secs=240
+cache-secs=180
 
 # Youtube dl / hardware acceleration
 ytdl-format=best[height<=?480]+bestaudio/best
