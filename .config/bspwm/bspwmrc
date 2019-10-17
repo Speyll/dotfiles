@@ -31,7 +31,7 @@ bspc rule -a 'mpv' desktop='^3' center=on state=pseudo_tiled
 # Colors settings
 bspc config focused_border_color "#88C0D0"
 bspc config normal_border_color "#9EA2C0"
-bspc config active_border_color "#F9FBF9"
+bspc config active_border_color "#7D97BB"
 bspc config urgent_border_color "#EBCB8B"
 
 # Split ratio and gapless monocle
