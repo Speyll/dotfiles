@@ -64,12 +64,11 @@ c1="${reset}${green}"               # second color
 
 cat <<EOF
 
-${c0}      _______      ${nc}${USER}${ic}@${nc}${host}${reset}
-${c1}      ${c0}\_____ \`-    ${lc}OS:        ${ic}${os}${reset}
-${c1}   /\   ${c0}___ \`- \   ${lc}KERNEL:    ${ic}${kernel}${reset}
-${c1}  | |  ${c0}/   \  | |  ${lc}UPTIME:    ${ic}${uptime}${reset}
-${c1}  | |  ${c0}\___/  | |  ${lc}PACKAGES:  ${ic}${packages}${reset}
-${c1}   \ \`-_____  ${c0}\/   ${lc}SHELL:     ${ic}${shell}${reset}
-${c1}    \`-______\      ${lc}${uitype}:        ${ic}${ui}${reset}
-
+${fc}     ╭────────╮  ${nc}${USER}${ic}@${nc}${hostname}${rc}
+${sc}  ╭─╮${fc}╰──────╮ │  ${lc}OS:        ${ic}${os}${rc}
+${sc}  │ │ ${fc}╭───╮ │ │  ${lc}KERNEL:    ${ic}${kernel}${rc}
+${sc}  │ │ ${fc}│   │ │ │  ${lc}UPTIME:    ${ic}${uptime}${rc}
+${sc}  │ │ ${fc}╰───╯ │ │  ${lc}PACKAGES:  ${ic}${packages}${rc}
+${sc}  │ ╰──────╮${fc}╰─╯  ${lc}SHELL:     ${ic}${shell}${rc}
+${sc}  ╰────────╯     ${lc}WM:        ${ic}${WM}${rc}
 EOF
