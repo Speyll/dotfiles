@@ -18,7 +18,7 @@ super + Escape
 super + shift + b
 	tabbed -c surf -e
 
-# pcmanfm
+# file manager
 super + shift + p
 	st -e nnn
 
@@ -38,11 +38,11 @@ super + alt + ctrl + s
 # Special hotkeys
 #
 
-# Screenshot key
+# screenshot key
 Print
 	scrot -e 'mkdir -p ~/Images/Screenshots && mv $f ~/Images/Screenshots && xclip -selection clipboard -t image/png -i ~/Images/Screenshots/`ls -1 -t ~/Images/Screenshots | head -1`'
 
-# Multimedia keys
+# multimedia keys
 XF86AudioRaiseVolume
 	amixer -q set Master 5%+ unmute
 
