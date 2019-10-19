@@ -27,13 +27,13 @@ I have a lemonbar setup (can be toggled with sxhkd) but I rarely use it, prefer 
 | downloader | axel |
 
 ## some tips for my setup:
-this is all the "core" and recommended software you will need for my setup `bspwm sxhkd nnn vim xorg-minimal xf86-input-synpatics xf86-input-evdev alsa-utils cherry-font font-Siji mpv xbacklight unzip openntpd sxiv hsetroot font-hack-ttf scrot xrdb simple-mtpfs xtitle xclip tmux base-devel libXft-devel libXinerama-devel xwinwrap youtube-dl ntfs-3g wireless_tools xdg-utils xprop`
+this is all the "core" and recommended software you will need for my setup `bspwm sxhkd nnn vim xorg-minimal xf86-input-synpatics xf86-input-evdev alsa-utils cherry-font font-Siji mpv xbacklight unzip openntpd sxiv hsetroot font-hack-ttf scrot xrdb simple-mtpfs xtitle xclip tmux base-devel libXft-devel libXinerama-devel xwinwrap youtube-dl ntfs-3g wireless_tools xdg-utils xprop`<br />
 
-if you have an intel igpu install `xf86-video-intel`
-if you have a nvidia gpu you can install `xf86-video-nouveau`
-if you have an amd gpu install `xf86-video-amdgpu`
-if you have bluetooth and want to use it install `bluez`
-if you have a bluetooth headset you will need `bluez-alsa`
-if you have a gamepad or a joyestick and want to use it you will need `xf86-input-joyestick`
+if you have an intel igpu install `xf86-video-intel`<br />
+if you have a nvidia gpu you can install `xf86-video-nouveau`<br />
+if you have an amd gpu install `xf86-video-amdgpu`<br />
+if you have bluetooth and want to use it install `bluez`<br />
+if you have a bluetooth headset you will need `bluez-alsa`<br />
+if you have a gamepad or a joyestick and want to use it you will need `xf86-input-joyestick`<br />
 
-if you want to compile `surf` from source and have a working youtube layout you will need this `libgtkdgl-devel libgcrypt-devel webkit2gtk-devel gstreamer1-devel gst-plugins-good1 gst-plugins-base1-devel gst-libav curl`
+if you want to compile `surf` from source and have a working youtube layout you will need this `libgtkdgl-devel libgcrypt-devel webkit2gtk-devel gstreamer1-devel gst-plugins-good1 gst-plugins-base1-devel gst-libav curl`< br />
