@@ -26,6 +26,9 @@ I have a lemonbar setup (can be toggled with sxhkd) but I rarely use it, prefer 
 | compositor  | compton |
 | downloader | axel |
 
+## mounting drives
+I don't use gvfs or udiskie to mount my drives instead i use a simple script that uses fstab (can be found in `~/.local/bin/scripts/dmenumount` it's actually the same script that Luke smith showcase in one of his videos) it only require dmenu, same script is used to mount android mtp but it require `simple-mtpfs` to be installed on your machine to work<br />
+
 ## some tips for my setup:
 this is all the "core" and recommended software you will need for my setup:<br />
 `bspwm sxhkd nnn vim xorg-minimal xf86-input-synpatics xf86-input-evdev alsa-utils cherry-font font-Siji mpv xbacklight unzip openntpd sxiv hsetroot font-hack-ttf scrot xrdb simple-mtpfs xtitle xclip tmux base-devel libXft-devel libXinerama-devel xwinwrap youtube-dl ntfs-3g wireless_tools xdg-utils xprop`<br />
@@ -54,3 +57,5 @@ replace the `#` with the values shown in ip link show!
 ### Removing unsed services
 in `/var/service/`<br />
 you can remove things like TTY3, TTY4, TTY5, TTY6, and SSHD (if you don't use them) don't worry they are just symlinks so they can easily be restored<br />
+
+**ps:** my keybindings are all in `~/. config/bspwm/sxhkdrc` they are all commented so if you want to know which keybind do what or want to change it to your likings it's all there!<br />
