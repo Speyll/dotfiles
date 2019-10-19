@@ -40,13 +40,13 @@ if you have a gamepad or a joyestick and want to use it you will need: `xf86-inp
 if you want to compile `surf` from source and have a working youtube layout you will need this `libgtkdgl-devel libgcrypt-devel webkit2gtk-devel gstreamer1-devel gst-plugins-good1 gst-plugins-base1-devel gst-libav curl`<br />
 
 ## activate your internet after installation
-`ip link show <br />
+ip link show <br />
 sudo ip link set up wlp#s0 <br />
-sudo ip link set up enp#s0 <br />`
+sudo ip link set up enp#s0 <br />
 
-`wpa_passphrase 'SSID' 'PASSWORD' >> /etc/wpa_supplicant/wpa_supplicant-wlp#s0.conf <br />
+wpa_passphrase 'SSID' 'PASSWORD' >> /etc/wpa_supplicant/wpa_supplicant-wlp#s0.conf <br />
 sudo ln -s /etc/sv/wpa_supplicant /var/service/ <br />
 sudo ln -s /etc/sv/dhcpcd /var/service/ <br />
-sudo wpa_supplicant -B -i wlp#s0 -c /etc/wpa_supplicant/wpa_supplicant-wlp#s0.conf <br />`
+sudo wpa_supplicant -B -i wlp#s0 -c /etc/wpa_supplicant/wpa_supplicant-wlp#s0.conf <br />
 
 replace the `#` with the value shown in ip link show!
