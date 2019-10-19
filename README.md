@@ -39,7 +39,7 @@ if you have a gamepad or a joyestick and want to use it you will need: `xf86-inp
 
 if you want to compile `surf` from source and have a working youtube layout you will need this `libgtkdgl-devel libgcrypt-devel webkit2gtk-devel gstreamer1-devel gst-plugins-good1 gst-plugins-base1-devel gst-libav curl`<br />
 
-# activate your internet after installation
+### activate your internet after installation
 ip link show <br />
 sudo ip link set up wlp#s# <br />
 sudo ip link set up enp#s# <br />
@@ -51,6 +51,6 @@ sudo wpa_supplicant -B -i wlp#s# -c /etc/wpa_supplicant/wpa_supplicant-wlp#s#.co
 
 replace the `#` with the values shown in ip link show!
 
-# Removing unsed services
-in `/var/service/`
-you can remove things like TTY3, TTY4, TTY5, TTY6, and SSHD (if you don't use them) don't worry they are just symlinks so they can easily be restored
+### Removing unsed services
+in `/var/service/`<br />
+you can remove things like TTY3, TTY4, TTY5, TTY6, and SSHD (if you don't use them) don't worry they are just symlinks so they can easily be restored<br />
