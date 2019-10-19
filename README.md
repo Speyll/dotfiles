@@ -39,7 +39,7 @@ if you have a gamepad or a joyestick and want to use it you will need: `xf86-inp
 
 if you want to compile `surf` from source and have a working youtube layout you will need this `libgtkdgl-devel libgcrypt-devel webkit2gtk-devel gstreamer1-devel gst-plugins-good1 gst-plugins-base1-devel gst-libav curl`<br />
 
-### activate your internet after installation
+#### activate your internet after installation
 *ip link show <br />
 sudo ip link set up wlp#s# <br />
 sudo ip link set up enp#s# <br />*
@@ -51,11 +51,11 @@ sudo wpa_supplicant -B -i wlp#s# -c /etc/wpa_supplicant/wpa_supplicant-wlp#s#.co
 
 replace the `#` with the values shown in ip link show!
 
-### removing unsed services
+#### removing unsed services
 in `/var/service/`<br />
 you can remove things like TTY3, TTY4, TTY5, TTY6, and SSHD (if you don't use them) don't worry they are just symlinks so they can easily be restored<br />
 
-## mounting drives
+#### mounting drives
 I don't use gvfs or udiskie to mount my drives instead i use a simple script that uses fstab (can be found in `~/.local/bin/scripts/dmenumount` it's actually the same script that Luke smith showcase in one of his videos) it only require dmenu, same script is used to mount android mtp but it require `simple-mtpfs` to be installed on your machine to work<br />
 
 **ps:** my keybindings are all in `~/. config/bspwm/sxhkdrc` they are all commented so if you want to know which keybind do what or want to change it to your likings it's all there!<br />
