@@ -42,12 +42,12 @@ if you want to compile `surf` from source and have a working youtube layout you 
 ### activate your internet after installation
 *ip link show <br />
 sudo ip link set up wlp#s# <br />
-sudo ip link set up enp#s# <br />
+sudo ip link set up enp#s# <br />*
 
 *wpa_passphrase 'SSID' 'PASSWORD' >> /etc/wpa_supplicant/wpa_supplicant-wlp#s#.conf <br />
 sudo ln -s /etc/sv/wpa_supplicant /var/service/ <br />
 sudo ln -s /etc/sv/dhcpcd /var/service/ <br />
-sudo wpa_supplicant -B -i wlp#s# -c /etc/wpa_supplicant/wpa_supplicant-wlp#s#.conf <br />
+sudo wpa_supplicant -B -i wlp#s# -c /etc/wpa_supplicant/wpa_supplicant-wlp#s#.conf <br />*
 
 replace the `#` with the values shown in ip link show!
 
