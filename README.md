@@ -28,7 +28,7 @@ I have a lemonbar setup (can be toggled with sxhkd) but I rarely use it, prefer 
 
 ## some tips for my setup:
 this is all the "core" and recommended software you will need for my setup:<br />
-`bspwm sxhkd nnn vim xorg-minimal xf86-input-synpatics xf86-input-evdev alsa-utils cherry-font font-Siji mpv xbacklight unzip openntpd sxiv hsetroot font-hack-ttf scrot xrdb simple-mtpfs xtitle xclip tmux base-devel libXft-devel libXinerama-devel xwinwrap youtube-dl ntfs-3g wireless_tools xdg-utils xprop`<br />
+`bspwm sxhkd nnn vim xorg-minimal xf86-input-synpatics xf86-input-evdev alsa-utils cherry-font font-Siji mpv xbacklight unzip openntpd sxiv hsetroot font-hack-ttf scrot xrdb simple-mtpfs xtitle xclip tmux base-devel libXft-devel libXinerama-devel xwinwrap youtube-dl ntfs-3g wireless_tools xdg-utils xprop tlp`<br />
 
 if you have an intel igpu install: `xf86-video-intel`<br />
 if you have a nvidia gpu you can install: `xf86-video-nouveau`<br />
@@ -56,7 +56,7 @@ in `/var/service/`<br />
 you can remove things like TTY3, TTY4, TTY5, TTY6, and SSHD (if you don't use them) don't worry they are just symlinks so they can easily be restored<br />
 
 #### mounting drives
-I don't use gvfs or udiskie to mount my drives instead i use a simple script that uses fstab (can be found in `~/.local/bin/scripts/dmenumount` it's actually the same script that Luke smith showcase in one of his videos) it only require dmenu, same script is used to mount android mtp but it require `simple-mtpfs` to be installed on your machine to work<br />
+I don't use gvfs or udiskie to mount my drives instead i use a simple script that uses fstab (can be found in `~/.local/bin/scripts/dmenumount` it's actually the same script that Luke Smith showcase in one of his videos) it only require dmenu, same script is used to mount android mtp but it require `simple-mtpfs` to be installed on your machine to work<br />
 
 #### watching videos
 even if my surf setup support watching videos directly in the browser i don't really do it there, instead i use `mpv + youtube-dl` if you have them both installed and use my config files you can just run from the terminal or dmenu `mpv ~link of the video~` without the ~ and it will run it, because i have a really bad internet connexion i have set youtube-dl to always pick 480p or lower if you want to change that you can edit the config file here `~/.config/mpv/config`
