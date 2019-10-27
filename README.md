@@ -35,7 +35,7 @@ if you have a nvidia gpu you can install: `xf86-video-nouveau`<br />
 if you have an amd gpu install: `xf86-video-amdgpu`<br />
 if you have bluetooth and want to use it install: `bluez`<br />
 if you have a bluetooth headset you will need: `bluez-alsa`<br />
-if you have a gamepad or a joyestick and want to use it you will need: `xf86-input-joystick`<br />
+if you have a gamepad or a joystick and want to use it you will need: `xf86-input-joystick`<br />
 
 if you want to compile `surf` from source and have a working youtube layout you will need this `libgtkdgl-devel libgcrypt-devel webkit2gtk-devel gstreamer1-devel gst-plugins-good1 gst-plugins-base1-devel gst-libav curl`<br />
 
