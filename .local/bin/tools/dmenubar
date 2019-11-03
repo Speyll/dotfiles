@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/bin/sh
 # Time
 get_time() {
     printf "%s\\n" "$(date +'%H:%M')"
@@ -40,8 +40,8 @@ get_network() {
 
 # Get them all
 get_all() {
-echo -e "Time: $(get_time) | Wi-fi: $(get_network) | Battery: $(get_battery)"
+echo "Time: $(get_time) | Wi-fi: $(get_network) | Battery: $(get_battery)"
 }
 
 # Notify them
-echo -e "$(get_all)" | dmenu -i -p "you are doing good"
+echo "$(get_all)" | dmenu -i -p "you are doing good"

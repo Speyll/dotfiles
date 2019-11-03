@@ -1,5 +1,5 @@
-#!/bin/bash
-choice=$(echo -e "dmenumount\ndmenuumount\nducksearch\nrecordmenu\nrecordkill" | dmenu -i -p "Choose what script launch:")
+#!/bin/sh
+choice=$(echo "dmenumount\ndmenuumount\nducksearch\nrecordmenu\nrecordkill" | dmenu -i -p "Choose what script launch:")
 
 case "$choice" in
     dmenumount) dmenumount & ;;
