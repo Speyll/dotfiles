@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/bin/sh
 pkill lemonbar
 
 # colors
@@ -36,8 +36,8 @@ get_network() {
 }
 
 get_battery() {
-    battery_status=$(cat /sys/class/power_supply/BAT0/status)
-    battery_percent=$(cat /sys/class/power_supply/BAT0/capacity)
+    battery_status=$(cat /sys/class/power_supply/BAT1/status)
+    battery_percent=$(cat /sys/class/power_supply/BAT1/capacity)
     case "$battery_status" in
         Charging)
             printf "%s%%\\n" "$(icon )${battery_percent}"
