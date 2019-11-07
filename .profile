@@ -23,9 +23,9 @@ READER=mupdf;   export READER
 export SUDO_ASKPASS="$HOME/.local/bin/tools/dmenupass"
 export GTK2_RC_FILES="$HOME/.config/gtk-2.0/gtkrc-2.0"
 
-# set ENV to a file invoked each time sh is started for interactive use.
-ENV=$HOME/.bashrc; export ENV
+# set bashrc each time sh is started for interactive use.
+[ -f $HOME/.bashrc ] && . $HOME/.bashrc
 
 # Start graphical server if bspwm not already running (replace bspwm with whatever wm you use)
-[ "$(tty)" = "/dev/tty1" ] && ! pgrep -x bspwm >/dev/null && exec startx
+[ "$(tty)" = "/dev/tty1" ] && ! pgrep -x dwm >/dev/null && exec startx
 
