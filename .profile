@@ -27,5 +27,5 @@ export GTK2_RC_FILES="$HOME/.config/gtk-2.0/gtkrc-2.0"
 [ -f $HOME/.bashrc ] && . $HOME/.bashrc
 
 # Start graphical server if bspwm not already running (replace bspwm with whatever wm you use)
-[ "$(tty)" = "/dev/tty1" ] && ! pgrep -x dwm >/dev/null && exec startx
+[ "$(tty)" = "/dev/tty1" ] && ! pgrep -x bspwm >/dev/null && exec startx
 
