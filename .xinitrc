@@ -8,5 +8,5 @@ fi
 
 # Wm settings
 xrdb -merge ~/.Xresources &
-sxhkd -c ~/.config/bspwm/sxhkdrc -m 1 &
-exec bspwm
+autostart &
+exec dwm
