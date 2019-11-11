@@ -8,5 +8,6 @@ fi
 
 # Wm settings
 xrdb -merge ~/.Xresources &
-autostart &
-exec dwm
+#autostart &
+#exec dwm
+exec bspwm
