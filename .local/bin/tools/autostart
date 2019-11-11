@@ -10,9 +10,6 @@ hsetroot -fill ~/Images/Wallpapers/Wallpaper.jpg &
 #xwinwrap -ov -ni -fs -- mpv -vo x11 -wid WID --keepaspect=no --pause=no --loop ~/Images/Wallpapers/Wallpaper.gif &
 #xwinwrap -ov -ni -fs -- sxiv -a -e WID -f -b -g 1366x768  ~/Images/Wallpapers/29.gif &
 
-# Dwm bar setting
-pkill xsetroot
-
 # Dwmbar
 pkill xsetroot
 dwmbar &
