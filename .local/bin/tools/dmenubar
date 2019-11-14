@@ -1,29 +1,29 @@
 #!/bin/sh
 # Time
 get_time() {
-    printf "%s\\n" "$(date +'%H:%M')"
+    printf "%s\\n" " $(date +'%H:%M')"
 }
 
 # Battery
 get_battery() {
-    battery_status=$(cat /sys/class/power_supply/BAT0/status)
-    battery_percent=$(cat /sys/class/power_supply/BAT0/capacity)
+    battery_status=$(cat /sys/class/power_supply/BAT1/status)
+    battery_percent=$(cat /sys/class/power_supply/BAT1/capacity)
     case "$battery_status" in
         Charging)
-            printf "%s%%\\n" "${battery_percent}"
+            printf "%s%%\\n" " ${battery_percent}"
             ;;
         Discharging)
             if [ "$battery_percent" -gt 80 ]
             then
-                printf "%s%%\\n" "${battery_percent}"
+                printf "%s%%\\n" " ${battery_percent}"
             elif [ "$battery_percent" -gt 30 ]
             then
-                printf "%s%%\\n" "${battery_percent}"
+                printf "%s%%\\n" " ${battery_percent}"
             else
-                printf "%s%%\\n" "${battery_percent}"
+                printf "%s%%\\n" " ${battery_percent}"
             fi
             ;;
-        Unknown|Full) printf "%s%%\\n" "100";;
+        Unknown|Full) printf "%s%%\\n" " 100";;
     esac
 }
 
@@ -32,16 +32,16 @@ get_network() {
     network_id=$(/sbin/iwgetid -r)
     if [ -n "$network_id" ]
     then
-        printf "%s\\n" "${network_id}"
+        printf "%s\\n" " ${network_id}"
     else
-        printf "%s\\n" "offline"
+        printf "%s\\n" " offline"
     fi
 }
 
 # Get them all
 get_all() {
-echo "Time: $(get_time) | Wi-fi: $(get_network) | Battery: $(get_battery)"
+echo " $(get_time) | $(get_network) | $(get_battery)"
 }
 
 # Notify them
-echo "$(get_all)" | dmenu -i -p "you are doing good"
+echo "$(get_all)" | dmenu -i -p "you are doing your best keep going"
