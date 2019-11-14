@@ -3,7 +3,7 @@
 
 include "/home/lyes/.gtkrc-2.0.mine"
 gtk-theme-name="Arc-Darker"
-gtk-icon-theme-name="Arc"
+gtk-icon-theme-name="Tango"
 gtk-font-name="cherry 10"
 gtk-cursor-theme-name="Adwaita"
 gtk-cursor-theme-size=0
