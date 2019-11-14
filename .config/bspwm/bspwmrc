@@ -14,7 +14,7 @@ hsetroot -fill ~/Images/Wallpapers/Wallpaper.jpg &
 
 # Compositor
 pkill compton
-#compton &
+compton &
 
 # default prefered settings
 amixer -q set Master 100% &
