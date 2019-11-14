@@ -2,25 +2,21 @@
 # wm independent hotkeys
 #
 
-# terminal emulator
-super + {Return, + shift + Return}
-	{st, st -c tmux -e tmux}
-
-# program launcher
-super + {d,n}
-	{dmenu_run -p 'uwu what`s this ?', dmenubar}
-
 # make sxhkd reload its configuration files:
 super + Escape
 	pkill -USR1 -x sxhkd
 
-# scratchpad
-super + ctrl + s
-    st -c scratchpad -g 70x25
+# terminal emulator / scratchpad / tmux
+super + {Return, shift + Return,  ctrl + Return}
+	{st, st -c scratchpad -g 70x25 -e tmux, st -c tmux -e tmux}
 
-# browser
+# program launcher / dmenubar
+super + {d,shift + d}
+	{dmenu_run -p ' what program launch ?', dmenubar}
+
+# browser (if both are installed choose one)
 super + shift + b
-	firefox
+	firefox | tabbed -c surf -e
 
 # file manager
 super + shift + p
@@ -30,21 +26,17 @@ super + shift + p
 super + shift + r
 	pkill lemonbar | pkill sleep | bar
 
-# script launcher
-super + shift + s
-	scriptlaunch
-
-# script shutdown
-super + alt + ctrl + s
-    dmenuout
+# script launcher and shutdown menu
+super + {shift + s, ctrl + s}
+	{scriptlaunch, dmenuout}
 
 #
 # Special hotkeys
 #
 
-# screenshot key
+# screenshot key (change the directory to what you want)
 Print
-	scrot -e "mv &f ~/Images/Screenshots/"
+	scrot ~/Images/Screenshots/%b%d::%H%M%S.png
 
 # multimedia keys
 XF86AudioRaiseVolume
@@ -73,7 +65,7 @@ super + m
 	bspc desktop -l next
 
 # focus the next/previous node in the current desktop
-super + {_,shift + }c
+super + {_,shift + }Tab
 	bspc node -f {next,prev}.local
 
 ## set the window state
@@ -100,14 +92,6 @@ super + r
 super + {_,shift + }{Left,Down,Up,Right}
 	bspc node -{f,s} {west,south,north,east}
 
-## focus the next node in the current desktop
-alt + Tab
-	bspc node -f next.local
-	
-## focus the previous node in the current desktop
-alt + shift + Tab
-	bspc node -f prev.local
-
 ## focus the next/previous desktop in the current monitor
 ctrl + alt + Left
 	bspc desktop -f prev.local
@@ -115,7 +99,7 @@ ctrl + alt + Right
 	bspc desktop -f next.local
 
 ## focus the last node/desktop
-super + {Tab,grave}
+super + {c, shift + c}
 	bspc {node,desktop} -f last
 
 ## focus or send to the given desktop
@@ -137,10 +121,10 @@ super + alt + {Left,Right,Up,Down}
 ## move floating windows
 alt + shift + {Left,Down,Up,Right}
 	bspc node -v {-50 0,0 50,0 -50,50 0}
-	
-## no gaps
-super + ctrl + equal
-	bspc config top_padding 0; bspc config bottom_padding 0; bspc config left_padding 0; bspc config right_padding 0; bspc config window_gap 0; bspc config border_width 0
+
+## adjust window gap on the fly
+super + {plus,equal}
+    bspc config window_gap $((\bspc config window_gap` {-,+} 20))`    
 
 ## hide window
 super + i
