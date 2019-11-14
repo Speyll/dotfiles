@@ -6,11 +6,13 @@ if [ -d /etc/X11/xinit/xinitrc.d ] ; then
  unset f
 fi
 
-# Bspwm settings
+# general settings
 xrdb -merge ~/.Xresources &
+
+# bspwm settings
 sxhkd -c ~/.config/bspwm/sxhkdrc -m 1 &
 exec bspwm
 
-# Dwm settings
+# dwm settings
 #autostart &
 #exec dwm
