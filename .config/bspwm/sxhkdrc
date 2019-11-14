@@ -4,7 +4,7 @@
 
 # terminal emulator
 super + {Return, + shift + Return}
-	{st, st -e tmux}
+	{st, st -c tmux -e tmux}
 
 # program launcher
 super + {d,n}
@@ -14,13 +14,17 @@ super + {d,n}
 super + Escape
 	pkill -USR1 -x sxhkd
 
+# scratchpad
+super + ctrl + s
+    st -c scratchpad -g 70x25
+
 # browser
 super + shift + b
-	tabbed -c surf -e
+	firefox
 
 # file manager
 super + shift + p
-	st -e nnn
+	st -c nnn -e nnn
 
 # lemonbar
 super + shift + r
@@ -40,7 +44,7 @@ super + alt + ctrl + s
 
 # screenshot key
 Print
-	scrot -e 'mkdir -p ~/Images/Screenshots && mv $f ~/Images/Screenshots && xclip -selection clipboard -t image/png -i ~/Images/Screenshots/`ls -1 -t ~/Images/Screenshots | head -1`'
+	scrot -e "mv &f ~/Images/Screenshots/"
 
 # multimedia keys
 XF86AudioRaiseVolume
