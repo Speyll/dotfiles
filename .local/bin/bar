@@ -15,23 +15,23 @@ get_workspaces() {
 	desk=$(xdotool get_desktop)
     current_workspace=$(($desk + 1))
     case "$current_workspace" in
-        1) echo  "$(icon  0)    ";;
-        2) echo  "  $(icon  0)  ";;
-        3) echo  "    $(icon  0)";;
+        1) echo  "$(icon a 0) b c";;
+        2) echo  "a $(icon b 0) c";;
+        3) echo  "a b $(icon c 0)";;
     esac
 }
 
 get_time() {
-    printf "%s\\n" "$(icon )$(date +'%H:%M')"
+    printf "%s\\n" "$(icon ) $(date +'%H:%M')"
 }
 
 get_network() {
     network_id=$(/sbin/iwgetid -r)
     if [ -n "$network_id" ]
     then
-        printf "%s\\n" " $(icon )${network_id} "
+        printf "%s\\n" " $(icon ) ${network_id} "
     else
-        printf "%s\\n" " $(icon )offline"
+        printf "%s\\n" " $(icon ) offline"
     fi
 }
 
@@ -40,25 +40,25 @@ get_battery() {
     battery_percent=$(cat /sys/class/power_supply/BAT1/capacity)
     case "$battery_status" in
         Charging)
-            printf "%s%%\\n" "$(icon )${battery_percent}"
+            printf "%s%%\\n" "$(icon ) ${battery_percent}"
             ;;
         Discharging)
             if [ "$battery_percent" -gt 80 ]
             then
-                printf "%s%%\\n" "$(icon )${battery_percent}"
+                printf "%s%%\\n" "$(icon ) ${battery_percent}"
             elif [ "$battery_percent" -gt 30 ]
             then
-                printf "%s%%\\n" "$(icon )${battery_percent}"
+                printf "%s%%\\n" "$(icon ) ${battery_percent}"
             else
-                printf "%s%%\\n" "$(icon )${battery_percent}"
+                printf "%s%%\\n" "$(icon ) ${battery_percent}"
             fi
             ;;
-        Unknown|Full) printf "%s%%\\n" "$(icon )100";;
+        Unknown|Full) printf "%s%%\\n" "$(icon ) 100";;
     esac
 }
 
 get_window(){
-	printf "%s\\n" "$(icon )$(xtitle -t 70)"
+	printf "%s\\n" "$(icon ) $(xtitle -t 60)"
 }
 
 # main
@@ -67,14 +67,14 @@ main() {
     while :
     do
        printf "%s%s%s\\n" \
-            "%{l} $(get_window)" \
-            "%{c}$(get_workspaces)" \
+            "%{l} $(get_workspaces) | $(get_window)" \
+            "%{c}" \
             "%{r}$(get_network) $(get_battery) $(get_time) "
         sleep 3s
     done |\
     # lemonbar settings
-    lemonbar -g 'x18'  \
-        -f 'cherry:size=9' -f 'Siji:size=10' \
+    lemonbar -g '800x18+283'  \
+        -f 'cherry:size=8' -f 'Siji:size=8' \
         -B "${background}" -F "${foreground}" \
         -n 'bar'
 }
