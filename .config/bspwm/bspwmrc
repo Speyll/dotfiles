@@ -16,6 +16,11 @@ hsetroot -fill ~/Images/Wallpapers/Wallpaper.jpg &
 pkill compton
 #compton &
 
+# default prefered settings
+amixer -q set Master 100% &
+xbacklight -set 60 &
+pkill redshift | redshift -l 36.73225:3.08746 &
+
 # Border gaps settings
 bspc config border_width         2
 bspc config window_gap           10
