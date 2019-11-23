@@ -8,7 +8,6 @@ pause
 
 # Cache
 cache=yes
-cache-default=8192
 cache-secs=180
 
 # Youtube dl / hardware acceleration
