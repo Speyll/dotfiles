@@ -1,4 +1,4 @@
-#! /bin/sh
+#!/bin/sh
 
 #  workspaces setup
 bspc monitor -d I II III
