@@ -6,8 +6,8 @@ get_time() {
 
 # Battery
 get_battery() {
-    battery_status=$(cat /sys/class/power_supply/BAT1/status)
-    battery_percent=$(cat /sys/class/power_supply/BAT1/capacity)
+    battery_status=$(cat /sys/class/power_supply/BAT0/status)
+    battery_percent=$(cat /sys/class/power_supply/BAT0/capacity)
     case "$battery_status" in
         Charging)
             printf "%s%%\\n" " ${battery_percent}"
@@ -34,7 +34,7 @@ get_network() {
     then
         printf "%s\\n" " ${network_id}"
     else
-        printf "%s\\n" " offline"
+        printf "%s\\n" " no wlan connected"
     fi
 }
 
