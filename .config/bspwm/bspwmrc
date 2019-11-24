@@ -20,7 +20,7 @@ compton &
 amixer -q set Master 100% &
 xbacklight -set 60 &
 pkill redshift
-redshift -x && redshift -l 36.73225:3.08746
+redshift -x && redshift -l 36.73225:3.08746 &
 
 # Border gaps settings
 bspc config border_width         2
