@@ -5,6 +5,7 @@ autofit-larger=90%x90%
 # Video control
 keep-open
 pause
+volume=50
 
 # Cache
 cache=yes
@@ -35,7 +36,6 @@ osd-level=1
 
 # hide the osd after x ms          
 osd-duration=2500
-  
 osd-font="Hack"
 osd-font-size=14
 osd-color="#ffffff"
