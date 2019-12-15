@@ -1,5 +1,5 @@
 #!/bin/sh
-choice=$(echo "shutdown\nreboot\nsuspend\nhibernate" | dmenu -i -p "what do?")
+choice=$(printf "shutdown\\nreboot\\nsuspend\\nhibernate" | dmenu -i -p "what do?")
 
 case "$choice" in
   shutdown) sudo poweroff & ;;
