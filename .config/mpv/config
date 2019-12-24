@@ -1,5 +1,5 @@
 # general
-hwdec=vdpau
+hwdec=yes
 #hwdec=nvdec
 hwdec-codecs=all
 deband=no
