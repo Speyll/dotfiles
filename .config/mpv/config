@@ -1,4 +1,13 @@
+# general
+hwdec=vdpau
+#hwdec=nvdec
+hwdec-codecs=all
+deband=no
+interpolation=no
+vd-lavc-dr=yes
+
 # window
+geometry=50%:50%
 autofit-smaller=60%x60%
 autofit-larger=60%x60%
 
@@ -12,11 +21,8 @@ screenshot-directory='~~desktop/'
 cache=yes
 cache-secs=180
 
-# youtube-dl / hardware acceleration
+# youtube-dl
 ytdl-format=best[height<=?480]+bestaudio/best
-hwdec=vdpau
-# hwdec=nvdec
-hwdec-codecs=all
 
 # osd
 osd-playing-msg = '${filename}'
