@@ -1,5 +1,5 @@
 ## introduction
-this is my simple dotfiles for a simple setup of bspwm in Void Linux, the goal of this setup is to be as minimal as possible on resources without completely dropping the eye candy<br />
+this is my simple dotfiles for a simple setup of bspwm in Void Linux (and Alpine), the goal of this setup is to be as minimal as possible on resources without completely dropping the eye candy<br />
 
 ## preview images
 ![busy](https://raw.githubusercontent.com/Speyll/void-bspwm/master/screenshots/busy.png)<br />
@@ -13,14 +13,14 @@ I have a lemonbar setup (can be toggled with sxhkd) but I rarely use it, prefer 
 
 | software  | what i use |
 | ------------- | ------------- |
-| distro  | voidlinux |
-| wm  | bspwm (somtimes switch to 2bwm) |
-| shell  | bash |
+| distro  | void linux and alpine linux |
+| wm  | bspwm (sometimes switch to 2bwm) |
+| shell  | bash or ash |
 | terminal  | st |
-| brower  | surf + tabbed |
+| brower  | surf + tabbed (or firefox-esr) |
 | image viewer  | sxiv |
 | file manager  | nnn |
-| text editor  | vim |
+| text editor  | neovim |
 | video player  | mpv + youtube-dl |
 | multiplexer  | tmux |
 | compositor  | compton |
@@ -28,7 +28,10 @@ I have a lemonbar setup (can be toggled with sxhkd) but I rarely use it, prefer 
 
 ## some tips for my setup:
 this is all the "core" and recommended software you will need for my setup:<br />
-`bspwm sxhkd nnn vim xorg-minimal xf86-input-synpatics xf86-input-evdev alsa-utils cherry-font font-Siji mpv xbacklight unzip openntpd sxiv hsetroot font-hack-ttf scrot xrdb simple-mtpfs xtitle xclip tmux base-devel libXft-devel libXinerama-devel xwinwrap youtube-dl ntfs-3g wireless_tools xdg-utils xprop tlp`<br />
+the base:`bspwm sxhkd nnn neovim (or vim) xorg-minimal xf86-input-synpatics xf86-input-evdev alsa-utils xbacklight unzip openntpd hsetroot font-hack-ttf xrdb simple-mtpfs ntfs-3g wireless_tools xdg-utils xprop tlp`<br />
+for my st/dmenu build: `base-devel libXft-devel libXinerama-devel terminus-font font-Siji`<br />
+for my lemonbar setup:`xtitle xclip`<br />
+optinal stuff to your likings: `tmux xwinwrap mpv youtube-dl sxiv scrot`<br />
 
 if you have an intel igpu install: `xf86-video-intel`<br />
 if you have a nvidia gpu you can install: `xf86-video-nouveau`<br />
