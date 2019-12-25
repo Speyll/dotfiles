@@ -29,7 +29,7 @@ get_battery() {
 
 # Network
 get_network() {
-    network_id=$(/sbin/iwgetid -r)
+    network_id=$(iwgetid -r)
     if [ -n "$network_id" ]
     then
         printf "%s\\n" " ${network_id}"
