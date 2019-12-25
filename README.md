@@ -30,7 +30,7 @@ I have a lemonbar setup (can be toggled with sxhkd) but I rarely use it, prefer 
 this is all the "core" and recommended software you will need for my setup:<br />
 the base:`bspwm sxhkd nnn neovim (or vim) xorg-minimal xf86-input-synpatics xf86-input-evdev alsa-utils xbacklight unzip openntpd hsetroot font-hack-ttf xrdb simple-mtpfs ntfs-3g wireless_tools xdg-utils xprop tlp`<br />
 for my st/dmenu build: `base-devel libXft-devel libXinerama-devel terminus-font font-Siji`<br />
-for my lemonbar setup:`xtitle xclip`<br />
+for my lemonbar setup:`xtitle`<br />
 optinal stuff to your likings: `tmux xwinwrap mpv youtube-dl sxiv scrot`<br />
 
 if you have an intel igpu install: `xf86-video-intel`<br />
