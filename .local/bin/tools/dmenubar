@@ -44,4 +44,4 @@ echo " $(get_time) | $(get_network) | $(get_battery)"
 }
 
 # Notify them
-echo "$(get_all)" | dmenu -i -p "you are doing your best keep going"
+echo "$(get_all)" | dmenu -i -p "be careful out there, wouldn't want to see you go hollow"
