@@ -3,7 +3,7 @@ this is my simple dotfiles for a simple setup of bspwm in Void Linux (and Alpine
 
 ## preview images
 ![busy](https://raw.githubusercontent.com/Speyll/void-bspwm/master/screenshots/busy.png)<br />
-this is tmux with vim, sxiv is the image viewer and nnn is the file manager/browser<br />
+this is tmux with neovim, sxiv is the image viewer and nnn is the file manager/browser<br />
 ![surf](https://raw.githubusercontent.com/Speyll/void-bspwm/master/screenshots/customsurf.png)<br />
 custom surf (added homepage patch) in tabbed and a poorlymade startpage both tabbed and surf can be downloaded here ![mysuckless](https://github.com/Speyll/mysuckless)<br />
 ![mpv and dmenubar](https://raw.githubusercontent.com/Speyll/void-bspwm/master/screenshots/dmenubar_and_vidya.png) <br />
