@@ -12,7 +12,3 @@ xrdb -merge ~/.Xresources &
 # bspwm settings
 sxhkd -c ~/.config/bspwm/sxhkdrc -m 1 &
 exec bspwm
-
-# dwm settings
-#autostart &
-#exec dwm
