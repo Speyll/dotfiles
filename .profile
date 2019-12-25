@@ -13,7 +13,7 @@ export PATH="$PATH:$HOME/.local/bin:$HOME/.local/bin/scripts:$HOME/.local/bin/to
 # Do only override if you're sure that you'll never log in via telnet or xterm or a serial line.
 
 TERM=st;        export TERMINAL
-EDITOR=vim;   	export EDITOR
+EDITOR=nvim;   	export EDITOR
 PAGER=less;  	export PAGER
 FILE=nnn;       export FILE
 BROWSER=surf;   export BROWSER
@@ -25,7 +25,7 @@ export GTK2_RC_FILES="$HOME/.config/gtk-2.0/gtkrc-2.0"
 
 # set bashrc each time sh is started for interactive use.
 [ -f $HOME/.bashrc ] && . $HOME/.bashrc
+#[ -f $HOME/.ashrc ] && . $HOME/.ashrc
 
 # Start graphical server if bspwm not already running (replace bspwm with whatever wm you use)
 [ "$(tty)" = "/dev/tty1" ] && ! pgrep -x bspwm >/dev/null && exec startx
-
