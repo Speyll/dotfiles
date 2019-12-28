@@ -43,7 +43,7 @@ URxvt.cursorBlink: true
 *.color15: #ECEFF4
 
 /*
-! special
+!base16 grayscale
 *.foreground:   #b9b9b9
 *.background:   #101010
 *.cursorColor:  #b9b9b9
