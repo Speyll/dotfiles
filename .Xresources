@@ -1,16 +1,16 @@
-!General font settings
-*.font: xft:cherry:style=Regular:size=11
-*.boldFont: xft:cherry:style=Regular:size=11
-*.italicFont: xft:cherry:style=Regular:size=11
-*.boldItalicFont: xft:cherry:style=Regular:size=11
+!font settings
+*.font: xft:terminus:style=Regular:size=9
+*.boldFont: xft:terminus:style=Regular:size=9
+*.italicFont: xft:terminus:style=Regular:size=9
+*.boldItalicFont: xft:terminus:style=Regular:size=9
 
 Xft.hinting: true
 Xft.rgba: false
 Xft.autohint: false
-Xft.hintstyle: hintmedium
+Xft.hintstyle: none
 Xft.lcdfilter: lcddefault
 
-!URxvt settings
+!urxvt settings
 URxvt.termName: rxvt-unicode-256color
 URxvt.scrollBar: false
 URxvt.scrollbar_right: false
@@ -20,11 +20,11 @@ URxvt.internalBorder: 25
 URxvt.depth: 25
 URxvt.cursorBlink: true
 
-!General colors setting
+!custom nord
 *.background: #161623
 *.foreground: #a6bbd9
 
-*.color0: #3B4252
+*.color0: #101010
 *.color1: #BF616A
 *.color2: #A3BE8C
 *.color3: #EBCB8B
@@ -41,3 +41,42 @@ URxvt.cursorBlink: true
 *.color13: #B48EAD
 *.color14: #8FBCBB
 *.color15: #ECEFF4
+
+/*
+! special
+*.foreground:   #b9b9b9
+*.background:   #101010
+*.cursorColor:  #b9b9b9
+
+! black
+*.color0:       #101010
+*.color8:       #525252
+
+! red
+*.color1:       #7c7c7c
+*.color9:       #7c7c7c
+
+! green
+*.color2:       #8e8e8e
+*.color10:      #8e8e8e
+
+! yellow
+*.color3:       #a0a0a0
+*.color11:      #a0a0a0
+
+! blue
+*.color4:       #686868
+*.color12:      #686868
+
+! magenta
+*.color5:       #747474
+*.color13:      #747474
+
+! cyan
+*.color6:       #868686
+*.color14:      #868686
+
+! white
+*.color7:       #b9b9b9
+*.color15:      #f7f7f7
+*/
