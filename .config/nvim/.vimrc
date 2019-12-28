@@ -50,16 +50,16 @@ set matchpairs+=<:>
 
 " Show line numbers
 set relativenumber
-highlight LineNr ctermfg=darkred
+highlight LineNr ctermfg=12
 
 " Set status line display
-"set laststatus=2
-"hi StatusLine ctermfg=NONE ctermbg=red cterm=NONE
-"hi StatusLineNC ctermfg=black ctermbg=red cterm=NONE
-"hi User1 ctermfg=black ctermbg=cyan
-"hi User2 ctermfg=NONE ctermbg=NONE
-"hi User3 ctermfg=white ctermbg=black
-"hi User4 ctermfg=black ctermbg=cyan
+set laststatus=2
+hi StatusLine ctermfg=0 ctermbg=1 cterm=NONE
+hi StatusLineNC ctermfg=7 ctermbg=0 cterm=NONE
+hi User1 ctermfg=0 ctermbg=12
+hi User2 ctermfg=NONE ctermbg=7
+hi User3 ctermfg=0 ctermbg=12
+hi User4 ctermfg=0 ctermbg=1
 set statusline=\                    " Padding
 set statusline+=%f                  " Path to the file
 set statusline+=\ %1*\              " Padding & switch colour
