@@ -1,4 +1,4 @@
-!font settings
+! font settings
 *.font: xft:terminus:style=Regular:size=9
 *.boldFont: xft:terminus:style=Regular:size=9
 *.italicFont: xft:terminus:style=Regular:size=9
@@ -10,7 +10,7 @@ Xft.autohint: false
 Xft.hintstyle: none
 Xft.lcdfilter: lcddefault
 
-!urxvt settings
+! urxvt settings
 URxvt.termName: rxvt-unicode-256color
 URxvt.scrollBar: false
 URxvt.scrollbar_right: false
