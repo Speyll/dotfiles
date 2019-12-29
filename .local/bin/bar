@@ -74,7 +74,7 @@ main() {
     done |\
     # lemonbar settings
     lemonbar -g '800x18+283'  \
-        -f 'cherry:size=8' -f 'Siji:size=8' \
+        -f 'terminus:size=8' -f 'Siji:size=8' \
         -B "${background}" -F "${foreground}" \
         -n 'bar'
 }
