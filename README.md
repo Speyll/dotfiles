@@ -1,5 +1,5 @@
 ## introduction
-this is my simple dotfiles for a simple setup of bspwm in Void Linux (and Alpine), the goal of this setup is to be as minimal as possible on resources without completely dropping the eye candy<br />
+this is my simple dotfiles for a simple setup of bspwm in Void Linux (and Alpine), the goal of this setup is to be as minimal as possible on resources without completely dropping the eye candy (the screens need a small update but they are pretty much what will look like the product, i will update them when i have some free time <3)<br />
 
 ## preview images
 ![busy](https://raw.githubusercontent.com/Speyll/void-bspwm/master/screenshots/busy.png)<br />
