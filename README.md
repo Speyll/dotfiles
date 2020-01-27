@@ -29,7 +29,7 @@ Same setup but with black gardients<br />
 this is all the "core" and recommended software you will need for my setup:<br />
 
 ### void linux
-the base:`bspwm sxhkd nnn neovim (or vim) xorg-minimal xf86-input-synpatics xf86-input-evdev alsa-utils xbacklight unzip openntpd hsetroot font-hack-ttf xrdb simple-mtpfs ntfs-3g wireless_tools xdg-utils xprop tlp`<br />
+the base:`bspwm sxhkd nnn neovim (or vim) xorg-minimal xf86-input-synpatics libva-intel-driver xf86-input-evdev alsa-utils xbacklight unzip openntpd hsetroot font-hack-ttf xrdb simple-mtpfs ntfs-3g wireless_tools xdg-utils xprop tlp`<br />
 for my st/dmenu build: `base-devel libXft-devel libXinerama-devel terminus-font font-Siji`<br />
 for my lemonbar setup:`lemonbar-xft (or lemonbar but you will need some tweaking) xtitle xdotool`<br />
 optinal stuff to your likings: `tmux xwinwrap mpv youtube-dl sxiv scrot redshift`<br />
