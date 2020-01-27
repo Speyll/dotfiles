@@ -79,4 +79,4 @@ if you have a bluetooth headset you will need: `bluez-alsa`<br />
 if you have a gamepad or a joystick and want to use it you will need: `xf86-input-joystick`<br />
 
 ## other screenshots:
-![1](https://i.imgur.com/XhcBTJp.png) ![2](https://i.imgur.com/XrbIEXQ.png)<br />
+![1](https://i.imgur.com/XhcBTJp.png)
