@@ -1,5 +1,5 @@
 ## introduction
-this is my simple dotfiles for a simple setup of bspwm in Void Linux (and Alpine), the goal of this setup is to be as minimal as possible on resources without completely dropping the eye candy<br />
+this is my simple dotfiles for a simple setup of bspwm in GNU/Linux, the goal of this setup is to be as minimal as possible on resources without completely dropping the eye candy<br />
 
 ## preview images
 ![nord](https://i.imgur.com/Pj9bXcL.png)<br />
