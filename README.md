@@ -10,18 +10,18 @@ same setup but with black gardient<br />
 ## software used:
 | software  | what i use |
 | ------------- | ------------- |
-| distro  | void linux and alpine linux |
-| wm  | bspwm (sometimes switch to 2bwm) |
-| shell  | bash or ash |
+| distros  | Void, Alpine, Debian GNU/Linux |
+| wms  | bspwm (sometimes switch to 2bwm) |
+| shells  | bash or ash |
 | terminal  | st |
-| brower  | surf + tabbed (or firefox-esr) |
+| browser  | tabbed + surf, palemoon or firefox-esr |
 | image viewer  | sxiv |
 | file manager  | nnn |
 | text editor  | neovim |
 | video player  | mpv + youtube-dl |
 | multiplexer  | tmux |
 | compositor  | compton |
-| downloader | axel |
+| downloader | axel, transmission |
 
 ## some tips for my setup:
 this is all the "core" and recommended software you will need for my setup:<br />
