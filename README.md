@@ -78,6 +78,3 @@ if you have an amd gpu install: `xf86-video-amdgpu`<br />
 if you have bluetooth and want to use it install: `bluez`<br />
 if you have a bluetooth headset you will need: `bluez-alsa`<br />
 if you have a gamepad or a joystick and want to use it you will need: `xf86-input-joystick`<br />
-
-## other screenshots:
-![1](https://i.imgur.com/NdhGfRI.png)
