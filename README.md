@@ -3,9 +3,10 @@ this is my simple dotfiles for a simple setup of bspwm in GNU/Linux, the goal of
 
 ## preview images
 ![nord](https://i.imgur.com/e9VaQyL.png)<br />
-this is my setup with my customish kinda nord theme<br />
+This is my setup with my customish kinda nord theme.<br />
+
 ![black gradient](https://i.imgur.com/NdhGfRI.png)<br />
-same setup but with black gardients<br />
+Same setup but with black gardients.<br />
 
 ## software used:
 | software  | what i use |
