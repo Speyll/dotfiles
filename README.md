@@ -1,16 +1,13 @@
 ## introduction
-this is my simple dotfiles for a simple setup of bspwm in Void Linux (and Alpine), the goal of this setup is to be as minimal as possible on resources without completely dropping the eye candy (the screens need a small update but they are pretty much what will look like the product, i will update them when i have some free time <3)<br />
+this is my simple dotfiles for a simple setup of bspwm in Void Linux (and Alpine), the goal of this setup is to be as minimal as possible on resources without completely dropping the eye candy<br />
 
 ## preview images
-![busy](https://raw.githubusercontent.com/Speyll/void-bspwm/master/screenshots/busy.png)<br />
-this is tmux with neovim, sxiv is the image viewer and nnn is the file manager/browser<br />
-![surf](https://raw.githubusercontent.com/Speyll/void-bspwm/master/screenshots/customsurf.png)<br />
-custom surf (added homepage patch) in tabbed and a poorlymade startpage both tabbed and surf can be downloaded here ![mysuckless](https://github.com/Speyll/mysuckless)<br />
-![mpv and dmenubar](https://raw.githubusercontent.com/Speyll/void-bspwm/master/screenshots/dmenubar_and_vidya.png) <br />
-I have a lemonbar setup (can be toggled with sxhkd) but I rarely use it, prefer the barless way instead i use dmenu as a bar, it's amazing how much you can do with it, for my video player it's a pretty basic mpv with some youtube-dl<br />
+![nord](https://i.imgur.com/Pj9bXcL.png)<br />
+this is my setup with the nord theme<br />
+![black gradient](https://i.imgur.com/NdhGfRI.png)<br />
+same setup but with black gardient<br />
 
-## other specifications:
-
+## software used:
 | software  | what i use |
 | ------------- | ------------- |
 | distro  | void linux and alpine linux |
@@ -80,3 +77,6 @@ if you have an amd gpu install: `xf86-video-amdgpu`<br />
 if you have bluetooth and want to use it install: `bluez`<br />
 if you have a bluetooth headset you will need: `bluez-alsa`<br />
 if you have a gamepad or a joystick and want to use it you will need: `xf86-input-joystick`<br />
+
+## other screenshots:
+![1](https://i.imgur.com/XhcBTJp.png) ![2](https://i.imgur.com/XrbIEXQ.png)<br />
