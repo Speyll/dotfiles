@@ -8,8 +8,8 @@ vd-lavc-dr=yes
 
 # window
 geometry=50%:50%
-autofit-smaller=60%x60%
-autofit-larger=60%x60%
+autofit-smaller=90%
+autofit-larger=90%
 
 # video control
 keep-open=yes
