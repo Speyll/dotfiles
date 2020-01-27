@@ -25,7 +25,7 @@ hsetroot -fill ~/Images/Wallpapers/Wallpaper.jpg &
 pkill compton
 compton -b &
 
-# default prefered settings
+# Default prefered settings
 amixer -q set Master 100% &
 xbacklight -set 60 &
 
