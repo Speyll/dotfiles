@@ -10,26 +10,24 @@ pkill lemonbar | pkill bar | pkill sleep | pkill xtitle
 #bar &
 
 ## Wallpaper setting
-pkill hsetroot | pkill setroot | pkill sxiv
+pkill xwinwrap | pkill hsetroot | pkill setroot | pkill sxiv
 
 # Image still
 hsetroot -fill ~/Images/Wallpapers/Wallpaper.jpg &
+#hsetroot -tile ~/Images/Wallpapers/Tile.png &
 #setroot -z ~/Images/Wallpapers/Wallpaper.jpg &
-#setroot --blank-color '#101010' &
 
 # Animated background
-#xwinwrap -ov -ni -fs -- mpv -vo x11 -wid WID --keepaspect=no --pause=no --loop ~/Images/Wallpapers/Wallpaper.gif &
-#xwinwrap -ov -ni -fs -- sxiv -a -e WID -f -b -g 1366x768  ~/Images/Wallpapers/29.gif &
+#xwinwrap -ov -ni -fs -- mpv -vo x11 -wid WID --keepaspect=no --pause=no --loop ~/Images/Wallpapers/*.gif &
+#xwinwrap -ov -ni -fs -- sxiv -a -e WID -f -b -g 1366x768  ~/Images/Wallpapers/*.gif &
 
 # Compositor
 pkill compton
-compton &
+compton -b &
 
 # default prefered settings
 amixer -q set Master 100% &
 xbacklight -set 60 &
-#pkill redshift
-#redshift -x && redshift -l 36.73225:3.08746 &
 
 # Workspaces settings
 bspc rule -a 'firefox' desktop='^1'
@@ -48,11 +46,11 @@ bspc config focus_follows_pointer true
 ## Nord theme
 # Border gaps settings
 bspc config border_width         2
-bspc config window_gap           10
-bspc config top_padding          15
-bspc config bottom_padding       15
-bspc config left_padding         15
-bspc config right_padding        15
+bspc config window_gap           6
+bspc config top_padding          18
+bspc config bottom_padding       18
+bspc config left_padding         18
+bspc config right_padding        18
 
 # Colors settings
 bspc config focused_border_color "#88C0D0"
@@ -64,11 +62,6 @@ bspc config urgent_border_color "#EBCB8B"
 ## Grayscale theme
 # Border gaps settings
 bspc config border_width         1
-bspc config window_gap           6
-bspc config top_padding          18
-bspc config bottom_padding       18
-bspc config left_padding         18
-bspc config right_padding        18
 
 # Colors settings
 bspc config focused_border_color "#B9B9B9"
