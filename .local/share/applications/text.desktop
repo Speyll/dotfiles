@@ -1,7 +1,7 @@
 [Desktop Entry]
 Type=Application
 Name=text
-Exec=st -e vim %u
+Exec=st -e nvim %u
 Categories=Other;
 NoDisplay=false
 MimeType=text/plain;text/x-shellscript
