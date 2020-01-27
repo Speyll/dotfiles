@@ -8,6 +8,10 @@
 # Personal additional paths:
 export PATH="$PATH:$HOME/.local/bin:$HOME/.local/bin/scripts:$HOME/.local/bin/tools:$HOME/.local/bin/toys"
 
+# Make sure everything is set to exectuable
+chmod +x ~/.local/bin/*
+chmod +x ~/.local/bin/*/*
+
 # BLOCKSIZE=K;	export BLOCKSIZE
 # Setting TERM is normally done through /etc/ttys.
 # Do only override if you're sure that you'll never log in via telnet or xterm or a serial line.
