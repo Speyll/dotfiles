@@ -15,6 +15,7 @@ Same setup but with black gardients<br />
 | wms  | bspwm (sometimes switch to 2bwm) |
 | shells  | bash or ash |
 | terminal  | st |
+| bar  | none just a custom dmenu script |
 | browser  | tabbed + surf, palemoon or firefox-esr |
 | image viewer  | sxiv |
 | file manager  | nnn |
