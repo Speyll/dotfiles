@@ -5,7 +5,7 @@ this is my simple dotfiles for a simple setup of bspwm in GNU/Linux, the goal of
 ![nord](https://i.imgur.com/e9VaQyL.png)<br />
 This is my setup with my customish kinda nord theme.<br />
 
-![black gradient](https://i.imgur.com/NdhGfRI.png)<br />
+![black gradient](https://i.imgur.com/yq6t4cy.png)<br />
 Same setup but with black gardients.<br />
 
 ## software used:
@@ -80,4 +80,4 @@ if you have a bluetooth headset you will need: `bluez-alsa`<br />
 if you have a gamepad or a joystick and want to use it you will need: `xf86-input-joystick`<br />
 
 ## other screenshots:
-![1](https://i.imgur.com/XhcBTJp.png)
+![1](https://i.imgur.com/NdhGfRI.png)
