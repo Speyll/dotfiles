@@ -30,7 +30,7 @@ amixer -q set Master 100% &
 xbacklight -set 60 &
 
 # Workspaces settings
-bspc rule -a 'firefox' desktop='^1'
+bspc rule -a 'Firefox' desktop='^1'
 bspc rule -a 'mpv' desktop='^3' center=on state=pseudo_tiled
 bspc rule -a 'nnn' center=on state=pseudo_tiled
 bspc rule -a 'scratchpad' sticky=on center=on state=floating
