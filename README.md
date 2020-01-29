@@ -2,7 +2,7 @@
 This is my simple dotfiles for a simple setup of bspwm in GNU/Linux, the goal of this setup is to be as minimal as possible on resources without completely dropping the eye candy<br />
 
 ## preview images
-![nord](https://i.imgur.com/e9VaQyL.png)<br />
+![nord](https://i.imgur.com/Jvd8nYQ.png)<br />
 This is my setup with my customish nord theme<br />
 
 ![black gradient](https://i.imgur.com/yq6t4cy.png)<br />
