@@ -1,0 +1,18 @@
+[MIME Cache]
+image/bmp=image.desktop;
+image/gif=image.desktop;
+image/jpeg=image.desktop;
+image/jpg=image.desktop;
+image/png=image.desktop;
+image/tiff=image.desktop;
+image/x-bmp=image.desktop;
+image/x-portable-anymap=image.desktop;
+image/x-portable-bitmap=image.desktop;
+image/x-portable-graymap=image.desktop;
+image/x-tga=image.desktop;
+image/x-xpixmap=image.desktop;
+text/plain=text.desktop;
+text/x-shellscript=text.desktop;
+x-scheme-handler/ftp=surf.desktop;
+x-scheme-handler/http=surf.desktop;
+x-scheme-handler/https=surf.desktop;
