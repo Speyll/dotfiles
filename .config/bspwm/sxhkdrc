@@ -28,7 +28,7 @@ super + shift + r
 
 # script launcher and shutdown menu
 super + {shift + s, ctrl + s}
-	{scriptlaunch, dmenuout}
+	{dmenulaunch, dmenuout}
 
 #
 # Special hotkeys
