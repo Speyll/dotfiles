@@ -4,7 +4,6 @@ choice=$(printf "dmenumount\\ndmenuumount\\nducksearch\\nrecordmenu\\nrecordkill
 case "$choice" in
     dmenumount) dmenumount & ;;
     dmenuumount) dmenuumount & ;;
-    ducksearch) ducksearch & ;;
     recordmenu) recordmenu & ;;
     recordkill) recordkill & ;;
 esac
