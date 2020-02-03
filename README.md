@@ -11,12 +11,12 @@ Same setup but with black gardients<br />
 ## software used:
 | software  | what i use |
 | ------------- | ------------- |
-| distros  | Void, Alpine, Debian GNU/Linux |
-| wms  | bspwm (sometimes switch to 2bwm) |
+| distros  | Void, Alpine, Debian |
+| wms  | bspwm, sowm |
 | shells  | bash or ash |
-| terminal  | st |
-| bar  | none a custom dmenu script (lemonbar script available tho) |
-| browser  | tabbed + surf, palemoon or firefox-esr |
+| terminal  | st, urxvt |
+| bar  | dmenu, lemonbar |
+| browser  | tabbed + surf, firefox-esr |
 | image viewer  | sxiv |
 | file manager  | nnn |
 | text editor  | neovim |
