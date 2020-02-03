@@ -29,7 +29,7 @@ Same setup but with black gardients<br />
 this is all the "core" and recommended software you will need for my setup:<br />
 
 ### My suckless repo
-![you can found it here](https://github.com/Speyll/mysuckless)<br />
+![you can find it here](https://github.com/Speyll/mysuckless)<br />
 
 ### void linux
 the base:`bspwm sxhkd nnn neovim (or vim) xorg-minimal xf86-input-synpatics libva-intel-driver xf86-input-evdev alsa-utils xbacklight unzip openntpd hsetroot font-hack-ttf xrdb simple-mtpfs ntfs-3g wireless_tools xdg-utils xprop tlp`<br />
