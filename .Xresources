@@ -6,7 +6,7 @@
 
 Xft.hinting: true
 Xft.rgba: false
-Xft.autohint: false
+Xft.autohint: true
 Xft.hintstyle: none
 Xft.lcdfilter: lcddefault
 
@@ -14,11 +14,20 @@ Xft.lcdfilter: lcddefault
 URxvt.termName: rxvt-unicode-256color
 URxvt.scrollBar: false
 URxvt.scrollbar_right: false
+URxvt.internalBorder: 25
+URxvt.depth: 32
+URxvt.cursorBlink: true
+
+!fake transparency
+URxvt.inheritPixmap: true
 URxvt.transparent: true
 URxvt.shading: 35
-URxvt.internalBorder: 25
-URxvt.depth: 25
-URxvt.cursorBlink: true
+
+/*
+!true transparency
+URxvt.background: [80]#212133
+*/
+
 
 ! custom nord
 *.background: #161623
