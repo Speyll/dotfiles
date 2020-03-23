@@ -12,6 +12,9 @@ export PATH="$PATH:$HOME/.local/bin:$HOME/.local/bin/scripts:$HOME/.local/bin/to
 chmod +x ~/.local/bin/*
 chmod +x ~/.local/bin/*/*
 
+# Xrdb merge
+xrdb -merge ~/.Xresources &
+
 # BLOCKSIZE=K;	export BLOCKSIZE
 # Setting TERM is normally done through /etc/ttys.
 # Do only override if you're sure that you'll never log in via telnet or xterm or a serial line.
