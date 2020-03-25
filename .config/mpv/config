@@ -23,6 +23,7 @@ cache-secs=180
 
 # youtube-dl
 ytdl-format=best[height<=?480]+bestaudio/best
+ytdl-raw-options=no-check-certificate=
 
 # osd
 osd-playing-msg = '${filename}'
