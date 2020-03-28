@@ -33,7 +33,7 @@ this is all the "core" and recommended software you will need for my setup:<br /
 ![you can find it here](https://github.com/Speyll/mysuckless)<br />
 
 ### Void Linux
-the base:`bspwm sxhkd nnn neovim (or vim) xorg-minimal xf86-input-synpatics libva-intel-driver xf86-input-evdev alsa-utils xbacklight unzip openntpd hsetroot font-hack-ttf xrdb simple-mtpfs ntfs-3g wireless_tools xdg-utils xprop tlp`<br />
+the base:`bspwm sxhkd nnn neovim (or vim) xorg-minimal libva-intel-driver alsa-utils xbacklight unzip openntpd xwallpaper font-hack-ttf xrdb simple-mtpfs ntfs-3g wireless_tools xdg-utils xprop tlp`<br />
 for my st/dmenu build: `base-devel libXft-devel libXinerama-devel terminus-font font-Siji`<br />
 for my lemonbar setup:`lemonbar-xft (or lemonbar but you will need some tweaking) xtitle xdotool`<br />
 optinal stuff to your likings: `tmux xwinwrap mpv youtube-dl sxiv scrot redshift`<br />
@@ -43,7 +43,6 @@ if you have a nvidia gpu you can install: `xf86-video-nouveau`<br />
 if you have an amd gpu install: `xf86-video-amdgpu`<br />
 if you have bluetooth and want to use it install: `bluez`<br />
 if you have a bluetooth headset you will need: `bluez-alsa`<br />
-if you have a gamepad or a joystick and want to use it you will need: `xf86-input-joystick`<br />
 
 if you want to compile `surf` from source and have a working youtube layout you will need this `libgtkdgl-devel libgcrypt-devel webkit2gtk-devel gstreamer1-devel gst-plugins-good1 gst-plugins-base1-devel gst-libav curl`<br />
 
@@ -82,4 +81,3 @@ if you have a nvidia gpu you can install: `xf86-video-nouveau`<br />
 if you have an amd gpu install: `xf86-video-amdgpu`<br />
 if you have bluetooth and want to use it install: `bluez`<br />
 if you have a bluetooth headset you will need: `bluez-alsa`<br />
-if you have a gamepad or a joystick and want to use it you will need: `xf86-input-joystick`<br />
