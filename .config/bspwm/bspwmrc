@@ -16,8 +16,8 @@ pkill xwinwrap | pkill xwallpaper | pkill sxiv
 xwallpaper --maximize ~/Images/Walls/1.jpg &
 
 # Animated background
-#xwinwrap -ov -ni -fs -- mpv -vo x11 -wid WID --keepaspect=no --pause=no --loop ~/Images/Wallpapers/*.gif &
-#xwinwrap -ov -ni -fs -- sxiv -a -e WID -f -b -g 1366x768  ~/Images/Wallpapers/*.gif &
+#xwinwrap -ov -ni -fs -- mpv -vo x11 -wid WID --keepaspect=no --pause=no --loop ~/Images/Walls/*.gif &
+#xwinwrap -ov -ni -fs -- sxiv -a -e WID -f -b -g 1366x768  ~/Images/Walls/*.gif &
 
 # Compositor
 pkill compton
