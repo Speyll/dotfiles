@@ -10,12 +10,10 @@ pkill lemonbar | pkill bar | pkill sleep | pkill xtitle
 #bar &
 
 ## Wallpaper setting
-pkill xwinwrap | pkill hsetroot | pkill setroot | pkill sxiv
+pkill xwinwrap | pkill xwallpaper | pkill sxiv
 
-# Image still
-hsetroot -fill ~/Images/Wallpapers/Wallpaper.jpg &
-#hsetroot -tile ~/Images/Wallpapers/Tile.png &
-#setroot -z ~/Images/Wallpapers/Wallpaper.jpg &
+# Image
+xwallpaper --maximize ~/Images/Walls/1.jpg &
 
 # Animated background
 #xwinwrap -ov -ni -fs -- mpv -vo x11 -wid WID --keepaspect=no --pause=no --loop ~/Images/Wallpapers/*.gif &
@@ -23,7 +21,7 @@ hsetroot -fill ~/Images/Wallpapers/Wallpaper.jpg &
 
 # Compositor
 pkill compton
-compton -b &
+#compton -b &
 
 # Default prefered settings
 amixer -q set Master 100% &
