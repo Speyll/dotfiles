@@ -41,7 +41,7 @@ bspc config gapless_monocle      false
 bspc config focus_follows_pointer true
 
 
-## Nord theme
+## Custom gruvbox
 # Border gaps settings
 bspc config border_width         2
 bspc config window_gap           6
@@ -51,19 +51,7 @@ bspc config left_padding         18
 bspc config right_padding        18
 
 # Colors settings
-bspc config focused_border_color "#88C0D0"
-bspc config normal_border_color "#455173"
-bspc config active_border_color "#7D97BB"
-bspc config urgent_border_color "#EBCB8B"
-
-'
-## Grayscale theme
-# Border gaps settings
-bspc config border_width         1
-
-# Colors settings
-bspc config focused_border_color "#B9B9B9"
-bspc config normal_border_color "#7C7C7C"
-bspc config active_border_color "#B9B9B9"
-bspc config urgent_border_color "#F7F7F7"
-'
+bspc config focused_border_color    "#689d6a"
+bspc config normal_border_color     "#1d2021"
+bspc config active_border_color     "#1d2021"
+bspc config urgent_border_color     "#d79921"
