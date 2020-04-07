@@ -11,7 +11,7 @@ syntax on
 set modelines=0
 
 " Uncomment below to set the max textwidth. Use a value corresponding to the width of your screen.
-"set textwidth=80
+set textwidth=80
 set formatoptions=tcqrn1
 set tabstop=4
 set shiftwidth=4
@@ -50,28 +50,35 @@ set matchpairs+=<:>
 
 " Show line numbers
 set relativenumber
-highlight LineNr ctermfg=12
+highlight LineNr ctermfg=7
 
 " Set status line display
 set laststatus=2
-hi StatusLine ctermfg=0 ctermbg=1 cterm=NONE
-hi StatusLineNC ctermfg=7 ctermbg=0 cterm=NONE
-hi User1 ctermfg=0 ctermbg=12
-hi User2 ctermfg=NONE ctermbg=7
-hi User3 ctermfg=0 ctermbg=12
-hi User4 ctermfg=0 ctermbg=1
-set statusline=\                    " Padding
-set statusline+=%f                  " Path to the file
-set statusline+=\ %1*\              " Padding & switch colour
-set statusline+=%y                  " File type
-set statusline+=\ %2*\              " Padding & switch colour
-set statusline+=%=                  " Switch to right-side
-set statusline+=\ %3*\              " Padding & switch colour
-set statusline+=line                " of Text
-set statusline+=\                   " Padding
-set statusline+=%l                  " Current line
-set statusline+=\ %4*\              " Padding & switch colour
-set statusline+=of                  " of Text
+hi StatusLine ctermfg=0 ctermbg=11 cterm=NONE
+hi StatusLineNC ctermfg=15 ctermbg=1 cterm=NONE
+hi User1 ctermfg=0 ctermbg=6
+hi User2 ctermfg=NONE ctermbg=NONE
+hi User3 ctermfg=0 ctermbg=14
+
+" Section 1
+set statusline=\            " Padding
+set statusline+=%f          " Path to the file
+
+" Section 2
+set statusline+=\ %1*\      " Padding & switch colour
+set statusline+=%y          " File type
+
+" Switch side and color
+set statusline+=\ %2*       " Change color
+set statusline+=%=          " Switch to right-side
+
+" Section 3
+set statusline+=\ %3*\                                      " Padding & switch colour
+set statusline+=[%{&fileencoding?&fileencoding:&encoding}]  " File encoding
+set statusline+=\ [%{&fileformat}\]                         " Padding & file format
+set statusline+=\ %l:%c                                     " Padding & line number
+
+set statusline+=\ of                " of texte
 set statusline+=\                   " Padding
 set statusline+=%L                  " Total line
 set statusline+=\                   " Padding
