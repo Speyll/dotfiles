@@ -4,9 +4,9 @@
 *.italicFont: xft:terminus:style=Regular:size=9
 *.boldItalicFont: xft:terminus:style=Regular:size=9
 
-Xft.hinting: true
+Xft.hinting: false
 Xft.rgba: false
-Xft.autohint: true
+Xft.autohint: false
 Xft.hintstyle: none
 Xft.lcdfilter: lcddefault
 
@@ -18,88 +18,36 @@ URxvt.internalBorder: 25
 URxvt.depth: 32
 URxvt.cursorBlink: true
 
-!fake transparency
+! fake transparency
 URxvt.inheritPixmap: true
 URxvt.transparent: true
 URxvt.shading: 35
 
 /*
-!true transparency
-URxvt.background: [80]#212133
+! true transparency
+URxvt.background: [80]#282828
 */
 
+! gruvbox colors
+*.background: #282828
+*.foreground: #fbf1c7
 
-! custom nord
-*.background: #161623
-*.foreground: #a6bbd9
+! 8 normal colors
+*.color0:  #1d2021 !black
+*.color1:  #fb4934 !red
+*.color2:  #98971a !green
+*.color3:  #d79921 !yellow
+*.color4:  #458588 !blue
+*.color5:  #b16286 !purple
+*.color6:  #689d6a !aqua
+*.color7:  #a89984 !gray
 
-! black
-*.color0: #101010
-*.color8:  #4C566A
-
-! red
-*.color1: #BF616A
-*.color9:  #BF616A
-
-! green
-*.color2: #A3BE8C
-*.color10: #A3BE8C
-
-! yellow
-*.color3: #EBCB8B
-*.color11: #EBCB8B
-
-! blue
-*.color4: #81A1C1
-*.color12: #81A1C1
-
-! magenta
-*.color5: #B48EAD
-*.color13: #B48EAD
-
-! cyan
-*.color6: #88C0D0
-*.color14: #8FBCBB
-
-! white
-*.color7: #E5E9F0
-*.color15: #ECEFF4
-
-/*
-! base16 grayscale
-*.foreground:   #b9b9b9
-*.background:   #101010
-*.cursorColor:  #b9b9b9
-
-! black
-*.color0:       #101010
-*.color8:       #525252
-
-! red
-*.color1:       #7c7c7c
-*.color9:       #7c7c7c
-
-! green
-*.color2:       #8e8e8e
-*.color10:      #8e8e8e
-
-! yellow
-*.color3:       #a0a0a0
-*.color11:      #a0a0a0
-
-! blue
-*.color4:       #686868
-*.color12:      #686868
-
-! magenta
-*.color5:       #747474
-*.color13:      #747474
-
-! cyan
-*.color6:       #868686
-*.color14:      #868686
-
-! white
-*.color7:       #b9b9b9
-*.color15:      #f7f7f7
-*/
+! 8 bright colors
+*.color8:  #928374 !gray
+*.color9:  #fb4934 !red
+*.color10: #b8bb26 !green
+*.color11: #fabd2f !yellow
+*.color12: #83a598 !blue
+*.color13: #d3869b !purple
+*.color14: #8ec07c !aqua
+*.color15: #ebdbb2 !white
