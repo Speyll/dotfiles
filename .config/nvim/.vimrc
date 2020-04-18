@@ -56,9 +56,9 @@ highlight LineNr ctermfg=7
 set laststatus=2
 hi StatusLine ctermfg=0 ctermbg=11 cterm=NONE
 hi StatusLineNC ctermfg=15 ctermbg=1 cterm=NONE
-hi User1 ctermfg=0 ctermbg=6
+hi User1 ctermfg=0 ctermbg=4
 hi User2 ctermfg=NONE ctermbg=NONE
-hi User3 ctermfg=0 ctermbg=14
+hi User3 ctermfg=0 ctermbg=6
 
 " Section 1
 set statusline=\            " Padding
