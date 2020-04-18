@@ -13,7 +13,7 @@ pkill lemonbar | pkill bar | pkill sleep | pkill xtitle
 pkill xwinwrap | pkill xwallpaper | pkill sxiv
 
 # Image
-xwallpaper --focus ~/Images/Walls/1.jpg &
+xwallpaper --zoom ~/Images/Walls/1.jpg &
 
 # Animated background
 #xwinwrap -ov -ni -fs -- mpv -vo x11 -wid WID --keepaspect=no --pause=no --loop ~/Images/Walls/1.gif &
