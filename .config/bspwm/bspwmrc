@@ -1,4 +1,8 @@
 #!/bin/sh
+
+# Make the mouse visible
+xsetroot -cursor_name left_ptr
+
 # Avoid doubling ruls
 bspc rule -r "*"
 
