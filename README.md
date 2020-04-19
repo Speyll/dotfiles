@@ -8,7 +8,7 @@ This is my setup with the nord theme
 ### Notes
 You have probably noticed that I changed themes a lot recently went from a customish Nord theme to grayscale, full black to gruvbox and now back to a true Nord theme and I think I will stick with it for now, sorry for the back and forth.
 
-As you can see in the preview i have a 1366x768 screen resolution, so if you have another screen resolution the dmenubar will probably not be centered you can align it manually by editing the dmenubar script in `~\.local\bin\tools\dmenubar` but if you have a way to center the output in dmenu automaticly feel free to tell me how!
+As you can see in the preview i have a 1366x768 screen resolution, if you have another screen resolution dmenubar will probably not be centered, you can align it manually by editing the dmenubar script in `~\.local\bin\tools\dmenubar` but if you have a way to center the output in dmenu automatically feel free to tell me how!
 
 ### Software used:
 
