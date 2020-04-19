@@ -1,10 +1,14 @@
 ## Introduction
-This is my simple dotfiles for a simple setup of bspwm in GNU/Linux, the goal of this setup is to be as minimal as possible on resources without completely dropping the eye candy.
+Hi, my name is Speyll and this is my simple dotfiles of bspwm in GNU/Linux, the goal of this setup is to be as minimal as possible on resources without completely dropping the eye candy.
 
 ### Preview images
-![gruvbox](https://i.imgur.com/LqrDM6w.png)
-This is my setup with my customish gruvbox theme
+![nord](https://i.imgur.com/dxYStBB.png)
+This is my setup with the nord theme
 
+### Notes
+You have probably noticed that I changed themes a lot recently went from a customish Nord theme to grayscale, full black to gruvbox and now back to a true Nord theme and I think I will stick with it for now, sorry for the back and forth.
+
+As you can see in the preview i have a 1366x768 screen resolution, so if you have another screen resolution the dmenubar will probably not be centered you can align it manually by editing the dmenubar script in `~\.local\bin\tools\dmenubar` but if you have a way to center the output in dmenu automaticly feel free to tell me how!
 
 ### Software used:
 
@@ -24,11 +28,11 @@ This is my setup with my customish gruvbox theme
 | compositor  | compton |
 | downloader | axel, transmission |
 
-## Some tips for my setup:
+## Core software
 this is all the **core** and recommended software you will need for my setup
 
 ### My suckless repo
-[you can find it here](https://github.com/Speyll/mysuckless)<br />
+all of my suckless utilities (dmenu, st..etc) can be found [here](https://github.com/Speyll/mysuckless)<br />
 
 ### Void Linux
 **the base:** `bspwm sxhkd nnn neovim (or vim) xorg-minimal libva-intel-driver alsa-utils xbacklight unzip openntpd xwallpaper font-hack-ttf xrdb simple-mtpfs ntfs-3g wireless_tools xdg-utils xprop tlp`<br />
