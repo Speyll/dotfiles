@@ -1,39 +1,43 @@
 ! font settings
-*.font: xft:terminus:style=Regular:size=9
-*.boldFont: xft:terminus:style=Regular:size=9
-*.italicFont: xft:terminus:style=Regular:size=9
-*.boldItalicFont: xft:terminus:style=Regular:size=9
+*.font: xft:Hack:style=Regular:size=12
+*.boldFont: xft:Hack:style=Bold:size=12
+*.italicFont: xft:Hack:style=Italic:size=12
+*.boldItalicFont: xft:Hack:style=BoldItalic:size=12
 
 Xft.hinting: false
-Xft.rgba: false
 Xft.autohint: false
-Xft.hintstyle: none
+Xft.rgba: true
 Xft.lcdfilter: lcddefault
 
 ! urxvt settings
-URxvt.termName: rxvt-unicode-256color
-URxvt.scrollBar: false
-URxvt.scrollbar_right: false
-URxvt.internalBorder: 25
-URxvt.depth: 32
-URxvt.cursorBlink: true
+*.termName: rxvt-unicode-256color
+*.scrollBar: false
+*.scrollbar_right: false
+*.internalBorder: 25
+*.cursorBlink: true
 *.fading: 35
-*.fadeColor: #EBCB8B
+*.depth: 35
+
+URxvt.perl-ext-common: default,tabbed,matcher,resize-font,-tabbed
+
+URxvt.keysym.C-Up:     font-size:increase
+URxvt.keysym.C-Down:   font-size:decrease
+URxvt.keysym.C-S-Up:   font-size:incglobal
+URxvt.keysym.C-S-Down: font-size:decglobal
+URxvt.keysym.C-equal:  font-size:reset
+URxvt.keysym.C-slash:  font-size:show
 
 ! fake transparency
-URxvt.inheritPixmap: true
-URxvt.transparent: true
-URxvt.shading: 35
+*.inheritPixmap: true
+*.transparent: true
+*.shading: 35
 
-/*
-! true transparency
-URxvt.background: [80]#282828
-*/
 
-! gruvbox colors
+! nord colors
 *.background:  #2E3440
 *.foreground:  #D8DEE9
 *.cursorColor: #81A1C1
+*.fadeColor: #EBCB8B
 
 ! 8 normal colors
 *.color0:  #3B4252
