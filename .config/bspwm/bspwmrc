@@ -14,10 +14,11 @@ pkill lemonbar | pkill bar | pkill sleep | pkill xtitle
 #bar &
 
 ## Wallpaper setting
-pkill xwinwrap | pkill xwallpaper | pkill sxiv
+pkill xwinwrap | pkill xwallpaper | pkill hsetroot | pkill sxiv
 
 # Image
-xwallpaper --zoom ~/Images/Walls/1.jpg &
+xwallpaper --zoom ~/Images/Walls/1.jpg
+#hsetroot -cover ~/Images/Walls/1.jpg
 
 # Animated background
 #xwinwrap -ov -ni -fs -- mpv -vo x11 -wid WID --keepaspect=no --pause=no --loop ~/Images/Walls/1.gif &
@@ -44,6 +45,15 @@ bspc config borderless_monocle      false
 bspc config gapless_monocle         false
 bspc config focus_follows_pointer   true
 
+'
+# Border gaps settings
+BW=2
+bspc config border_width $BW
+bspc config window_gap -$BW
+for side in top right bottom left ; do
+    bspc config ${side}_padding $BW
+done
+'
 
 ## Nord theme
 # Border gaps settings
