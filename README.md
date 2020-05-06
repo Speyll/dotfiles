@@ -2,7 +2,7 @@
 Hi, my name is Speyll and this is my simple dotfiles of bspwm in GNU/Linux, the goal of this setup is to be as minimal as possible on resources without completely dropping the eye candy.
 
 ### Preview images
-![nord](https://i.imgur.com/dxYStBB.png)
+![nord](https://i.imgur.com/fjAuSby.png)
 This is my setup with the nord theme
 
 ### Notes
@@ -35,11 +35,11 @@ this is all the **core** and recommended software you will need for my setup
 all of my suckless utilities (dmenu, st..etc) can be found [here](https://github.com/Speyll/mysuckless)<br />
 
 ### Void Linux
-**the base:** `bspwm sxhkd nnn neovim (or vim) xorg-minimal libva-intel-driver alsa-utils xbacklight unzip openntpd xwallpaper font-hack-ttf xrdb simple-mtpfs ntfs-3g wireless_tools xdg-utils xprop tlp`<br />
+**the base:** `bspwm sxhkd nnn neovim (or vim) xorg-minimal libva-intel-driver alsa-utils xbacklight unzip xwallpaper font-hack-ttf xrdb simple-mtpfs ntfs-3g wireless_tools xdg-utils xprop tlp`<br />
 
-**for my st/dmenu build:** `base-devel libXft-devel libXinerama-devel terminus-font font-Siji`
+**for my st/dmenu build:** `gcc libXft-devel libXinerama-devel font-kakwafont font-Siji`
 
-**for my lemonbar setup:** `lemonbar-xft (or lemonbar but you will need some tweaking) xtitle xdotool`
+**for my lemonbar setup:** `lemonbar-xft`
 
 **optinal stuff to your likings:** `tmux xwinwrap mpv youtube-dl sxiv scrot redshift`
 
@@ -74,7 +74,7 @@ even if my surf setup support watching videos directly in the browser i don't re
 
 **for my st/dmenu build:** `git make gcc g++ libx11-dev libxft-dev libxinerama-dev font-siji`
 
-**for my lemonbar setup:**`lemonbar xtitle xdotool`
+**for my lemonbar setup:**`lemonbar`
 
 **optinal stuff to your likings:** `tmux mpv sxiv setroot compton lemonbar youtube-dl redshift`
 
