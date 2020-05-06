@@ -70,7 +70,7 @@ even if my surf setup support watching videos directly in the browser i don't re
 **ps:** my keybindings are all in `~/. config/bspwm/sxhkdrc` they are all commented so if you want to know which keybind do what or want to change it to your likings it's all there!<br />
 
 ### Alpine linux
-**the base:**`xorg-server xrdb alsa-utils alsa-lib alsaconf lm-sensors pm-utils xbacklight tlp bspwm sxhkd st ncurses-terminfo ncurses nnn neovim ttf-hack terminus-font  simple-mtpfs unzip openntpd ntfs-3g xdg-utils xprop`
+**the base:**`xorg-server xrdb alsa-utils alsa-lib alsaconf pm-utils xbacklight tlp bspwm sxhkd st ncurses-terminfo ncurses nnn neovim ttf-hack font-kakwafont simple-mtpfs unzip ntfs-3g xdg-utils xprop`
 
 **for my st/dmenu build:** `git make gcc g++ libx11-dev libxft-dev libxinerama-dev font-siji`
 
