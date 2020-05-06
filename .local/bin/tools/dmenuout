@@ -1,9 +1,0 @@
-#!/bin/sh
-choice=$(printf "shutdown\\nreboot\\nsuspend\\nhibernate" | dmenu -i -p "what to do?")
-
-case "$choice" in
-  shutdown) prompt "do you want to shutdown?" "sudo poweroff" & ;;
-  reboot) prompt "do you want to reboot?" "sudo reboot" & ;;
-  suspend) prompt "do you want to suspend?" "sudo pm-suspend" & ;;
-  hibernate) prompt "do you want to hibernate?" "sudo pm-hibernate" & ;;
-esac
