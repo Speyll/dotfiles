@@ -9,24 +9,19 @@ bspc rule -r "*"
 # Workspace setup
 bspc monitor -d I II III
 
-# Lemonbar
-pkill lemonbar | pkill bar | pkill sleep | pkill xtitle
-#bar &
-
 ## Wallpaper setting
-pkill xwinwrap | pkill xwallpaper | pkill hsetroot | pkill sxiv
+pkill xwinwrap | pkill hsetroot | pkill sxiv
 
 # Image
-xwallpaper --zoom ~/Images/Walls/1.jpg
-#hsetroot -cover ~/Images/Walls/1.jpg
+hsetroot -cover ~/Images/Walls/4.jpg
 
 # Animated background
 #xwinwrap -ov -ni -fs -- mpv -vo x11 -wid WID --keepaspect=no --pause=no --loop ~/Images/Walls/1.gif &
 #xwinwrap -ov -ni -fs -- sxiv -a -e WID -f -b -g 1366x768  ~/Images/Walls/1.gif &
 
 # Compositor
-pkill compton
-compton -b &
+pkill picom
+#picom -b &
 
 # Default prefered settings
 amixer -q set Master 100% &
@@ -45,27 +40,24 @@ bspc config borderless_monocle      false
 bspc config gapless_monocle         false
 bspc config focus_follows_pointer   true
 
-'
+
+## Nord theme
 # Border gaps settings
 BW=2
 bspc config border_width $BW
 bspc config window_gap -$BW
-for side in top right bottom left ; do
+for side in right bottom left ; do
     bspc config ${side}_padding $BW
 done
-'
 
-## Nord theme
-# Border gaps settings
-bspc config border_width         2
-bspc config window_gap           6
-bspc config top_padding          18
-bspc config bottom_padding       18
-bspc config left_padding         18
-bspc config right_padding        18
+bspc config top_padding 22
 
 # Colors settings
 bspc config focused_border_color    "#88C0D0"
 bspc config normal_border_color     "#3B4252"
 bspc config active_border_color     "#3B4252"
 bspc config urgent_border_color     "#EBCB8B"
+
+# Lemonbar
+[ -e "$fifo" ] && bspc subscribe report > "$fifo" &
+pgrep -x panel > /dev/null || bar &
