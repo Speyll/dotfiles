@@ -11,8 +11,8 @@ super + {Return, shift + Return,  ctrl + Return}
 	{st, st -c scratchpad -g 70x25 -e tmux, st -c tmux -e tmux}
 
 # program launcher / dmenubar
-super + {d,shift + d}
-	{dmenu_run -p ' what program launch ?', dmenubar}
+super + d
+	{dmenu_run -p 'Choose a program:'}
 
 # browser (if both are installed choose one)
 super + shift + b
