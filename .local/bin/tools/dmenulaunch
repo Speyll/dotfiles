@@ -1,5 +1,5 @@
 #!/bin/sh
-choice=$(printf "dmenumount\\ndmenuumount\\nrecordmenu\\nrecordkill" | dmenu -i -p "Choose what script launch:")
+choice=$(printf "dmenumount\\ndmenuumount\\nrecordmenu\\nrecordkill" | dmenu -i -p "Choose a script:")
 
 case "$choice" in
     dmenumount) dmenumount & ;;
