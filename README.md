@@ -37,9 +37,9 @@ all of my suckless utilities (dmenu, st..etc) can be found [here](https://github
 ### Void Linux
 **the base:** `bspwm sxhkd nnn neovim (or vim) xorg-minimal libva-intel-driver alsa-utils xbacklight unzip xwallpaper font-hack-ttf xrdb simple-mtpfs ntfs-3g wireless_tools xdg-utils xprop tlp`<br />
 
-**for my st/dmenu build:** `gcc libXft-devel libXinerama-devel font-kakwafont font-Siji`
+**for my st/dmenu build:** `pkg-config gcc libXft-devel libXinerama-devel font-kakwafont`
 
-**for my lemonbar setup:** `lemonbar-xft`
+**for my lemonbar setup:** `lemonbar-xft font-Siji`
 
 **optinal stuff to your likings:** `tmux xwinwrap mpv youtube-dl sxiv scrot redshift`
 
@@ -74,7 +74,7 @@ even if my surf setup support watching videos directly in the browser i don't re
 
 **for my st/dmenu build:** `git make gcc g++ libx11-dev libxft-dev libxinerama-dev font-siji`
 
-**for my lemonbar setup:**`lemonbar`
+**for my lemonbar setup:**`lemonbar font-Siji`
 
 **optinal stuff to your likings:** `tmux mpv sxiv setroot compton lemonbar youtube-dl redshift`
 
