@@ -1,0 +1,41 @@
+#!/bin/sh
+
+a="%{F#88C0D0}"
+t="%{F-}"
+fifo=/tmp/bar
+
+# source all functions
+for i in ~/.local/bin/lemonbar/lemons/*; do
+    . "$i"
+done
+
+# ensure proper script cleanup
+trap 'trap - TERM; kill 0' INT TERM QUIT EXIT
+
+[ -e "$fifo" ] && rm "$fifo"
+mkfifo "$fifo"
+
+wks > "$fifo" &
+clk > "$fifo" &
+dte > "$fifo" &
+ntw > "$fifo" &
+vol > "$fifo" &
+bat > "$fifo" &
+
+while read -r line; do
+    case $line in
+        W*) wks=${line#?};;
+        C*) clk=${line#?};;
+        D*) dte=${line#?};;
+        N*) ntw=${line#?};;
+        V*) vol=${line#?};;
+        B*) bat=${line#?}
+    esac
+
+    echo "%{l} ${wks} %{c}${clk}%{r}${vol} | ${ntw} | ${bat} | ${dte} "
+done < "$fifo" | \
+    lemonbar -g x20 \
+    -o -1 -f "kakwafont:size=9" \
+    -o +0.5 -f "siji:size=9" \
+    -B \#2E3440 \
+    -F \#D8DEE9
