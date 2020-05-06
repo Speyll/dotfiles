@@ -1,0 +1,13 @@
+# get time
+#
+# lemonbar script
+
+clk ()
+{
+    while :; do
+        var=$(date +%H:%M\ %P)
+        echo "C$a$t $var"
+
+        sleep 10s
+    done
+}

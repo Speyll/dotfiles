@@ -1,0 +1,13 @@
+# get volume
+#
+# lemonbar script
+
+vol ()
+{
+    while :; do
+        var=$(amixer get Master | awk '$0~/%/{print $4}' | tr -d '[]')
+        echo "V$a$t $var"
+
+        sleep 3s
+    done
+}

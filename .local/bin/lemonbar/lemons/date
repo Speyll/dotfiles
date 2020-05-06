@@ -1,0 +1,13 @@
+# get date
+#
+# lemonbar script
+
+dte ()
+{
+    while :; do
+        var=$(date +%a\ %d\ %b)
+        echo "D$a$t $var"
+
+        sleep 30m
+    done
+}
