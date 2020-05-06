@@ -86,8 +86,9 @@ export GCC_COLORS='error=01;31:warning=01;35:note=01;36:caret=01;32:locus=01:quo
 alias ll='ls -l'
 alias la='ls -A'
 alias l='ls -CF'
-alias xbs='sudo xbps-install -S'
+alias xbs='sudo xbps-install'
 alias xbr='sudo xbps-remove -Rv'
+alias apti='sudo apt-get -no-install-recommends'
 
 # Alias definitions.
 # You may want to put all your additions into a separate file like

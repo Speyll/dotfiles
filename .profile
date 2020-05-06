@@ -6,7 +6,7 @@
 # PATH=/sbin:/bin:/usr/sbin:/usr/bin:/usr/local/sbin:/usr/local/bin:$HOME/bin;
 
 # Personal additional paths:
-export PATH="$PATH:$HOME/.local/bin:$HOME/.local/bin/scripts:$HOME/.local/bin/tools:$HOME/.local/bin/toys"
+export PATH="$PATH:$HOME/.local/bin:$HOME/.local/bin/scripts:$HOME/.local/bin/tools:$HOME/.local/bin/toys:$HOME/.local/bin/lemonbar"
 
 # Make sure everything is set to exectuable
 chmod +x ~/.local/bin/*

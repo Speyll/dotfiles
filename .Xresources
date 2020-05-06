@@ -1,12 +1,12 @@
 ! font settings
-*.font: xft:Hack:style=Regular:size=12
-*.boldFont: xft:Hack:style=Bold:size=12
-*.italicFont: xft:Hack:style=Italic:size=12
-*.boldItalicFont: xft:Hack:style=BoldItalic:size=12
+*.font: xft:kakwafont:style=Regular:size=9
+*.boldFont: xft:kakwafont:style=Regular:size=9
+*.italicFont: xft:kakwafont:style=Regular:size=9
+*.boldItalicFont: xft:kakwafont:style=Regular:size=9
 
 Xft.hinting: false
 Xft.autohint: false
-Xft.rgba: true
+Xft.rgba: false
 Xft.lcdfilter: lcddefault
 
 ! urxvt settings
@@ -21,7 +21,8 @@ Xft.lcdfilter: lcddefault
 ! fake transparency
 *.inheritPixmap: true
 *.transparent: true
-*.shading: 35
+! *.tintColor: #2E3440
+.*shading: 100
 
 ! nord colors
 *.background:  #2E3440
