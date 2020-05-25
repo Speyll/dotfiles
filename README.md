@@ -13,7 +13,7 @@ This is my setup with the nord theme
 | wms  | bspwm, sowm |
 | shells  | bash or ash |
 | terminal  | st, urxvt |
-| bar  | dmenu, lemonbar |
+| bar  | lemonbar-xft |
 | browser  | tabbed + surf, firefox-esr |
 | image viewer  | sxiv |
 | file manager  | nnn |
@@ -69,7 +69,7 @@ even if my surf setup support watching videos directly in the browser i don't re
 
 **for my st/dmenu build:** `git make gcc g++ libx11-dev libxft-dev libxinerama-dev font-siji`
 
-**for my lemonbar setup:**`lemonbar font-Siji`
+**for my lemonbar setup:**`lemonbar-xft font-Siji`
 
 **optinal stuff to your likings:** `tmux mpv sxiv setroot compton lemonbar youtube-dl redshift`
 
