@@ -30,7 +30,7 @@ this is all the **core** and recommended software you will need for my setup
 all of my suckless utilities (dmenu, st..etc) can be found [here](https://github.com/Speyll/mysuckless)<br />
 
 ### Void Linux
-**the base:** `bspwm sxhkd nnn neovim (or vim) xorg-minimal libva-intel-driver alsa-utils xbacklight unzip xwallpaper font-hack-ttf xrdb simple-mtpfs ntfs-3g wireless_tools xdg-utils xprop tlp`<br />
+**the base:** `bspwm sxhkd nnn neovim (or vim) xorg-minimal libva-intel-driver alsa-utils xbacklight unzip hsetroot font-hack-ttf xrdb simple-mtpfs ntfs-3g wireless_tools xdg-utils xprop tlp`<br />
 
 **for my st/dmenu build:** `pkg-config gcc libXft-devel libXinerama-devel font-kakwafont`
 
