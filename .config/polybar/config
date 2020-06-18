@@ -14,11 +14,13 @@ enable-ipc=true
 height = 26
 width = 18%
 offset-x = 81.5%
-offset-y = 5
+offset-y = 6
 radius = 15
 
 border-size = 0
-border-color = ${colors.foreground}
+border-color = ${colors.background-alt}
+wm-restack = bspwm
+override-redirect = false
 
 module-margin = 1
 line-size = 1
@@ -33,9 +35,6 @@ font-1=Siji:size=10;2
 scroll-up = bspwn-wsnext
 scroll-down = bspwn-wsprev
 
-wm-restack = bspwm
-override-redirect = false
-
 ;; COLOR !
 background = ${colors.background-alt}
 foreground = ${colors.foreground}
@@ -44,7 +43,6 @@ foreground = ${colors.foreground}
 modules-left =
 modules-center = bspwm alsa memory date
 modules-right =
-
 
 
 
@@ -206,5 +204,4 @@ pseudo-transparency = true
 [global/wm]
 margin-top = 0
 margin-bottom = 0
-
 ; vim:ft=dosini
