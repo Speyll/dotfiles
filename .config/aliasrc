@@ -1,9 +1,6 @@
 #!/bin/sh
 
 # Colorize commands when possible.
-if [ -x /usr/bin/dircolors ]; then
-	test -r ~/.dircolors && eval "$(dircolors -b ~/.dircolors)" || eval "$(dircolors -b)"
-
 alias \
 	ls="ls -hN --color=auto --group-directories-first" \
 	dir="dir --color=auto" \
