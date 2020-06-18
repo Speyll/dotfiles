@@ -38,3 +38,8 @@ alias \
 	mv="mv -iv" \
 	rm="rm -vI" \
 	mkd="mkdir -pv"
+
+# Tmux
+tmux="tmux -f ${XDG_CONFIG_HOME:-$HOME/.config}/tmux/tmux.conf" \
+
+	
