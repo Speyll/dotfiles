@@ -10,17 +10,17 @@ This is my setup with the nord theme
 | software  | what i use |
 | ------------- | ------------- |
 | distros  | Void, Alpine, Debian |
-| wms  | bspwm, sowm |
+| wms  | bspwm, 2bwm, berrywm |
 | shells  | bash or ash |
 | terminal  | st, urxvt |
-| bar  | lemonbar-xft |
+| bar  | lemonbar-xft, polybar |
 | browser  | tabbed + surf, firefox-esr |
 | image viewer  | sxiv |
 | file manager  | nnn |
 | text editor  | neovim |
 | video player  | mpv + youtube-dl |
 | multiplexer  | tmux |
-| compositor  | compton |
+| compositor  | picom |
 | downloader | axel, transmission |
 
 ## Core software
@@ -36,7 +36,7 @@ all of my suckless utilities (dmenu, st..etc) can be found [here](https://github
 
 **for my lemonbar setup:** `lemonbar-xft font-Siji`
 
-**optinal stuff to your likings:** `tmux xwinwrap mpv youtube-dl sxiv scrot redshift`
+**optinal stuff to your likings:** `tmux xwinwrap mpv youtube-dl sxiv scrot`
 
 **intel igpu install:** `xf86-video-intel`, **nvidia gpu install:** `xf86-video-nouveau`, **amd gpu install:** `xf86-video-amdgpu`
 
@@ -71,6 +71,6 @@ even if my surf setup support watching videos directly in the browser i don't re
 
 **for my lemonbar setup:**`lemonbar-xft font-Siji`
 
-**optinal stuff to your likings:** `tmux mpv sxiv setroot compton lemonbar youtube-dl redshift`
+**optinal stuff to your likings:** `tmux mpv sxiv youtube-dl`
 
 **intel igpu install:** `xf86-video-intel`, **nvidia gpu install:** `xf86-video-nouveau`, **amd gpu install:** `xf86-video-amdgpu`
