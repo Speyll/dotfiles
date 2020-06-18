@@ -7,7 +7,7 @@ if [ -x /usr/bin/dircolors ]; then
 alias \
 	ls="ls -hN --color=auto --group-directories-first" \
 	dir='dir --color=auto' \
-	vdir='vdir --color=auto'
+	vdir='vdir --color=auto' \
 	grep="grep --color=auto" \
 	fgrep='fgrep --color=auto' \
 	egrep='egrep --color=auto' \
