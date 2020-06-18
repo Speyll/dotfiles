@@ -23,7 +23,7 @@ alias \
 # xbps aliases.
 alias \
 	xbs='sudo xbps-install' \
-	xbr='sudo xbps-remove -Rv' \
+	xbr='sudo xbps-remove -Rv'
 
 # apt aliases.
 alias \
@@ -37,4 +37,4 @@ alias \
 	cp="cp -iv" \
 	mv="mv -iv" \
 	rm="rm -vI" \
-	mkd="mkdir -pv" \
+	mkd="mkdir -pv"
