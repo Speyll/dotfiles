@@ -1,8 +1,4 @@
 [Desktop Entry]
 Type=Application
-Name=text
-Exec=st -e nvim %u
-Categories=Other;
-NoDisplay=false
-MimeType=text/plain;text/x-shellscript
-Terminal=true
+Name=Text editor
+Exec=/usr/local/bin/st -e nvim %u
