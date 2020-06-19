@@ -8,7 +8,11 @@ super + Escape
 
 # terminal emulator / scratchpad / tmux
 super + {Return, shift + Return,  ctrl + Return}
-	{st, st -c scratchpad -g 70x25 -e tmux, st -c tmux -e tmux}
+	{urxvt, urxvt -name scratchpad -g 70x25 -e tmux, urxvt -name tmux -e tmux}
+
+# terminal emulator / scratchpad / tmux
+#super + {Return, shift + Return,  ctrl + Return}
+#	{st, st -c scratchpad -g 70x25 -e tmux, st -c tmux -e tmux}
 
 # program launcher / dmenubar
 super + d
@@ -20,7 +24,7 @@ super + shift + b
 
 # file manager
 super + shift + p
-	st -c nnn -e nnn
+	urxvt -name nnn -e nnn
 
 # lemonbar
 super + shift + r
@@ -133,4 +137,3 @@ super + i
 ## unhide window
 super shift + i
 	bspc node {,$(bspc query -N -n .hidden | tail -n1)} -g hidden=off
-
