@@ -2,7 +2,7 @@
 Hi, my name is Speyll and this is my simple dotfiles of bspwm in GNU/Linux, the goal of this setup is to be as minimal as possible on resources without completely dropping the eye candy.
 
 ### Preview images
-![nord](https://i.imgur.com/fjAuSby.png)
+![nord](https://i.imgur.com/VYkoUge.png)
 This is my setup with the nord theme
 
 ### Software used:
