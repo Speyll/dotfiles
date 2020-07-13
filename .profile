@@ -36,6 +36,7 @@ export CARGO_HOME="${XDG_DATA_HOME:-$HOME/.local/share}/cargo"
 export GOPATH="${XDG_DATA_HOME:-$HOME/.local/share}/go"
 export ANSIBLE_CONFIG="${XDG_CONFIG_HOME:-$HOME/.config}/ansible/ansible.cfg"
 export HISTFILE="${XDG_DATA_HOME:-$HOME/.local/share}/history"
+export SUDO_ASKPASS="$HOME/.local/bin/tools/dmenupass"
 
 # set bashrc each time sh is started for interactive use.
 [ -f $HOME/.bashrc ] && . $HOME/.bashrc
