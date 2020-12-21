@@ -2,11 +2,10 @@
 # .profile - Bourne Shell startup script for login shells
 
 # Personal additional paths in ~/.local/bin:
-export PATH="$PATH:$(du "$HOME/.local/bin/" | cut -f2 | paste -sd ':')"
+export PATH="$PATH:$(du "$HOME/.local/bin/" | cut -f2 | paste -sd ':' -)"
 
 # Make sure everything is set to exectuable
-chmod +x ~/.local/bin/*
-chmod +x ~/.local/bin/*/*
+chmod +x $HOME/.local/bin/* | chmod +x $HOME/.local/bin/*/*
 
 # BLOCKSIZE=K;	export BLOCKSIZE
 # Setting TERM is normally done through /etc/ttys.
