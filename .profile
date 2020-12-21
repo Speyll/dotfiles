@@ -13,8 +13,8 @@ chmod +x ~/.local/bin/*/*
 # Do only override if you're sure that you'll never log in via telnet or xterm or a serial line.
 
 # Default programs:
+export TERM="st"
 export EDITOR="nvim"
-export TERMINAL="st"
 export FILE="nnn"
 export PAGER="less"
 
