@@ -1,36 +1,40 @@
+#!/bin/sh
+
 #
-# wm independent hotkeys
+# WM Independent hotkeys
 #
 
-# make sxhkd reload its configuration files:
+# Reload sxhkd
 super + Escape
 	pkill -USR1 -x sxhkd
 
-# terminal emulator / scratchpad / tmux
-super + {Return, shift + Return,  ctrl + Return}
-	{urxvt, urxvt -name scratchpad -g 70x25 -e tmux, urxvt -name tmux -e tmux}
+# Terminal emulator / tmux
+super + {Return, shift + Return}
+	{st, st -c tmux -e tmux}
 
-# terminal emulator / scratchpad / tmux
-#super + {Return, shift + Return,  ctrl + Return}
-#	{st, st -c scratchpad -g 70x25 -e tmux, st -c tmux -e tmux}
+: '
+# Terminal emulator / tmux
+super + {Return, shift + Return}
+	{st, st -c tmux -e tmux}
+'
 
-# program launcher / dmenubar
+# Dmenu
 super + d
-	{dmenu_run -p 'Choose a program:'}
+	{dmenu_run -p 'Select a program:'}
 
-# browser (if both are installed choose one)
+# Browser
 super + shift + b
-	firefox #| tabbed -c surf -e
+	firefox # tabbed -c surf -e
 
-# file manager
+# File browser
 super + shift + p
-	urxvt -name nnn -e nnn
+	st -c nnn -e nnn
 
-# lemonbar
+# Lemonbar
 super + shift + r
-	pkill lemonbar | pkill sleep | bar
+	pkill -x panel | pkill -x lemonbar | panel
 
-# script launcher and shutdown menu
+# Script launcher
 super + {shift + s, ctrl + s}
 	{dmenulaunch, dmenuout}
 
@@ -38,11 +42,14 @@ super + {shift + s, ctrl + s}
 # Special hotkeys
 #
 
-# screenshot key (change the directory to what you want)
+# Screenshots
 Print
-	scrot ~/Images/Screenshots/%b%d::%H%M%S.png
+	scrot $HOME/Pictures/Screenshot-$(date +%F_%T).png -e "xclip -selection c -t image/png < $f"
 
-# multimedia keys
+super + Print
+	scrot -s /tmp/Screenshot-$(date +%F_%T).png -e "xclip -selection c -t image/png < $f"
+
+# Multimedia keys
 XF86AudioRaiseVolume
 	amixer -q set Master 5%+ unmute
 
@@ -53,87 +60,113 @@ XF86AudioMute
 amixer -q set Master mute
 
 #
-# bspwm hotkeys
+# BSPWM Hotkeys
 #
 
-# quit/restart bspwm
+# Quit/Restart bspwm
 super + alt + {q,r}
-	pkill lemonbar | pkill bar | pkill sleep | pkill xtitle | pkill sxiv | pkill compton | pkill hsetroot | bspc {quit,wm -r}
+	bspc {quit,wm -r}
 
-# close and kill
-super + {_,shift + }a
+# Close and kill
+super + {_,shift + }q
 	bspc node -{c,k}
-d
-## alternate between the tiled and monocle layout
+
+# Alternate between the tiled and monocle layout
 super + m
 	bspc desktop -l next
 
-# focus the next/previous node in the current desktop
-super + {_,shift + }Tab
-	bspc node -f {next,prev}.local
+# Send the newest marked node to the newest preselected node
+super + y
+	bspc node newest.marked.local -n newest.!automatic.local
 
-## set the window state
+# Swap the current node and the biggest window
+super + g
+	bspc node -s biggest.window
+
+#
+# State/Flags
+#
+
+# Set the window state
 super + {t,p,s,f}
 	bspc node -t {tiled,pseudo_tiled,floating,fullscreen}
-
-## set the node flags
+	
+# Set the node flags
 super + ctrl + {m,x,y,z}
 	bspc node -g {marked,locked,sticky,private}
-	
-## spit horizontal & split vertical, like in i3-gaps :D
-super + {h,v}
-	bspc node -p {east,south}
-	
-## preselect the ratio
-super + ctrl + {ampersand,eacute,quotedbl,apostrophe,parenleft,minus,egrave,underscore}
-	bspc node -o 0.{1-8}
 
-## cancel it, I set it to super + r. like in my herbstluftwm config
-super + r
-	bspc node -p cancel
+#
+# Focus/Swap
+#
 
-## send the window in the given direction
+# Focus the window in the given direction
 super + {_,shift + }{Left,Down,Up,Right}
 	bspc node -{f,s} {west,south,north,east}
 
-## focus the next/previous desktop in the current monitor
-ctrl + alt + Left
-	bspc desktop -f prev.local
-ctrl + alt + Right
-	bspc desktop -f next.local
+# Focus the next/previous node in the current desktop
+super + {_,shift + }Tab
+	bspc node -f {next,prev}.local
 
-## focus the last node/desktop
+# Focus the next/previous desktop in the current monitor
+ctrl {_,Left + }{Left,Right}
+	bspc desktop -f {prev,next}.local
+
+# Focus the last node/desktop
 super + {c, shift + c}
 	bspc {node,desktop} -f last
 
-## focus or send to the given desktop
-super + {_,shift + }{ampersand,eacute,quotedbl}
+# Focus or send to the given desktop
+super + {_,shift + }{ampersand,eacute,quotedbl,apostrophe,parenleft,section,egrave,exclam,ccedilla,agrave}
 	bspc {desktop -f,node -d} '^{1-3}'
 	
-## jump to another workspace
-super + {ampersand,eacute,quotedbl}
-	bspc desktop --focus^{1-3}
+# Jump to another workspace
+super + {ampersand,eacute,quotedbl,apostrophe,parenleft,section,egrave,exclam,ccedilla,agrave}
+	bspc desktop --focus^{1-9}
 
-## expanding windows
+#
+# Preselect
+#
+
+# Split Window
+super + {h,v}
+	bspc node -p {east,south}
+	
+# Preselect the split ratio
+super + ctrl + {ampersand,eacute,quotedbl,apostrophe,parenleft,section,egrave,exclam,ccedilla,agrave}
+	bspc node -o 0.{1-9}
+
+# Cancel split
+super + Escape
+	bspc node -p cancel
+
+#
+# Move/Resize
+#
+
+# Expand windows
 super + ctrl + {Left,Down,Up,Right}
 	bspc node -z {left -20 0,bottom 0 20,top 0 -20,right 20 0}
 
-## shrinking windows
+# Shrink windows
 super + alt + {Left,Down,Up,Right}
 	bspc node -z {right -20 0,top 0 20,bottom 0 -20,left 20 0}
 
-## move floating windows
+# Move floating windows
 super + shift + {Left,Down,Up,Right}
 	bspc node -v {-50 0,0 50,0 -50,50 0}
 
-## adjust window gap on the fly
-super + {plus,equal}
+#
+# Misc
+#
+
+# Adjust window gap on the fly
+super + {KP_Add,KP_Subtract}
     bspc config window_gap $((\bspc config window_gap` {-,+} 20))`    
 
-## hide window
-super + i
+# Hide window
+super + h
 	bspc node -g hidden
 
-## unhide window
-super shift + i
+# Unhide window
+super + shift + h
 	bspc node {,$(bspc query -N -n .hidden | tail -n1)} -g hidden=off
