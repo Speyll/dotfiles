@@ -28,10 +28,10 @@ Dependencies
 My Dmenu and St can be found [here](https://github.com/Speyll/suckless)<br />
 
 Core: `xorg-minimal xrdb alsa-utils lm-sensors xbacklight tlp bspwm sxhkd st-terminfo hsetroot base-devel openntpd simple-mtpfs xsetroot xprop xdg-utils ffmpeg libva-utils libva-vdpau-driver vdpauinfo`<br />
-To build St and Dmenu: `pkg-config gcc libXft-devel libXinerama-devel`
-Fonts: `font-kakwafont font-Siji`
-Lemonbar: `lemonbar-xft`
-Optional: `font-ibm-plex-otf tmux mpv youtube-dl sxiv scrot unzip axel nnn ncurses neovim`
+To build St and Dmenu: `pkg-config gcc libXft-devel libXinerama-devel`<br />
+Fonts: `font-kakwafont font-Siji`<br />
+Lemonbar: `lemonbar-xft`<br />
+Optional: `font-ibm-plex-otf tmux mpv youtube-dl sxiv scrot unzip axel nnn ncurses neovim`<br />
 
 Mount drives
 ------------
