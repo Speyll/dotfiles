@@ -21,7 +21,7 @@ urxvt.cursorBlink: true
 *.foreground:	#657b83
 *.background:	#002b36
 *.cursorColor:	#657b83
-*.fading:		40
+!*.fading:	40
 *.fadeColor:	#002b36
 *.cursorColor:	#93a1a1
 *.pointerColorBackground:	#586e75
