@@ -1,11 +1,11 @@
 #!/bin/sh
 
 # Usage:
-# `record`: Ask for recording type via dmenu
-# `record screencast`: Record both audio and screen
-# `record video`: Record only screen
-# `record audio`: Record only audio
-# `record kill`: Kill existing recording
+# `$0`: Ask for recording type via dmenu
+# `$0 screencast`: Record both audio and screen
+# `$0 video`: Record only screen
+# `$0 audio`: Record only audio
+# `$0 kill`: Kill existing recording
 #
 # If there is already a running instance, user will be prompted to end it.
 
@@ -14,7 +14,7 @@ killrecording() {
 	# kill with SIGTERM, allowing finishing touches.
 	kill -15 "$recpid"
 	rm -f /tmp/recordingpid
-	pkill -RTMIN+9 i3blocks
+	pkill -RTMIN+9 "${STATUSBAR:-dwmblocks}"
 	# even after SIGTERM, ffmpeg may still run, so SIGKILL it.
 	sleep 3
 	kill -9 "$recpid"
@@ -24,23 +24,22 @@ killrecording() {
 screencast() { \
 	ffmpeg -y \
 	-f x11grab \
-	-framerate 30 \
+	-framerate 60 \
 	-s 1366x768 \
 	-i :0.0 \
 	-f alsa -i default \
 	-r 30 \
- 	-c:v libx264rgb -crf 0 -preset ultrafast -c:a flac \
-	"$HOME/Videos/screencast-$(date '+%y%m%d-%H%M-%S').mkv" &
+ 	-c:v h264 -crf 0 -preset ultrafast -c:a aac \
+	"$HOME/Videos/screencast-$(date '+%y%m%d-%H%M-%S').mp4" &
 	echo $! > /tmp/recordingpid
-       	}
+	}
 
 video() { ffmpeg \
 	-f x11grab \
-	-framerate 30 \
 	-s 1366x768 \
 	-i :0.0 \
  	-c:v libx264 -qp 0 -r 30 \
-	"$HOME/Videos/video-$(date '+%y%m%d-%H%M-%S').mkv" &
+	"$HOME/Videos/video-$(date '+%y%m%d-%H%M-%S').mp4" &
 	echo $! > /tmp/recordingpid
 	}
 
@@ -48,7 +47,7 @@ webcamhidef() { ffmpeg \
 	-f v4l2 \
 	-i /dev/video0 \
 	-video_size 1920x1080 \
-	"$HOME/Videos/webcam-$(date '+%y%m%d-%H%M-%S').mkv" &
+	"$HOME/Videos/webcam-$(date '+%y%m%d-%H%M-%S').mp4" &
 	echo $! > /tmp/recordingpid
 	}
 
@@ -56,7 +55,7 @@ webcam() { ffmpeg \
 	-f v4l2 \
 	-i /dev/video0 \
 	-video_size 640x480 \
-	"$HOME/Videos/webcam-$(date '+%y%m%d-%H%M-%S').mkv" &
+	"$HOME/Videos/webcam-$(date '+%y%m%d-%H%M-%S').mp4" &
 	echo $! > /tmp/recordingpid
 	}
 
@@ -64,17 +63,18 @@ webcam() { ffmpeg \
 audio() { \
 	ffmpeg \
 	-f alsa -i default \
-	-c:a flac \
-	"$HOME/Videos/audio-$(date '+%y%m%d-%H%M-%S').flac" &
+	-c:a libvorbis \
+	"$HOME/audio-$(date '+%y%m%d-%H%M-%S').ogg" &
 	echo $! > /tmp/recordingpid
 	}
 
 askrecording() { \
-	choice=$(printf "screencast\\nvideo\\naudio\\nwebcam\\nwebcam (hi-def)" | dmenu -i -p "Select recording style:")
+	choice=$(printf "screencast\\nvideo\\nvideo selected\\naudio\\nwebcam\\nwebcam (hi-def)" | dmenu -i -p "Select recording style:")
 	case "$choice" in
 		screencast) screencast;;
 		audio) audio;;
 		video) video;;
+		*selected) videoselected;;
 		webcam) webcam;;
 		"webcam (hi-def)") webcamhidef;;
 	esac
@@ -85,11 +85,28 @@ asktoend() { \
 	[ "$response" = "Yes" ] &&  killrecording
 	}
 
+videoselected()
+{
+	slop -f "%x %y %w %h" > /tmp/slop
+	read -r X Y W H < /tmp/slop
+	rm /tmp/slop
+
+	ffmpeg \
+	-f x11grab \
+	-framerate 60 \
+	-video_size "$W"x"$H" \
+	-i :0.0+"$X,$Y" \
+	-c:v libx264 -qp 0 -r 30 \
+	"$HOME/box-$(date '+%y%m%d-%H%M-%S').mkv" &
+	echo $! > /tmp/recordingpid
+}
 
 case "$1" in
 	screencast) screencast;;
 	audio) audio;;
 	video) video;;
+	*selected) videoselected;;
 	kill) killrecording;;
 	*) ([ -f /tmp/recordingpid ] && asktoend && exit) || askrecording;;
 esac
+

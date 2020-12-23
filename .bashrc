@@ -52,9 +52,9 @@ if [ -n "$force_color_prompt" ]; then
 fi
 
 if [ "$color_prompt" = yes ]; then
-    PS1='[$] [\[\e[m\]\[\e[35m\]\w\[\e[m\]] '
+    PS1='[$][\[\e[m\]\[\e[35m\]\w\[\e[m\]] '
 else
-    PS1='[$] [\w\] '
+    PS1='[$][\w\] '
 fi
 unset color_prompt force_color_prompt
 

@@ -1,0 +1,77 @@
+#!/bin/sh
+
+# Colors settings
+c="%{F#6c71c4}"
+e="%{F-}"
+
+# Show the time and date
+pdate (){
+	var=$(date -u)
+	echo "$c[$e $var$c]$e"
+}
+
+# Mixer volume level
+vol (){
+	var=$(amixer get Master | awk '$0~/%/{print $4}' | tr -d '[]%')
+	echo "$c[$e $var $c]$e"
+}
+
+# Battery 
+bat (){
+		var=$(cat /sys/class/power_supply/BAT1/capacity)
+        case $var in
+            [0-9])  out="$c$e $var%";;
+            [1-7]?) out="$a$e $var%";;
+            *)      out="$a$e 100%"
+		esac
+		echo "$out"
+}
+
+# CPU temp
+cpu (){
+	var=$(sensors | awk '/Core 0/ {print $3}')
+	echo "$c[$e $var$c]$e"
+}
+
+# RAM management
+mem (){
+    var=$(free -h | awk '/Mem/ {print $3}')
+    echo "$c[$e $var$c]$e"
+}
+
+# Hard drive
+drive (){
+	var=$(df -h | grep '/$' | awk '{print $5}')
+	echo "$c[$e $var $c]$e"
+}
+
+# private IP
+privip (){
+    var=$(ip addr show | grep wl | awk '/inet/ {print $2}')
+	echo "$c[$e $var$c]$e"
+}
+
+# Public IP
+pubip (){
+	var=$(curl ifconfig.me 2>/dev/null)
+	echo "$c[$e $var$c]$e"
+}
+
+# Current Workspace
+cur (){
+    var=$(xprop -root _NET_CURRENT_DESKTOP | awk '{print $3}')
+	echo "$c[$e $var$c]$e"
+}
+
+# Total Workspaces
+tot (){
+    var=$(xprop -root _NET_NUMBER_OF_DESKTOPS | awk '{print $3}')
+	echo "$c[$e $var$c]$e"
+}
+
+while true
+do
+    BAR_INPUT="%{l} $(cur) $(tot)%{c}%{r}$(pubip) $(privip) $(drive) $(mem) $(cpu) $(vol) $(pdate)"
+	echo $BAR_INPUT
+	sleep 1
+done
