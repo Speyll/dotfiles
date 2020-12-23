@@ -22,17 +22,17 @@ Hi, this is my bspwm dotfiles, the goal of this setup is to be as minimal as pos
 | Torrent | transmission |
 
 #### Dependencies
-My Dmenu and St can be found [here](https://github.com/Speyll/suckless)<br />
+dmenu & st can be found [here](https://github.com/Speyll/suckless)<br />
 
-Core: `xorg-minimal xrdb alsa-utils lm-sensors xbacklight tlp bspwm sxhkd st-terminfo hsetroot base-devel openntpd simple-mtpfs xsetroot xprop xdg-utils ffmpeg libva-utils libva-vdpau-driver vdpauinfo`<br />
+core: `xorg-minimal xrdb alsa-utils lm-sensors xbacklight tlp bspwm sxhkd st-terminfo hsetroot base-devel openntpd simple-mtpfs xsetroot xprop xdg-utils ffmpeg libva-utils libva-vdpau-driver vdpauinfo`<br />
 
-Build st & dmenu: `pkg-config gcc libXft-devel libXinerama-devel`<br />
+build st & dmenu: `pkg-config gcc libXft-devel libXinerama-devel`<br />
 
-Fonts: `font-kakwafont font-Siji`<br />
+fonts: `font-kakwafont font-Siji`<br />
 
-Lemonbar: `lemonbar-xft`<br />
+lemonbar: `lemonbar-xft`<br />
 
-Optional: `font-ibm-plex-otf tmux mpv youtube-dl sxiv scrot unzip axel nnn ncurses neovim`<br />
+optional: `font-ibm-plex-otf tmux mpv youtube-dl sxiv scrot unzip axel nnn ncurses neovim`<br />
 
 #### Mount drives
 I don't use gvfs or udiskie to mount my drives instead i use a simple script that uses fstab (`~/.local/bin/scripts/dmenumount` it's actually the same script that Luke Smith showcase in one of his videos) it only require dmenu, same script is used to mount android-mtp but it require `simple-mtpfs` to be installed on your machine to work.
