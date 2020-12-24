@@ -28,7 +28,7 @@ xbacklight -set 60 &
 
 # Lemonbar
 pkill -x panel | pkill -x lemonbar
-$HOME/.local/bin/lemonbar/panel | lemonbar -g x20 -f "-kakwa-kakwafont-medium-r-normal--12-120-72-72-c-60-iso8859-1" -o -1 -f "-wuncon-siji-medium-r-normal--10-100-75-75-c-80-iso10646-1" -B "#002b36" -F "#657b83" &
+$HOME/.local/bin/lemonbar/panel | lemonbar -g x20 -f "kakwafont:style=Regular:pixelsize=12" -o -1 -f "Siji:style=Regular:size=10" -B "#002b36" -F "#657b83" &
 
 # Workspaces
 bspc rule -a 'Firefox' desktop='^1'
