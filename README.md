@@ -2,7 +2,7 @@
 Hi, this is my bspwm dotfiles, the goal of this setup is to be as minimal as possible on resources without completely dropping the eye candy.
 
 #### Scrot
-![solarized](https://i.imgur.com/VYkoUge.png)
+![scrot](https://i.ibb.co/Tr7XsWS/028.webp)
 
 | Software  | What i use |
 | ------------- | ------------- |
