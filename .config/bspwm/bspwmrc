@@ -31,7 +31,7 @@ pkill -x panel | pkill -x lemonbar
 $HOME/.local/bin/lemonbar/panel | lemonbar -g x20 -f "kakwafont:style=Regular:pixelsize=12" -o -1 -f "Siji:style=Regular:size=10" -B "#002b36" -F "#657b83" &
 
 # Workspaces
-bspc rule -a 'Firefox' desktop='^1'
+bspc rule -a 'chromium' desktop='^1'
 bspc rule -a 'mpv' desktop='^3' center=on state=pseudo_tiled
 bspc rule -a 'nnn' center=on state=pseudo_tiled
 
