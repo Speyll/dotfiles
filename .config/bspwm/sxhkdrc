@@ -161,7 +161,7 @@ super + shift + {Left,Down,Up,Right}
 
 # Adjust window gap on the fly
 super + {KP_Add,KP_Subtract}
-    bspc config window_gap $((\bspc config window_gap` {-,+} 20))`    
+    bspc config window_gap $((\bspc config window_gap` {-,+} 20))`
 
 # Hide window
 super + h
