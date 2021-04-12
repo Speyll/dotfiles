@@ -25,8 +25,8 @@ bspc config focus_follows_pointer   true
 BW=2
 bspc config border_width $BW
 bspc config window_gap -2
-bspc config top_padding 22
-for side in right bottom left ; do
+#bspc config top_padding 22
+for side in top right bottom left ; do
     bspc config ${side}_padding $BW
 done
 
