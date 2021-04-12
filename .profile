@@ -7,6 +7,7 @@ export PATH="$PATH:$(du "$HOME/.local/bin/" | cut -f2 | paste -sd ':' -)"
 # Make sure everything is set to exectuable
 chmod +x $HOME/.local/bin/*
 chmod +x $HOME/.local/bin/*/*
+chmod +x $HOME/.config/autostart/*
 
 # BLOCKSIZE=K;	export BLOCKSIZE
 # Setting TERM is normally done through /etc/ttys.
