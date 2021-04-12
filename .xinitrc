@@ -13,6 +13,5 @@ $HOME/.config/autostart/rice &
 xrdb -merge $HOME/.Xresources &
 
 # wm settings
-#sxhkd -c $HOME/.config/bspwm/sxhkdrc -m 1 &
 #exec bspwm
-exec sowm
+exec berry

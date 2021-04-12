@@ -1,5 +1,8 @@
 #!/bin/sh
 
+# sxhkd
+sxhkd -c $HOME/.config/bspwm/sxhkdrc -m 1 &
+
 # Avoid doubling ruls
 bspc rule -r "*"
 

@@ -1,0 +1,108 @@
+#!/bin/sh
+
+#
+# WM Independent hotkeys
+#
+
+# Reload sxhkd
+super + Escape
+	pkill -USR1 -x sxhkd
+
+# Terminal emulator / tmux
+super + {Return, shift + Return}
+	{st, st -c tmux -e tmux}
+
+# Dmenu
+super + d
+	{dmenu_run -p 'Select a program:'}
+
+# Browser
+super + shift + b
+	firefox # tabbed -c surf -e
+
+# File browser
+super + shift + p
+	st -c nnn -e nnn
+
+# Lemonbar
+super + shift + r
+	pkill -x panel | pkill -x lemonbar | panel
+
+# Script launcher
+super + {shift + s, ctrl + s}
+	{dmenulaunch, dmenuout}
+
+#
+# Special hotkeys
+#
+
+# Screenshots
+Print
+	scrot $HOME/Pictures/Screenshot-$(date +%F_%T).png -e "xclip -selection c -t image/png < $f"
+
+super + Print
+	scrot -s /tmp/Screenshot-$(date +%F_%T).png -e "xclip -selection c -t image/png < $f"
+
+# Multimedia keys
+XF86AudioRaiseVolume
+	amixer -q set Master 5%+ unmute
+
+XF86AudioLowerVolume
+	amixer -q set Master 5%- unmute
+
+XF86AudioMute
+amixer -q set Master mute
+
+
+#
+# BERRYWM Hotkeys
+#
+
+super + alt + q
+	berryc quit
+
+super + {f, shift + f}
+    berryc {fullscreen, fullscreen_state}
+
+super + m
+    berryc window_monocle
+
+super + ctrl + {Left, Right}
+    berryc {snap_left, snap_right}
+
+super + n
+    berryc toggle_decorations
+
+super + Tab
+    berryc cycle_focus
+
+super + {_,shift + }q
+    berryc window_close
+
+super + c
+    berryc window_center
+
+~button1
+berryc pointer_focus
+
+#
+# Move/Resize
+#
+
+# Move window
+super + {Left, Down, Up, Right}
+    berryc window_move {-50 0, 0 50, 0 -50, 50 0}
+
+# Resize window
+super + shift + {Left, Down, Up, Right}
+    berryc window_resize {-50 0, 0 50, 0 -50, 50 0}
+
+#
+# Workspaces
+#
+
+super + {ampersand,eacute,quotedbl,apostrophe,parenleft,section,egrave,exclam,ccedilla,agrave}
+    berryc switch_workspace {1-9}
+
+super + {_,shift + }{ampersand,eacute,quotedbl,apostrophe,parenleft,section,egrave,exclam,ccedilla,agrave}
+    berryc send_to_workspace {1-9}
