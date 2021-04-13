@@ -1,10 +1,9 @@
 #!/bin/sh
-choice=$(printf "ytfzf\\ndmenumount\\ndmenuumount\\nrecordmenu\\nrecordkill" | dmenu -i -p "Select a script:")
+choice=$(printf "Youtube search\\nMount drive\\nUnmount drive\\nScreen record" | dmenu -i -p "Select a script:")
 
 case "$choice" in
-    ytfzf) ytfzf -D & ;;
-    dmenumount) sudo dmenumount & ;;
-    dmenuumount) sudo dmenuumount & ;;
-    recordmenu) recordmenu & ;;
-    recordkill) recordkill & ;;
+	"Youtube search") ytfzf -D ;;
+	"Mount drive") dmenumount ;;
+	"Unmount drive") dmenuumount ;;
+	"Record screen") dmenurecord ;;
 esac
