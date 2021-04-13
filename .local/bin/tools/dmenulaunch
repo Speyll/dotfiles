@@ -1,9 +1,0 @@
-#!/bin/sh
-choice=$(printf "dmenumount\\ndmenuumount\\nrecordmenu\\nrecordkill" | dmenu -i -p "Select a script:")
-
-case "$choice" in
-    dmenumount) dmenumount & ;;
-    dmenuumount) dmenuumount & ;;
-    recordmenu) recordmenu & ;;
-    recordkill) recordkill & ;;
-esac

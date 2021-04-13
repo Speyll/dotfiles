@@ -1,0 +1,10 @@
+#!/bin/sh
+choice=$(printf "ytfzf\\ndmenumount\\ndmenuumount\\nrecordmenu\\nrecordkill" | dmenu -i -p "Select a script:")
+
+case "$choice" in
+    ytfzf) ytfzf -D & ;;
+    dmenumount) sudo dmenumount & ;;
+    dmenuumount) sudo dmenuumount & ;;
+    recordmenu) recordmenu & ;;
+    recordkill) recordkill & ;;
+esac
