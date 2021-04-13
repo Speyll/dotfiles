@@ -1,6 +1,4 @@
 [Desktop Entry]
 Type=Application
-Name=sxiv
-GenericName=Image Viewer
-Exec=/usr/bin/sxiv -b -a %f
-Icon=sxiv
+Name=Image viewer
+Exec=/usr/bin/sxiv -a %f
