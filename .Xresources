@@ -17,6 +17,11 @@ urxvt.scrollbar_right: false
 urxvt.internalBorder: 25
 urxvt.cursorBlink: true
 
+! sxiv settings
+Sxiv.font: kakwafont
+Sxiv.foreground: #657b83
+Sxiv.background: #002b36
+
 ! colors
 *.foreground:	#657b83
 *.background:	#002b36
