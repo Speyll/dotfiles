@@ -7,10 +7,10 @@ Hi, this is my bspwm dotfiles, the goal of this setup is to be as minimal as pos
 | Software  | What i use |
 | ------------- | ------------- |
 | Distro  | Void |
-| WM  | bspwm |
+| WM  | bspwm, sowm |
 | Shell  | bash or ash |
 | Terminal  | st, urxvt |
-| Bar  | lemonbar-xft, dmenu |
+| Info  | lemonbar-xft, dmenu, conky |
 | Browser  | Still searching |
 | Image viewer  | sxiv |
 | File browser  | nnn |
@@ -18,7 +18,7 @@ Hi, this is my bspwm dotfiles, the goal of this setup is to be as minimal as pos
 | Video player | mpv + youtube-dl |
 | Multiplexer | tmux |
 | Compositor | picom |
-| Downloader | axel
+| Downloader | wget
 | Torrent | transmission |
 
 #### Dependencies
