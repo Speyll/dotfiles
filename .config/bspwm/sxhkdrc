@@ -45,13 +45,13 @@ super + Print
 
 # Multimedia keys
 XF86AudioRaiseVolume
-	amixer -q set Master 5%+ unmute
+	amixer sset Master 5%+
 
 XF86AudioLowerVolume
-	amixer -q set Master 5%- unmute
+	amixer sset Master 5%-
 
 XF86AudioMute
-amixer -q set Master mute
+	amixer sset Master toggle
 
 #
 # BSPWM Hotkeys
