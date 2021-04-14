@@ -6,6 +6,6 @@ case "$choice" in
 	"Mount drive") dmenumount ;;
 	"Unmount drive") dmenuumount ;;
 	"Record screen") dmenurecord ;;
-	"Scrot") scrot $HOME/Pictures/Screenshot-$(date +%F_%T).png -e "xclip -selection c -t image/png < $f" ;;
+	"Scrot") scrot -d 1 $HOME/Pictures/Screenshot-$(date +%F_%T).png -e "xclip -selection c -t image/png < $f" ;;
 	"Scrot selec") scrot -s /tmp/Screenshot-$(date +%F_%T).png -e "xclip -selection c -t image/png" ;;
 esac
