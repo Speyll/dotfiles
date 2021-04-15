@@ -7,7 +7,7 @@ Hi, this is my bspwm dotfiles, the goal of this setup is to be as minimal as pos
 | Software  | What i use |
 | ------------- | ------------- |
 | Distro  | Void |
-| WM  | bspwm, sowm |
+| WM  | bspwm, 2bwm |
 | Shell  | bash or ash |
 | Terminal  | st, urxvt |
 | Info  | lemonbar-xft, dmenu, conky |
