@@ -14,4 +14,4 @@ xrdb -merge $HOME/.Xresources &
 
 # wm settings
 #exec bspwm
-exec sowm
+exec bspwm

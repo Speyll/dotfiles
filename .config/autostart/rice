@@ -22,8 +22,8 @@ xbacklight -set 60 &
 
 # Lemonbar
 pkill -x panel | pkill -x lemonbar
-#panel | lemonbar -g x20 -f "kakwafont:style=Regular:pixelsize=12" -o -1 -f "Siji:style=Regular:size=10" -B "#002b36" -F "#657b83" &
+panel | lemonbar -g x20 -f "kakwafont:style=Regular:pixelsize=12" -o -1 -f "Siji:style=Regular:size=10" -B "#002b36" -F "#657b83" &
 
 # Conky
 pkill -x conky
-conky &
+#conky &
