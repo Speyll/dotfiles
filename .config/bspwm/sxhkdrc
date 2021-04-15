@@ -110,11 +110,11 @@ super + {c, shift + c}
 	bspc {node,desktop} -f last
 
 # Focus or send to the given desktop
-super + {_,shift + }{ampersand,eacute,quotedbl,apostrophe,parenleft,section,egrave,exclam,ccedilla,agrave}
+super + {_,shift + }{ampersand,eacute,quotedbl,apostrophe,parenleft,minus,egrave,underscore,ccedilla,agrave}
 	bspc {desktop -f,node -d} '^{1-9}'
 	
 # Jump to another workspace
-super + {ampersand,eacute,quotedbl,apostrophe,parenleft,section,egrave,exclam,ccedilla,agrave}
+super + {ampersand,eacute,quotedbl,apostrophe,parenleft,minus,egrave,underscore,ccedilla,agrave}
 	bspc desktop --focus^{1-9}
 
 #
