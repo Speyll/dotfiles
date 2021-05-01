@@ -2,7 +2,7 @@
 # .profile - Bourne Shell startup script for login shells
 
 # Personal additional paths in ~/.local/bin:
-export PATH="$PATH:$(du "$HOME/.local/bin/" | cut -f2 | paste -sd ':' -)"
+export PATH=$PATH$(find $HOME/.local/bin/ -type d -printf ":%p")
 
 # Make sure everything is set to exectuable
 chmod +x $HOME/.local/bin/*
