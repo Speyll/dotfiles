@@ -13,5 +13,4 @@ $HOME/.config/autostart/rice &
 xrdb -merge $HOME/.Xresources &
 
 # wm settings
-#exec bspwm
 exec bspwm
