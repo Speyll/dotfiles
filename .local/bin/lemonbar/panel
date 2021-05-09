@@ -1,4 +1,4 @@
-#!/bin/sh
+﻿#!/bin/sh
 
 # Colors settings
 c="%{F#6c71c4}"
@@ -18,7 +18,7 @@ vol (){
 
 # Battery 
 bat (){
-		var=$(cat /sys/class/power_supply/BAT1/capacity)
+	var=$(cat /sys/class/power_supply/BAT1/capacity)
         case $var in
             [0-9])  out="$c$e $var%";;
             [1-7]?) out="$a$e $var%";;
@@ -35,8 +35,8 @@ cpu (){
 
 # RAM management
 mem (){
-    var=$(free -h | awk '/Mem/ {print $3}')
-    echo "$c[$e $var$c]$e"
+	var=$(free -h | awk '/Mem/ {print $3}')
+	echo "$c[$e $var$c]$e"
 }
 
 # Hard drive
@@ -57,21 +57,22 @@ pubip (){
 	echo "$c[$e $var$c]$e"
 }
 
-# Current Workspace
-cur (){
-    var=$(xprop -root _NET_CURRENT_DESKTOP | awk '{print $3}')
-	echo "$c[$e $var$c]$e"
+# Workspace
+work (){
+	cur=$(xprop -root _NET_CURRENT_DESKTOP | awk '{print $3}')
+	tot=$(xprop -root _NET_NUMBER_OF_DESKTOPS | awk '{print $3}')
+	echo "$c[$e$cur | $c$e$tot$c]$e"
 }
 
-# Total Workspaces
-tot (){
-    var=$(xprop -root _NET_NUMBER_OF_DESKTOPS | awk '{print $3}')
-	echo "$c[$e $var$c]$e"
+# Title
+tit (){
+	var=$(xdotool getwindowfocus getwindowname)
+	echo "$c$var$e"
 }
 
 while true
 do
-    BAR_INPUT="%{l} $(cur) $(tot)%{c}%{r}$(pubip) $(privip) $(drive) $(mem) $(cpu) $(vol) $(pdate)"
+	BAR_INPUT="%{l}  $(work) $(tit) %{c}$(pdate) %{r}$(pubip) $(privip) $(drive) $(mem) $(cpu) $(vol) "
 	echo $BAR_INPUT
 	sleep 1
 done
