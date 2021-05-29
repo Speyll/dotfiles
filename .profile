@@ -2,12 +2,12 @@
 # .profile - Bourne Shell startup script for login shells
 
 # Personal additional paths in ~/.local/bin:
-export PATH=$PATH$(find $HOME/.local/bin/ -type d -printf ":%p")
+export PATH=$PATH$(find $HOME/.local/bin/ -type d -printf ":%p") 
 
 # Make sure everything is set to exectuable
 chmod +x $HOME/.local/bin/*
 chmod +x $HOME/.local/bin/*/*
-chmod +x $HOME/.config/autostart/*
+chmod +x $HOME/.config/bspwm/*
 
 # BLOCKSIZE=K;	export BLOCKSIZE
 # Setting TERM is normally done through /etc/ttys.

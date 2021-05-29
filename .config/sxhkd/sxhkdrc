@@ -10,7 +10,7 @@ super + Escape
 
 # Terminal emulator / tmux
 super + {Return, shift + Return}
-	{st, st -c tmux -e tmux}
+	{urxvt, urxvt -name tmux -e tmux}
 
 # Dmenu
 super + d
@@ -22,11 +22,11 @@ super + shift + b
 
 # File browser
 super + shift + p
-	st -c nnn -e nnn
+	urxvt -name nnn -e nnn
 
 # Lemonbar
 super + shift + r
-	pkill -x panel | pkill -x lemonbar | panel
+	pkill -x panel | pkill -x lemonbar | pkill polybar | polybar top &
 
 # Script launcher
 super + {shift + s, ctrl + s}

@@ -1,10 +1,11 @@
 #!/bin/sh
 
-# sxhkd
-sxhkd -c $HOME/.config/bspwm/sxhkdrc -m 1 &
+# Load files
+${HOME}/.config/bspwm/autostart.sh &
 
-# Avoid doubling ruls
-bspc rule -r "*"
+# Defaults
+amixer -q set Master 100% &
+xbacklight -set 60 &
 
 # Workspace setup
 bspc monitor -d I II III
@@ -22,15 +23,10 @@ bspc config gapless_monocle         false
 bspc config focus_follows_pointer   true
 
 # Border & gaps
-BW=2
+BW=0
 bspc config border_width $BW
 bspc config window_gap -2
 #bspc config top_padding 22
 for side in top right bottom left ; do
     bspc config ${side}_padding $BW
 done
-
-# Colors
-bspc config focused_border_color        "#6c71c4"
-bspc config normal_border_color         "#073642"
-bspc config active_border_color         "#073642"

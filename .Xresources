@@ -1,9 +1,7 @@
 ! font settings
-*.font: -kakwa-kakwafont-medium-r-normal--12-120-72-72-c-60-iso8859-1,\
-        -wuncon-siji-medium-r-normal--10-100-75-75-c-80-iso10646-1
-*.boldFont: -kakwa-kakwafont-medium-r-bold--12-120-72-72-c-60-iso8859-1
-*.italicFont: -kakwa-kakwafont-medium-r-normal--12-120-72-72-c-60-iso8859-1
-*.boldItalicFont: -kakwa-kakwafont-medium-r-bold--12-120-72-72-c-60-iso8859-1
+*.font: kakwafont:size=8
+urxvt.font: xft: kakwafont:size=8
+dmenu.font: kakwafont:size=8
 
 Xft.hinting: true
 Xft.autohint: true
@@ -16,6 +14,8 @@ urxvt.scrollBar: false
 urxvt.scrollbar_right: false
 urxvt.internalBorder: 25
 urxvt.cursorBlink: true
+! urxvt.transparent: true
+! urxvt.shading: 10
 
 ! sxiv settings
 Sxiv.font: kakwafont
@@ -23,14 +23,13 @@ Sxiv.foreground: #657b83
 Sxiv.background: #002b36
 
 ! colors
+*.alpha: 0.9
 *.foreground:	#657b83
 *.background:	#002b36
-*.cursorColor:	#657b83
-!*.fading:	40
+! *.fading:	40
 *.fadeColor:	#002b36
 *.cursorColor:	#93a1a1
 *.pointerColorBackground:	#586e75
-*.pointerColorForeground:	#93a1a1
 
 ! black
 *.color0:       #073642

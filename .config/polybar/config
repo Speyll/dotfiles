@@ -1,0 +1,236 @@
+[colors]
+background = ${xrdb:color0:#222}
+foreground = ${xrdb:color7:#222}
+foreground-alt = ${xrdb:color7:#222}
+primary = ${xrdb:color1:#222}
+secondary = ${xrdb:color2:#222}
+alert = ${xrdb:color3:#222}
+
+
+[settings]
+screenchange-reload = true
+;compositing-background = xor
+;compositing-background = screen
+;compositing-foreground = source
+;compositing-border = over
+throttle-output = 5
+throttle-output-for = 10
+pseudo-transparency = true
+
+
+
+[global/wm]
+margin-top = 0
+margin-bottom = 0
+; vim:ft=dosini
+
+
+
+[bar/bspbar]
+enable-ipc=true
+height = 24
+width = 100%
+offset-x = 0%
+offset-y = 0
+radius = 0
+
+border-size = 0
+border-color = ${colors.background}
+
+module-margin = 1
+line-size = 1
+padding = 2
+bottom = false
+fixed-center = true
+tray-position = right
+tray-maxsize = 16
+
+wm-restack = bspwm
+override-redirect = false
+
+;; FONTS!
+font-0=kakwafont:size=8:antialias=false;2
+font-1=Siji:size=8;2
+
+; SCROLL!
+scroll-up = bspwn-wsnext
+scroll-down = bspwn-wsprev
+
+;; COLOR !
+background = ${colors.background}
+foreground = ${colors.foreground}
+
+;; BAR MODULES!
+modules-left = bspwm
+modules-center = xwindow
+modules-right = filesystem eth wlan cpu memory battery alsa date
+
+
+
+;; MODULES!
+[module/xwindow]
+type = internal/xwindow
+format = <label>
+
+label = %title:0:30:...%
+label-maxlen = 50
+
+label-color1 = ${colors.foreground} 
+label-background = ${colors.background}
+
+
+[module/bspwm]
+type = internal/bspwm
+format = <label-state> <label-mode>
+label-monitor = %name%
+index-sort = true
+enable-click = true
+reverse-scroll = false
+
+label-focused = %name%
+label-occupied = %name%
+label-empty = %name%
+
+label-focused-foreground = ${colors.background}
+label-focused-background = ${colors.primary}
+label-focused-padding = 1
+
+label-occupied-foreground = ${colors.primary}
+label-occupied-background = ${colors.background}
+label-occupied-padding = 1
+
+label-empty-foreground = ${colors.foreground}
+label-empty-background = ${colors.background}
+label-empty-padding = 1
+
+[module/cpu]
+type = internal/cpu
+interval = 2
+
+format-prefix = " "
+format-prefix-foreground = ${colors.primary}
+
+format-foreground = ${colors.foreground}
+label = %percentage%%
+
+
+[module/memory]
+type = internal/memory
+interval = 2
+
+format-prefix = " "
+format-prefix-foreground = ${colors.primary}
+
+format-foreground = ${colors.foreground}
+label = %percentage_used%%
+
+
+[module/wlan]
+type = internal/network
+interface = wlp7s0
+interval = 3.0
+
+format-connected-prefix = " "
+format-connected-prefix-foreground = ${colors.primary}
+format-connected = <label-connected>
+label-connected = %local_ip% (%downspeed%)
+label-connected-color1 = ${colors.foreground}
+
+format-disconnected-prefix = " "
+format-disconnected-prefix-foreground = ${colors.primary}
+;format-disconnected =
+format-disconnected = <label-disconnected>
+label-disconnected = %ifname% No network
+label-disconnected-color1 = ${colors.foreground}
+
+
+[module/date]
+type = internal/date
+interval = 10
+
+time = %H:%M
+time-alt = %H:%M:%S
+
+date = %Y-%m-%d%
+date-alt = %A, %d %B %Y
+
+format-prefix = " "
+format-prefix-foreground = ${colors.primary}
+
+label-foreground = ${colors.foreground}
+label = %date% %time%
+
+
+[module/alsa]
+type = internal/alsa
+master-soundcard = default
+speaker-soundcard = default
+headphone-soundcard = default
+master-mixer = Master
+interval = 5
+format-volume = <label-volume>
+
+format-volume-prefix = " "
+format-volume-prefix-foreground = ${colors.primary}
+label-volume-foreground = ${colors.foreground}
+label-volume = %percentage%%
+
+format-muted-prefix = " "
+format-muted-foreground = ${colors.foreground}
+format-muted-prefix-foreground = ${colors.primary}
+label-muted = Muted
+
+
+[module/battery]
+type = internal/battery
+battery = BAT0
+adapter = ADP1
+full-at = 99
+
+format-charging = <label-charging>
+format-discharging = <label-discharging>
+
+format-charging-prefix = " "
+format-charging-prefix-foreground = ${colors.primary}
+label-charging = %percentage%%
+
+format-discharging-prefix = " "
+format-discharging-prefix-foreground = ${colors.primary}
+label-discharging = %percentage%%
+
+format-full-prefix = " " 
+format-full-prefix-foreground = ${colors.primary}
+label-full = %percentage%%
+
+
+[module/eth]
+type = internal/network
+interface = enp9s0
+interval = 3.0
+
+format-connected-prefix = " "
+format-connected-prefix-color1 = ${colors.primary}
+label-connected = %local_ip% - %downspeed%
+
+format-disconnected =
+;format-disconnected = <label-disconnected>
+;format-disconnected-underline = ${self.format-connected-underline}
+;label-disconnected = %ifname% disconnected
+;label-disconnected-color1 = ${colors.primary}
+
+
+[module/filesystem]
+type = internal/fs
+mount-0 = /
+;mount-1 = /home
+
+interval = 10
+fixed-values = true
+
+format-mounted-prefix = " "
+format-mounted-prefix-foreground = ${colors.primary}
+format-mounted = <label-mounted>
+format-unmounted = <label-unmounted>
+
+label-mounted = %mountpoint%:%percentage_used%%
+label-unmounted =
