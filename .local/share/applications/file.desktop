@@ -1,4 +1,10 @@
 [Desktop Entry]
 Type=Application
-Name=File Manager
-Exec=/usr/local/bin/st -e nnn %u
+Name=File manager
+Comment=File manager
+Exec=nnn
+Terminal=true
+MimeType=inode/directory
+Icon=file-manager
+Categories=System;FileTools;FileManager;ConsoleOnly
+Keywords=File;Manager;Management;Explorer;Launcher

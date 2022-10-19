@@ -2,10 +2,14 @@
 *.font: kakwafont:size=8
 urxvt.font: xft: kakwafont:size=8
 dmenu.font: kakwafont:size=8
+URxvt.boldFont:
 
-Xft.hinting: true
-Xft.autohint: true
-Xft.rgba: true
+Xft.dpi: 96
+Xft.antialias: 0
+Xft.hinting: 1
+Xft.autohint: 0
+Xft.rgba: rgb
+Xft.hintstyle: hintslight
 Xft.lcdfilter: lcddefault
 
 ! urxvt settings

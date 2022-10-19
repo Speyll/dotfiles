@@ -1,0 +1,78 @@
+﻿#!/bin/sh
+
+a="%{F#6c71c4}"
+t="%{F-}"
+sp="%{F#002b36}-%{F-}" 
+
+dte ()
+{
+        var=$(date -u)
+        echo "$a[$t $var$a]$t"
+}
+
+vol ()
+{
+  var=$(amixer get Master | awk '$0~/Left/{print $5}' | tr -d '[]-')
+  #var=$(amixer get Master | awk '$0~/Mono/{print $4}' | tr -d '[]-')
+        echo "$a[$t $var$a]$t"
+}
+
+bat ()
+{
+	device="BAT0"
+	var=$(cat /sys/class/power_supply/${device}/capacity)
+
+	case $var in
+		[0-9])  out="$a$t $var%";;
+		[1-7]?) out="$a$t $var%";;
+		*)      out="$a$t 100%"
+	esac
+	echo "$out"
+}
+
+cpu ()
+{
+	var=$(sensors | awk '/Core 0/ {print $3}')
+	echo "$a[$t $var$a]$t"
+}
+
+mem ()
+{
+	var=$(free -h | awk '/Mem/ {print $3}')
+	echo "$a[$t $var$a]$t"
+}
+
+hdd ()
+{
+	var=$(df -h | grep '/$' | awk '{print $5}')
+	echo "$a[$t $var$a]$t"
+}
+
+add ()
+{
+	var=$(ip route get 1 | awk '{print $(NF-2);exit}')
+	echo "$a[$t $var$a]$t"
+}
+
+padd (){
+	var=$(curl ifconfig.me 2>/dev/null)
+	echo "$a[$t $var$a]$t"
+}
+
+work (){
+	cur=$(xprop -root _NET_CURRENT_DESKTOP | awk '{print $3}')
+	all=$(xprop -root _NET_NUMBER_OF_DESKTOPS | awk '{print $3}')
+	echo "$a[$t$cur | $a$t$all$a]$t"
+}
+
+tit (){
+	var=$(xdotool getwindowfocus getwindowname)
+	echo "$a[$t$var$a]$t"
+}
+
+while true
+do
+	BAR_INPUT="%{l}${sp} $(work) %{c} $(tit) %{r} $(padd) ${sp} $(add) ${sp} $(hdd) ${sp} $(mem) ${sp} $(cpu) ${sp} $(bat) ${sp} $(vol) ${sp} $(dte) "
+	echo $BAR_INPUT 2>/dev/null
+	sleep 10s
+done

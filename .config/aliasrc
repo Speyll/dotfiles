@@ -2,7 +2,7 @@
 
 # Colorize commands when possible.
 alias \
-	ls="ls -hN --color=auto --group-directories-first" \
+	ls="ls -sh --color=auto" \
 	dir="dir --color=auto" \
 	vdir="vdir --color=auto" \
 	grep="grep --color=auto" \
@@ -13,11 +13,10 @@ alias \
 
 # Some more ls aliases.
 alias \
-	ll="ls -l" \
-	la="ls -A" \
-	l="ls -CF"
+	ll="ls -l --color=auto" \
+	la="ls -A --color=auto" \
 
-# xbps aliases.
+# xbps and pkg aliases.
 alias \
 	xbs="sudo xbps-install" \
 	xbr="sudo xbps-remove -Rv"

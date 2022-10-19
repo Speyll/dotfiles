@@ -1,11 +1,9 @@
 #!/bin/sh
-choice=$(printf "Youtube search\\nMount drive\\nUnmount drive\\nScreen record\\nScrot\\nScrot selec" | dmenu -i -p "Select a script:")
+choice=$(printf "Youtube search\\nMount drive\\nUnmount drive\\nScreen record" | dmenu -i -p "Select a script:")
 
 case "$choice" in
 	"Youtube search") ytfzf -D ;;
 	"Mount drive") dmenumount ;;
 	"Unmount drive") dmenuumount ;;
 	"Record screen") dmenurecord ;;
-	"Scrot") scrot -d 1 $HOME/Pictures/Screenshot-$(date +%F_%T).png -e "xclip -selection c -t image/png < $f" ;;
-	"Scrot selec") scrot -s /tmp/Screenshot-$(date +%F_%T).png -e "xclip -selection c -t image/png" ;;
 esac
