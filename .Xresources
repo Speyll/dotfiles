@@ -1,11 +1,15 @@
 ! font settings
-*.font: kakwafont:size=8
-urxvt.font: xft: kakwafont:size=8
-dmenu.font: kakwafont:size=8
+*.font: monospace:size=12
+urxvt.font: xft: monospace:size=12
+dmenu.font: monospace:size=12
+URxvt.boldFont:
 
-Xft.hinting: true
-Xft.autohint: true
-Xft.rgba: true
+Xft.dpi: 96
+Xft.antialias: 1
+Xft.hinting: 1
+Xft.autohint: 0
+Xft.rgba: rgb
+Xft.hintstyle: hintslight
 Xft.lcdfilter: lcddefault
 
 ! urxvt settings
@@ -14,51 +18,49 @@ urxvt.scrollBar: false
 urxvt.scrollbar_right: false
 urxvt.internalBorder: 25
 urxvt.cursorBlink: true
-! urxvt.transparent: true
-! urxvt.shading: 10
+urxvt.transparent: true
+urxvt.shading: 10
 
 ! sxiv settings
-Sxiv.font: kakwafont
-Sxiv.foreground: #657b83
-Sxiv.background: #002b36
+Sxiv.font: Hack
+Sxiv.foreground: #ebdbb2
+Sxiv.background: #282828
 
-! colors
-*.alpha: 0.9
-*.foreground:	#657b83
-*.background:	#002b36
-! *.fading:	40
-*.fadeColor:	#002b36
-*.cursorColor:	#93a1a1
-*.pointerColorBackground:	#586e75
+! general
+! *.alpha: 0.9
+! hard contrast: *background: #1d2021
+*background: #282828
+! soft contrast: *background: #32302f
+*foreground: #ebdbb2
 
-! black
-*.color0:       #073642
-*.color8:       #002b36
+! Black + DarkGrey
+*color0:  #282828
+*color8:  #928374
 
-! red
-*.color1:       #dc322f
-*.color9:       #cb4b16
+! DarkRed + Red
+*color1:  #cc241d
+*color9:  #fb4934
 
-! green
-*.color2:       #859900
-*.color10:      #586e75
+! DarkGreen + Green
+*color2:  #98971a
+*color10: #b8bb26
 
-! yellow
-*.color3:       #b58900
-*.color11:      #657b83
+! DarkYellow + Yellow
+*color3:  #d79921
+*color11: #fabd2f
 
-! blue
-*.color4:       #268bd2
-*.color12:      #839496
+! DarkBlue + Blue
+*color4:  #458588
+*color12: #83a598
 
-! magenta
-*.color5:       #d33682
-*.color13:      #6c71c4
+! DarkMagenta + Magenta
+*color5:  #b16286
+*color13: #d3869b
 
-! cyan
-*.color6:       #2aa198
-*.color14:      #93a1a1
+! DarkCyan + Cyan
+*color6:  #689d6a
+*color14: #8ec07c
 
-! white
-*.color7:       #eee8d5
-*.color15:      #fdf6e3
+! LightGrey + White
+*color7:  #a89984
+*color15: #ebdbb2

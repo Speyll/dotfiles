@@ -10,7 +10,7 @@ super + Escape
 
 # Terminal emulator / tmux
 super + {Return, shift + Return}
-	{urxvt, urxvt -name tmux -e tmux}
+	{st, st -n tmux -e tmux}
 
 # Dmenu
 super + d
@@ -22,7 +22,7 @@ super + shift + b
 
 # File browser
 super + shift + p
-	urxvt -name nnn -e nnn
+	st -n nnn -e nnn
 
 # Lemonbar
 super + shift + r
@@ -100,10 +100,6 @@ super + {_,shift + }{Left,Down,Up,Right}
 # Focus the next/previous node in the current desktop
 super + {_,shift + }Tab
 	bspc node -f {next,prev}.local
-
-# Focus the next/previous desktop in the current monitor
-ctrl {_,Left + }{Left,Right}
-	bspc desktop -f {prev,next}.local
 
 # Focus the last node/desktop
 super + {c, shift + c}

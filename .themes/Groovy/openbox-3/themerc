@@ -1,0 +1,78 @@
+!! Menu background
+menu.items.bg: flat
+menu.items.bg.color: #282828
+menu.overlap.x: 0
+menu.overlap.y: 0
+
+!! Menu text
+menu.items.text.color: #ebdbb2
+menu.items.justify: left
+menu.items.disabled.text.color: #928374
+
+!! Menu separator
+menu.separator.width: 0
+menu.separator.padding.width: 6
+menu.separator.padding.height: 3
+menu.separator.color: #282828
+
+!! Menu border
+menu.border.width: 0
+menu.border.color: #ebdbb2
+
+!! Menu headers
+menu.title.bg: flat
+menu.title.bg.color: #32302f
+menu.title.text.color: #ebdbb2
+menu.title.text.justify: center
+
+!! Selected menu item
+menu.items.active.bg: flat
+menu.items.active.bg.color: #ebdbb2
+menu.items.active.text.color: #282828
+
+!! Titlebar
+window.active.title.bg: flat
+window.active.title.bg.color: #ebdbb2
+window.inactive.title.bg: flat
+window.inactive.title.bg.color: #282828
+
+!! Titlebar text
+window.label.text.justify: left
+window.active.label.bg: parentrelative
+window.active.label.text.color: #282828
+window.inactive.label.bg: parentrelative
+window.inactive.label.text.color: #ebdbb2
+
+!! Window buttons
+window.*.button.*.bg: parentrelative
+window.active.button.*.hover.bg: flat
+window.inactive.button.*.hover.bg: parentrelative
+window.*.button.*.pressed.bg: flat
+
+window.active.button.*.hover.bg.color: #a89984
+window.active.button.*.pressed.bg.color: #928374
+window.inactive.button.*.pressed.bg.color: #a89984
+
+window.active.button.*.image.color: #282828
+window.active.button.disabled.image.color: #a89984
+window.inactive.button.*.image.color: #ebdbb2
+window.inactive.button.disabled.image.color: #32302f
+
+!! Borders
+window.active.border.color: #ebdbb2
+window.inactive.border.color: #282828
+border.width: 1
+padding.width: 3
+padding.height: 3
+window.handle.width: 0
+window.active.client.color:  #ebdbb2
+window.inactive.client.color:  #282828
+window.client.padding.width: 0
+window.client.padding.height: 0
+
+!! On-screen displays
+osd.bg: flat
+osd.border.width: 0
+osd.bg.color: #32302f
+osd.border.color: #ebdbb2
+osd.label.text.color: #ebdbb2

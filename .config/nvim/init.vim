@@ -1,10 +1,3 @@
-" (N)Vim Configuration File
-" vim  : place in $HOME/.vimrc
-" nvim : place in $HOME/.config/nvim/init.vim
-" $ ln -s $HOME/.config/nvim/init.vim $HOME/.vimrc
-" General settings
-" https://learnvimscriptthehardway.stevelosh.com/
-" ---------------------------------------------------------------------------
 let data_dir = has('nvim') ? stdpath('data') . '/site' : '~/.config/nvim'
 if empty(glob(data_dir . '/autoload/plug.vim'))
   silent execute '!curl -fLo '.data_dir.'/autoload/plug.vim --create-dirs  https://raw.githubusercontent.com/junegunn/vim-plug/master/plug.vim'
@@ -93,20 +86,12 @@ set hidden
 set wildmenu wildmode=list:longest,full
 
 " StatusLine always visible, display full path
-" http://learnvimscriptthehardway.stevelosh.com/chapters/17.html
 set laststatus=2 statusline=%F
 
 " Use system clipboard
-" http://vim.wikia.com/wiki/Accessing_the_system_clipboard
-" for linux
 set clipboard=unnamedplus
-" for macOS
-" set clipboard=unnamed
 
 " Folding
-" https://vim.fandom.com/wiki/Folding
-" https://vim.fandom.com/wiki/All_folds_open_when_opening_a_file
-" https://stackoverflow.com/questions/8316139/how-to-set-the-default-to-unfolded-when-you-open-a-file
 set foldmethod=indent
 set foldnestmax=1
 set foldlevelstart=1
@@ -114,36 +99,23 @@ set foldlevelstart=1
 " netrw and vim-vinegar
 let g:netrw_browse_split = 3
 
-" Plugins, syntax, and colors
-" ---------------------------------------------------------------------------
-" vim-plug
-" https://github.com/junegunn/vim-plug
-" Specify a directory for plugins
-" - For Neovim: ~/.local/share/nvim/plugged
-" - Avoid using standard Vim directory names like 'plugin'
-call plug#begin('~/.config/nvim/plugged')
-
-" Make sure to use single quotes
-" Install with `:PlugInstall`
-
-call plug#begin()
-Plug 'tpope/vim-surround'
-Plug 'junegunn/goyo.vim'
-Plug 'ap/vim-css-color'
-Plug 'dylanaraps/wal.vim'
-" On-demand loading
-Plug 'scrooloose/nerdtree', { 'on': 'NERDTreeToggle' }
-call plug#end()
-
 syntax enable
 " Neovim only
 
 " Enable mouse support
 set mouse=a
 
-" Color
-colorscheme wal
-set background=dark
+" Colors
+set t_Co=16
+
+" Plugins
+call plug#begin('~/.config/nvim/plugged')
+
+call plug#begin()
+Plug 'tpope/vim-surround'
+Plug 'junegunn/goyo.vim'
+Plug 'ap/vim-css-color'
+call plug#end()
 
 autocmd VimEnter *
   \  if len(filter(values(g:plugs), '!isdirectory(v:val.dir)'))

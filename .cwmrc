@@ -1,0 +1,110 @@
+# General settings
+borderwidth 1
+fontname "monospace:size=12:Medium"
+snapdist 5
+gap 24 0 0 0
+sticky yes
+
+# Executables
+unbind-key all
+bind-key 4-Return st
+bind-key 4-d "dmenu_run -p 'Select a program:'"
+bind-key 4-i menu-window
+
+# Colors
+color activeborder "#ebdbb2"
+color inactiveborder "#282828"
+
+color font "#ebdbb2"
+color selfont "#fb4934"
+
+color menufg "#ebdbb2"
+color menubg "#282828"
+
+# Keybindings
+bind-key 4-Tab      window-cycle
+bind-key M-Tab      group-cycle
+bind-key 4-f        window-maximize
+bind-key 4-space    window-fullscreen
+bind-key 4S-q       window-close
+bind-key 4S-i	    window-hide
+bind-key 4M-r       restart
+bind-key 4M-Escape  quit
+
+# Mousebindings
+unbind-mouse all
+bind-mouse 4-3 window-resize
+bind-mouse 4-1 window-move
+bind-mouse 4-2 window-lower
+
+# Snaping Resizing
+bind-key 4-Left window-snap-left
+bind-key 4-Right window-snap-right
+bind-key 4-Up window-snap-up
+bind-key 4-Down window-snap-down
+
+bind-key 4S-Left window-resize-left
+bind-key 4S-Right window-resize-right
+bind-key 4S-Up window-resize-up
+bind-key 4S-Down window-resize-down
+
+bind-key 4-h window-hmaximize
+bind-key 4-v window-vmaximize
+
+# Auto group with xprop
+autogroup 1 "Navigator,Firefox"
+autogroup 3 "mpv"
+
+# Commands
+command term        "st"
+command lock        "slock"
+command firefox     "firefox"
+command nnn         "st -n nnn -e nnn"
+
+# Special Keys
+bind-key XF86AudioLowerVolume "amixer sset Master 5%-"
+bind-key XF86AudioRaiseVolume "amixer sset Master 5%+"
+bind-key XF86AudioMute "amixer sset Master toggle"
+bind-key XF86MonBrightnessUp "xbacklight -inc 10"
+bind-key XF86MonBrightnessDown "xbacklight -dec 10"
+
+# Groupes
+
+# Move to group
+bind-key 4-ampersand        group-only-1
+bind-key 4-eacute           group-only-2
+bind-key 4-quotedbl         group-only-3
+bind-key 4-apostrophe       group-only-4
+bind-key 4-parenleft        group-only-5
+bind-key 4-minus            group-only-6
+bind-key 4-egrave           group-only-7
+bind-key 4-underscore       group-only-8
+bind-key 4-ccedilla         group-only-9
+bind-key 4-agrave           group-toggle-all
+
+# Move windows to group
+bind-key 4S-ampersand        window-movetogroup-1
+bind-key 4S-eacute           window-movetogroup-2
+bind-key 4S-quotedbl         window-movetogroup-3
+bind-key 4S-apostrophe       window-movetogroup-4
+bind-key 4S-parenleft        window-movetogroup-5
+bind-key 4S-minus            window-movetogroup-6
+bind-key 4S-egrave           window-movetogroup-7
+bind-key 4S-underscore       window-movetogroup-8
+bind-key 4S-ccedilla         window-movetogroup-9
+
+# Tiling
+htile 55%
+vtile 55%
+bind-key 4-t window-vtile
+bind-key 4S-Return window-vtile
+bind-key 4S-t window-htile
+
+# Ignore, and do not warp to, windows with these names
+ignore dmenu
+ignore dzen2
+ignore lemonbar
+ignore Bar
+ignore lemon
+ignore tint2
+ignore polybar

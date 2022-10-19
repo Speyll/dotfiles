@@ -1,0 +1,24 @@
+#!/bin/sh
+
+# Defaults
+sct 2500 &
+amixer -q set Master 100% &
+xbacklight -set 60 &
+
+# Set Wallpaper
+pkill hsetroot
+#hsetroot -solid "#fbf1c7" &
+hsetroot -cover $HOME/pictures/wall.jpg &
+
+# Launch things
+#$HOME/.config/picom/launch.sh &
+#$HOME/.config/sxhkd/launch.sh &
+$HOME/.config/lemonbar/lemon &
+#$HOME/.config/polybar/launch.sh &
+
+# Dunst
+pkill dunst
+dunst &
+
+# Cursor
+xsetroot -cursor_name left_ptr &

@@ -2,3 +2,8 @@
 Type=Application
 Name=Image viewer
 Exec=/usr/bin/sxiv -a %f
+Type=Application
+Categories=Utility;ImageViewer;
+MimeType=image/bmp;image/gif;image/jpeg;image/jpg;image/png;image/tiff;image/x-bmp;image/x-portable-anymap;image/x-portable-bitmap;image/x-portable-graymap;image/x-tga;image/x-xpixmap;
+NoDisplay=true
+Icon=image-viewer
