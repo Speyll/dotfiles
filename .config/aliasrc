@@ -8,7 +8,9 @@ alias \
 	fgrep="fgrep --color=auto" \
 	egrep="egrep --color=auto" \
 	diff="diff --color=auto" \
-	ccat="highlight --out-format=ansi"
+	ccat="highlight --out-format=ansi" \
+	dfg="df -BG" \
+	dfm="df -BM"
 
 # Some more ls aliases.
 alias \
