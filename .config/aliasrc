@@ -1,8 +1,7 @@
 #!/bin/sh
-
 # Colorize commands when possible.
 alias \
-	ls="ls -sh --color=auto" \
+	ls="ls -shA --color=auto" \
 	dir="dir --color=auto" \
 	vdir="vdir --color=auto" \
 	grep="grep --color=auto" \
