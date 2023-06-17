@@ -24,7 +24,7 @@ alias \
 
 # apt aliases.
 alias \
-	apti="sudo apt-get -no-install-recommends"
+	apti="sudo apt-get install --no-install-recommends"
 
 # Use neovim for vim if present.
 command -v nvim >/dev/null && alias vim="nvim" vimdiff="nvim -d"
