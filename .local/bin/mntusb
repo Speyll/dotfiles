@@ -1,0 +1,5 @@
+#!/bin/sh
+sudo fdisk -l | grep /dev/sdb
+echo "Press any key after you've confirmed the mounted drive"
+sudo mkdir $HOME/usb
+sudo mount /dev/sdb1 $HOME/usb
