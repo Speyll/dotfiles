@@ -1,11 +1,20 @@
-#!/bin/zsh
+# the default umask is set in /etc/profile; for setting the umask
+# for ssh logins, install and configure the libpam-umask package.
+#umask 022
 
-# Personal additional paths in ~/.local/bin
-export PATH=$PATH:$HOME/.local/bin
+# set PATH so it includes user's private bin if it exists
+if [ -d "$HOME/bin" ] ; then
+    PATH="$HOME/bin:$PATH"
+fi
+
+# set PATH so it includes user's private bin if it exists
+if [ -d "$HOME/.local/bin" ] ; then
+    PATH="$HOME/.local/bin:$PATH"
+fi
 
 # Default programs
 export TERM="xterm-256color"
-export EDITOR="nvim"
+export EDITOR="nano"
 export FILE="nnn"
 export PAGER="less"
 
