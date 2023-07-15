@@ -25,6 +25,7 @@ alias \
 # apt aliases.
 alias \
 	apti="sudo apt-get install --no-install-recommends"
+	aptr="sudo apt-get --purge autoremove"
 
 # Use neovim for vim if present.
 command -v nvim >/dev/null && alias vim="nvim" vimdiff="nvim -d"
