@@ -24,7 +24,7 @@ alias \
 
 # apt aliases.
 alias \
-	apti="sudo apt-get install --no-install-recommends"
+	apti="sudo apt-get install --no-install-recommends" \
 	aptr="sudo apt-get --purge autoremove"
 
 # Use neovim for vim if present.
