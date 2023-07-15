@@ -57,16 +57,16 @@ if [ -n "$force_color_prompt" ]; then
 fi
 
 if [ "$color_prompt" = yes ]; then
-    PS1='[$][\[\e[m\]\[\e[35m\]\w\[\e[m\]] '
+    PS1='[\[\e[96m\]\A\[\e[0m\]][\[\e[93m\]\w\[\e[0m\]]\$ '
 else
-    PS1='[$][\w\] '
+    PS1='[\A][\w]\$ '
 fi
 unset color_prompt force_color_prompt
 
 # If this is an xterm set the title to user@host:dir
 case "$TERM" in
 xterm*|rxvt*)
-    PS1='[$][\[\e[m\]\[\e[35m\]\w\[\e[m\]] '
+    PS1='[\[\e[96m\]\A\[\e[0m\]][\[\e[93m\]\w\[\e[0m\]]\$ '
     ;;
 *)
     ;;
