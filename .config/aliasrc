@@ -16,6 +16,7 @@ alias \
 alias \
 	ll="ls -l --color=auto" \
 	la="ls -A --color=auto" \
+	llt="ls -latrG"
 
 # xbps and pkg aliases.
 alias \

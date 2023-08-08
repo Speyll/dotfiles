@@ -12,8 +12,12 @@ if [ -d "$HOME/.local/bin" ] ; then
     PATH="$HOME/.local/bin:$PATH"
 fi
 
+# Add color
+export CLICOLOR=1
+export TERM=xterm-256color
+export GREP_OPTIONS="--color=always"
+
 # Default programs
-export TERM="xterm-256color"
 export EDITOR="nano"
 export FILE="nnn"
 export PAGER="less"
