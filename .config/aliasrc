@@ -27,6 +27,13 @@ alias \
 alias \
 	apti="sudo apt-get install --no-install-recommends" \
 	aptr="sudo apt-get --purge autoremove"
+	
+	# flatpak aliases.
+alias \
+	flinst="sudo flatpak install" \
+	flrem="sudo flatpak uninstall" \
+	flclean="sudo flatpak uninstall --unused & flatpak repair"
+
 
 # Use neovim for vim if present.
 command -v nvim >/dev/null && alias vim="nvim" vimdiff="nvim -d"
