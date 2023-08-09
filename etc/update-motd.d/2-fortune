@@ -1,6 +1,0 @@
-#!/bin/sh
-
-cat << EOF
-	      Wise words of the day:
-		`/usr/games/fortune -as | sed "s/^/         /"`
-EOF
