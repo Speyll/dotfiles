@@ -1,0 +1,29 @@
+#!/bin/sh
+# Startup script for sway from console
+# License: GNU General Public License, version 3 or later
+
+# Check for correct usage
+if [ "$#" -ne 0 ]; then
+    echo "Usage: $(basename "$0"): start a sway session from a console tty"
+    exit 1
+fi
+
+# Define the log file
+mkdir -p "$HOME/.cache"
+LOGFILE="$HOME/.cache/wsession-errors"
+exec > "$LOGFILE" 2>&1
+
+# Log the script start time
+echo "Labwc session started: $(date)"
+
+# Enable debug mode (remove this line for production use)
+# set -x
+
+export XDG_DATA_DIRS="$HOME/.local/share/flatpak/exports/share:/var/lib/flatpak/exports/share:/usr/local/share:/usr/share"
+
+# Cleanup older sessions
+rm "$HOME"/.cache/*.wob
+
+# Start sway using dbus-run-session for improved compatibility
+#exec dbus-launch --sh-syntax --exit-with-session labwc
+dbus-run-session labwc

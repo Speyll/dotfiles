@@ -1,0 +1,24 @@
+#!/bin/sh
+
+# Define the menu options with Font Awesome 4 icons
+options=" Terminal\n File Manager\n Librewolf"
+
+# Use Tofi to create a menu with the options
+choice=$(echo "$options" | tofi -c "$HOME/.config/tofi/config-apps")
+
+# Check the user's choice and launch the corresponding application
+case "$choice" in
+    " Terminal")
+        foot
+        ;;
+    " File Manager")
+        foot -T nnn nnn
+        ;;
+    " Librewolf")
+        librewolf
+        ;;
+    *)
+        echo "Invalid choice: $choice" >&2
+        exit 1
+        ;;
+esac

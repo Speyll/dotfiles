@@ -1,0 +1,9 @@
+#!/bin/sh
+
+appimage_path="$HOME/.var/appimgs/LibreWolf.x86_64.AppImage"
+
+if [ -e "$appimage_path" ]; then
+    "$appimage_path"
+else
+    echo "LibreWolf AppImage not found in the specified directory."
+fi

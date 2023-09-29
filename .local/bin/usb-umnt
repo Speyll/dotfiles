@@ -1,0 +1,14 @@
+#!/bin/sh
+
+mount_point="$HOME/.var/usb"
+
+if [ -d "$mount_point" ]; then
+    sudo umount "$mount_point"
+    if [ $? -eq 0 ]; then
+        echo "Unmounted the drive at $mount_point"
+    else
+        echo "Failed to unmount the drive at $mount_point"
+    fi
+else
+    echo "No USB drive is currently mounted at $mount_point"
+fi

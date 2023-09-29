@@ -1,0 +1,2 @@
+#!/bin/sh
+tofi-run | xargs sh -c

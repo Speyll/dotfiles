@@ -1,0 +1,48 @@
+# Bar
+anchor=bottom-right
+horizontal=false
+width=35%
+height=60%
+exclusive-zone=0
+margin-top=0
+margin-bottom=4
+margin-left=0
+margin-right=4
+
+# Border
+corner-radius=0
+outline-width=0
+border-width=2
+
+# Font
+font=monospace
+font-size=12
+prompt-text="pick:"
+placeholder-text=".."
+prompt-padding=4
+
+# Colors
+background-color=#282828EF
+text-color=#ebdbb2
+
+prompt-color=#427b58
+#prompt-background=
+
+input-color=#ebdbb2
+#input-background=
+
+selection-color=#427b58
+selection-match-color=#fb4934
+#selection-background=#3c3836EF
+#selection-background-padding=8
+
+border-color=#427b58
+outline-color=#282828
+
+# Layout
+min-input-width=120
+result-spacing=15
+padding-top=12
+padding-bottom=0
+padding-left=8
+padding-right=8

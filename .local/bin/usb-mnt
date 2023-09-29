@@ -1,0 +1,26 @@
+#!/bin/sh
+
+devices=$(lsblk -n -o name,mountpoint | awk '$2 == "" {print $1}')
+
+if [ -z "$devices" ]; then
+    echo "No available disk devices found."
+    exit 1
+fi
+
+echo "Available disk devices and partitions:"
+PS3="Select a device (enter the number): "
+
+select_device() {
+    local choice
+    for device in $devices; do
+        echo "$device"
+    done
+
+    read -r choice
+    echo "You chose $choice"
+    sudo mkdir -p "$HOME/.var/usb"
+    sudo mount "/dev/$choice" "$HOME/.var/usb"
+    echo "Drive mounted at $HOME/.var/usb"
+}
+
+select_device

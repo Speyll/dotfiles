@@ -1,0 +1,21 @@
+#!/bin/sh
+
+# List available Wi-Fi networks and assign them numbers
+nmcli device wifi list | awk 'NR>1 {print NR ". " $2}'
+
+# Prompt the user to select a Wi-Fi network
+read -p "Enter the number of the Wi-Fi network to connect to: " choice
+
+# Find the corresponding Wi-Fi network name (SSID)
+wifi_ssid=$(nmcli device wifi list | awk 'NR>1 {if (NR == '$choice') print $2}')
+
+# Check if the user entered a valid choice
+if [ -n "$wifi_ssid" ]; then
+    # Prompt for the Wi-Fi password if needed
+    read -s -p "Enter the Wi-Fi password (if required): " wifi_password
+
+    # Connect to the selected Wi-Fi network
+    nmcli device wifi connect "$wifi_ssid" password "$wifi_password"
+else
+    echo "Invalid selection. No connection was made."
+fi

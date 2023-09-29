@@ -1,0 +1,71 @@
+#!/bin/sh
+
+# A general, all-purpose extraction script.
+#
+# Default behavior: Extract archive into a new directory
+# Behavior with `-c` option: Extract contents into the current directory
+
+while getopts "hc" opt; do
+  case "${opt}" in
+    c) extracthere="True" ;;
+    h)
+      printf "Usage: %s [-c] archive\\n" "$0"
+      printf "Options:\\n"
+      printf "  -c: Extract archive into the current directory rather than a new one.\\n"
+      exit 0
+      ;;
+    *)
+      printf "Invalid option\\n"
+      exit 1
+      ;;
+  esac
+done
+
+shift $((OPTIND-1))
+
+if [ -z "$extracthere" ]; then
+  if [ $# -eq 0 ]; then
+    printf "Error: No archive provided.\\n"
+    exit 1
+  fi
+
+  archive="$(readlink -f "$1")"
+  directory="$(echo "$archive" | sed 's/\.[^.]*$//')"
+  mkdir -p "$directory" || exit 1
+  cd "$directory" || exit 1
+else
+  if [ $# -eq 0 ]; then
+    printf "Error: No archive provided.\\n"
+    exit 1
+  fi
+
+  archive="$(readlink -f "$1" 2>/dev/null)"
+  shift
+fi
+
+[ -z "$archive" ] && printf "Error: Give archive to extract as an argument.\\n" && exit 1
+
+if [ -f "$archive" ]; then
+  case "$archive" in
+    *.tar.bz2 | *.tbz2) tar xvjf "$archive" ;;
+    *.tar.xz) tar -xf "$archive" ;;
+    *.tar.gz | *.tgz) tar xvzf "$archive" ;;
+    *.tar.zst) tar -I zstd -xf "$archive" ;;
+    *.lzma) unlzma "$archive" ;;
+    *.bz2) bunzip2 "$archive" ;;
+    *.rar) unrar x -ad "$archive" ;;
+    *.gz) gunzip "$archive" ;;
+    *.tar) tar xvf "$archive" ;;
+    *.zip) unzip "$archive" ;;
+    *.Z) uncompress "$archive" ;;
+    *.7z) 7z x "$archive" ;;
+    *.xz) unxz "$archive" ;;
+    *.exe) cabextract "$archive" ;;
+    *)
+      printf "Error: '%s' - unknown archive method\\n" "$archive"
+      ;;
+  esac
+else
+  printf "Error: File \"%s\" not found.\\n" "$archive"
+  exit 1
+fi

@@ -1,0 +1,154 @@
+# Common values we will be re-using
+awesome: &awesome FontAwesome:style=Regular:pixelsize=12
+fg_color: &fg EBDBB2FF
+bg_color: &bg 282828BF
+aqua_color: &aqua 427b58FF
+yellow_color: &yellow fabd2fff
+brown_color: &brown 3c3836bf
+std_underline: &std_underline {underline: { size: 2, color: *yellow}}
+
+# This is THE bar configuration
+bar:
+  # Size
+  location: bottom
+  height: 24
+  spacing: 6
+  margin: 0
+
+  # Default font
+  font: monospace:pixelsize=12
+
+  # Colors
+  foreground: *fg
+  background: *bg
+
+  # Borders
+  border:
+    width: 0
+    margin: 0
+    top-margin: 0
+    color: *aqua
+
+  left:
+    - label:
+        content:
+          string:
+            on-click: tofi-apps
+            text: 
+            font: *awesome
+            foreground: *aqua
+            left-margin: 8
+
+    - foreign-toplevel:
+        content:
+          map:
+            conditions:
+              ~activated: {empty: {}}
+              activated:
+                - string: {text: , font: *awesome, foreground: *aqua}
+                - string: {text: "{app-id}:", foreground: *yellow, left-margin: 4}
+                - string: {text: "{title}", foreground: *fg}
+
+  right:
+    - script:
+        path: ~/.config/yambar/xkb-layout.sh
+        poll-interval: 2500
+        content:
+          - string: {text: , font: *awesome, foreground: *aqua}
+          - string: {text: "{xkb_layout}", foreground: *fg, left-margin: 4}
+
+    - backlight:
+        name: acpi_video0
+        content:
+          - string: {text: , font: *awesome, foreground: *aqua}
+          - string: {text: "{percent}%", left-margin: 4}
+
+    - mem:
+        poll-interval: 2500
+        content:
+          - string: {text: , font: *awesome, foreground: *aqua}
+          - string: {text: "{used:mb} mb", left-margin: 4}
+
+    - battery:
+        name: BAT1
+        poll-interval: 30000
+        content:
+          map:
+            conditions:
+              state == unknown:
+                - string: {text: , foreground: *aqua, font: *awesome}
+                - string: {text: "100%", left-margin: 4}
+              state == discharging:
+                - string: {text: , foreground: *aqua, font: *awesome}
+                - string: {text: "{capacity}%", left-margin: 4}
+              state == charging:
+                - string: {text: , foreground: *aqua, font: *awesome}
+                - string: {text: "{capacity}% {estimate}", left-margin: 4}
+              state == full:
+                - string: {text: , foreground: *aqua, font: *awesome}
+                - string: {text: "{capacity}% full", left-margin: 4}
+              state == "not charging":
+                - string: {text: , foreground: *aqua, font: *awesome}
+                - string: {text: "{capacity}%", left-margin: 4}
+
+    - network:
+        name: enp9s0
+        content:
+          map:
+            conditions:
+              ~carrier: {empty: {}}
+              carrier:
+                map:
+                  default:
+                    - string: {text: , font: *awesome, foreground: *aqua}
+                    - string: {text: "{state}", foreground: *fg, left-margin: 4}
+                  conditions:
+                    state == up && ipv4 != "":
+                    - string: {text: , font: *awesome, foreground: *aqua}
+                    - string: {text: "{ipv4}", foreground: *fg, left-margin: 4}
+
+    - network:
+        name: wlp7s0
+        poll-interval: 1000
+        content:
+          map:
+            default:
+              - string: {text: , font: *awesome, foreground: *aqua}
+              - string: {text: "{state}", foreground: *fg, left-margin: 4}
+            conditions:
+              state == down:
+                - string: {text: , font: *awesome, foreground: *aqua}
+                - string: {text: "{state}", foreground: *fg, left-margin: 4}
+              state == up:
+                - string: {text: , font: *awesome, foreground: *aqua}
+                - string: {text: "{ipv4}", foreground: *fg, left-margin: 4}
+
+    - alsa:
+        card: default
+        mixer: Master
+        content:
+          map:
+            default:
+              - string: {text: , foreground: *aqua, font: *awesome, on-click: "foot -T alsamixer alsamixer"}
+              - string: {text: "{volume}%", left-margin: 4, on-click: "foot -T alsamixer alsamixer"}
+            conditions:
+              muted:
+                - string: {text: , foreground: *aqua, font: *awesome, on-click: "foot alsamixer"}
+                - string: {text: "muted", left-margin: 4, on-click: "foot alsamixer"}
+
+    - clock:
+        time-format: "%H:%M"
+        date-format: "%a\ %d\ %b"
+        content:
+          - string: {text: , font: *awesome, foreground: *aqua}
+          - string: {text: "{date} {time}", left-margin: 4}
+
+    - label:
+        content:
+          string:
+            on-click: tofi-power
+            text: 
+            font: *awesome
+            foreground: *aqua
+            left-margin: 0
+            right-margin: 8
