@@ -58,7 +58,7 @@ bar:
           - string: {text: "{xkb_layout}", foreground: *fg, left-margin: 4}
 
     - backlight:
-        name: acpi_video0
+        name: intel_backlight
         content:
           - string: {text: , font: *awesome, foreground: *aqua}
           - string: {text: "{percent}%", left-margin: 4}
