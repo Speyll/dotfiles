@@ -13,9 +13,7 @@ If you are here for my old bspwm setup, you can find it [here](https://github.co
 
 ## Screenshot
 
-Obligatory screenshot:
 ![Screenshot](https://i.ibb.co/JjdVqh0/scrott.webp)
-This screenshot is temporary this is not the final product.
 
 ## Software Used
 
