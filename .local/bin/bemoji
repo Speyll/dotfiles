@@ -4,7 +4,7 @@ bm_version=0.3.0
 # Emoji default database location
 bm_db_location=${BEMOJI_DB_LOCATION:-"${XDG_DATA_HOME:-$HOME/.local/share}/bemoji"}
 # Setting custom emoji list file location:
-# BEMOJI_CUSTOM_LIST=
+# BEMOJI_CUSTOM_LIST=/my/location/emojis.txt
 # Setting custom recent emoji history:
 # BEMOJI_HISTORY_LOCATION=/path/to/my/recents/directory
 bm_state_dir="${BEMOJI_HISTORY_LOCATION:-${XDG_STATE_HOME:-$HOME/.local/state}}"
@@ -14,7 +14,7 @@ bm_history_file="${bm_state_dir}/bemoji-history.txt"
 bm_default_cmd="$BEMOJI_DEFAULT_CMD"
 
 # Newline after echo
-bm_echo_newline=${BEMOJI_ECHO_NEWLINE:-false}
+bm_echo_newline=${BEMOJI_ECHO_NEWLINE:-true}
 # Do not save choices
 bm_private_mode=${BEMOJI_PRIVATE_MODE:-false}
 # Do not sort results
@@ -24,9 +24,10 @@ declare -A default_pickers=(
 	["bemenu"]="bemenu -p 🔍 -i -l 20"
 	["wofi"]="wofi -p 🔍 -i --show dmenu"
 	["rofi"]="rofi -p 🔍 -i -dmenu --kb-custom-1 "Alt+1" --kb-custom-2 "Alt+2""
-	["tofi"]="tofi -c $HOME/.config/tofi/config-emoji"
 	["dmenu"]="dmenu -p 🔍 -i -l 20"
 	["ilia"]="ilia -n -p textlist -l 'Emoji' -i desktop-magnifier"
+	["fuzzel"]="fuzzel -d -p 🔍"
+  ["tofi"]="tofi -c $HOME/.config/tofi/config-emoji"
 )
 
 # Report usage
@@ -57,6 +58,11 @@ usage() {
 version() {
     printf "v%s\ndatabase=%s\nhistory=%s\n" "$bm_version" "$bm_db_location" "$bm_history_file"
     exit
+}
+
+msg() {
+# Outputs a message to stderr, to be used for info, warning and error messages.
+    printf "%s\n" "$1" >&2
 }
 
 parse_cli() {
@@ -130,7 +136,7 @@ prepare_db() {
     if [ -n "$BEMOJI_DOWNLOAD_LIST" ]; then
         # Populate default lists
         if echo "$BEMOJI_DOWNLOAD_LIST" | grep -q -e 'none'; then
-            printf "Not downloading a default emoji list.\n"
+            msg "Not downloading a default emoji list."
             return
         elif echo "$BEMOJI_DOWNLOAD_LIST" | grep -q -e 'all'; then
             dl_default_emoji
@@ -158,19 +164,19 @@ dl_default_emoji() {
     local emojis
     emojis=$(curl -sSL "https://unicode.org/Public/emoji/latest/emoji-test.txt")
     printf "%s" "$emojis" | sed -ne 's/^.*; fully-qualified.*# \(\S*\) \S* \(.*$\)/\1 \2/gp' >"$bm_db_location/emojis.txt"
-    printf "Downloaded default emoji set.\n"
+    msg "Downloaded default emoji set."
 }
 dl_math_symbols() {
     curl -sSL "https://unicode.org/Public/math/latest/MathClassEx-15.txt" |
         grep -ve '^#' | cut -d';' -f3,7 | sed -e 's/;/ /' >"$bm_db_location/math.txt"
-    printf "Downloaded math symbols set.\n"
+    msg "Downloaded math symbols set."
 }
 dl_nerd_symbols() {
     local nerd all
     nerd=$(curl -sSL "https://raw.githubusercontent.com/ryanoasis/nerd-fonts/master/css/nerd-fonts-generated.css")
     all+=$(printf "%s" "$nerd" | sed -ne '/\.nf-/p' -e '/\s*[^_]content:/p' | sed -e 'N;s/^\.nf-\(.*\):before.* content: \"\\\(.*\)\";/\\U\2 \1/')
     echo -e "$all" > "$bm_db_location/nerdfont.txt"
-    printf "Downloaded nerdfont symbols set.\n"
+    msg "Downloaded nerdfont symbols set."
 }
 
 gather_emojis() {
@@ -231,7 +237,7 @@ _clipper() {
     elif [ -n "$DISPLAY" ] && command -v xsel >/dev/null 2>&1; then
         xsel -b
     else
-        printf "No suitable clipboard tool found."
+        msg "No suitable clipboard tool found."
         exit 1
     fi
 }
@@ -250,7 +256,7 @@ _typer() {
     elif [ -n "$DISPLAY" ] && command -v xdotool >/dev/null 2>&1; then
         xdotool type --delay 30 "$totype"
     else
-        printf "No suitable typing tool found."
+        msg "No suitable typing tool found."
         exit 1
     fi
 }
@@ -270,7 +276,7 @@ _picker() {
 		fi
 	done
 
-	printf "No suitable picker tool found." 1>&2
+	msg "No suitable picker tool found."
 	exit 1
 }
 
