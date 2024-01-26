@@ -1,0 +1,24 @@
+#!/bin/sh
+
+start_recording() {
+    timestamp=$(date +"%Y%m%d_%H%M%S")
+    output_directory="$HOME/videos"
+    output_file="$output_directory/recording_$timestamp.mkv"
+
+    # Create the videos directory if it doesn't exist
+    mkdir -p "$output_directory"
+
+    echo "Press Enter to start recording..."
+    read -r
+    sudo ffmpeg -f kmsgrab -i - -filter_complex 'hwmap=derive_device=vaapi,hwdownload,format=bgr0' "$output_file" &
+    PID=$!
+
+    # Capture background process ID
+    trap "kill $PID && wait $PID" INT
+
+    echo "Recording started. Press Ctrl+C when you're ready to stop recording."
+    wait $PID
+    echo "Recording stopped. File saved as $output_file."
+}
+
+start_recording
