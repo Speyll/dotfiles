@@ -1,21 +1,42 @@
-#!/bin/sh
+#!/bin/bash
 
-# List available Wi-Fi networks and assign them numbers
-nmcli device wifi list | awk 'NR>1 {print NR ". " $2}'
+# Function to display available Wi-Fi networks
+show_wifi_networks() {
+    nmcli device wifi list
+}
 
-# Prompt the user to select a Wi-Fi network
-read -p "Enter the number of the Wi-Fi network to connect to: " choice
+# Function to connect to a Wi-Fi network
+connect_to_wifi() {
+    nmcli --mode tabular device wifi list | awk 'NR>1 {gsub(/\*/, " (In Use)", $1); print NR-1 ". " $3 " - " $2}'
+    read -p "Enter the number of the Wi-Fi network to connect to: " choice
 
-# Find the corresponding Wi-Fi network name (SSID)
-wifi_ssid=$(nmcli device wifi list | awk 'NR>1 {if (NR == '$choice') print $2}')
+    # Find the corresponding Wi-Fi network SSID
+    ssid=$(nmcli --mode tabular device wifi list | awk 'NR>1 {if (NR-1 == '$choice') print $3}')
 
-# Check if the user entered a valid choice
-if [ -n "$wifi_ssid" ]; then
-    # Prompt for the Wi-Fi password if needed
-    read -s -p "Enter the Wi-Fi password (if required): " wifi_password
+    if [ -n "$ssid" ]; then
+        read -s -p "Enter the password for $ssid: " password
+        echo
 
-    # Connect to the selected Wi-Fi network
-    nmcli device wifi connect "$wifi_ssid" password "$wifi_password"
-else
-    echo "Invalid selection. No connection was made."
-fi
+        # Attempt to connect to the Wi-Fi network
+        nmcli device wifi connect "$ssid" password "$password"
+    else
+        echo "Invalid selection. No connection was made."
+    fi
+}
+
+# Main menu
+echo "1. Show available Wi-Fi networks"
+echo "2. Connect to a Wi-Fi network"
+read -p "Enter your choice (1 or 2): " choice
+
+case $choice in
+    1)
+        show_wifi_networks
+        ;;
+    2)
+        connect_to_wifi
+        ;;
+    *)
+        echo "Invalid choice. Exiting."
+        ;;
+esac
