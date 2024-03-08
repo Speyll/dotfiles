@@ -1,24 +1,24 @@
-#!/bin/bash
+#!/bin/sh
 
-# ProtonVPN Configuration File
-CONFIG_FILE="$HOME/.var/openvpn/protonvpn.ovpn"
+# ProtonVPN WireGuard Connection Name
+CONNECTION_NAME="protonvpn"
 
 # Function to connect to ProtonVPN
 connect() {
-    sudo openvpn --config "$CONFIG_FILE"
+    sudo nmcli connection up "$CONNECTION_NAME"
 }
 
 # Function to disconnect from ProtonVPN
 disconnect() {
-    sudo pkill -f "openvpn --config $CONFIG_FILE"
-    sudo killall -SIGINT openvpn
+    sudo nmcli connection down "$CONNECTION_NAME"
 }
 
 # Main script
-echo "ProtonVPN Script"
-echo "1. Connect to ProtonVPN"
-echo "2. Disconnect from ProtonVPN"
-read -p "Choose an option (1/2): " choice
+printf "ProtonVPN Script\n"
+printf "1. Connect to ProtonVPN\n"
+printf "2. Disconnect from ProtonVPN\n"
+printf "Choose an option (1/2): "
+read -r choice
 
 case $choice in
     1)
@@ -28,6 +28,6 @@ case $choice in
         disconnect
         ;;
     *)
-        echo "Invalid option. Exiting."
+        printf "Invalid option. Exiting.\n"
         ;;
 esac

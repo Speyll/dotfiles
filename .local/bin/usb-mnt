@@ -1,36 +1,22 @@
-#!/bin/sh
+#!/bin/bash
 
-devices=$(lsblk -n -o name,mountpoint | awk '$2 == "" && !match($1, /[0-9]/) {print $1}')
+# Get the list of removable disk devices
+removable_devices=$(lsblk -nrpo name,rm | awk '$2 == 1 {print $1}')
 
-if [ -z "$devices" ]; then
-    echo "No available disk devices found."
+if [ -z "$removable_devices" ]; then
+    echo "No removable disk devices found."
     exit 1
 fi
 
-echo "Available disk devices:"
-PS3="Select a device (enter the number): "
-
-select_device() {
-    local choice
-    for device in $devices; do
-        echo "$device"
-    done
-
-    read -r choice
-    echo "You chose $choice"
-    sudo mkdir -p "$HOME/.var/usb"
-    
-    # Check if the chosen device has partitions
-    if [ -b "/dev/${choice}1" ] && [ -b "/dev/${choice}2" ]; then
-        # If there are partitions, mount them
-        sudo mount "/dev/${choice}1" "$HOME/.var/usb"
-        sudo mount "/dev/${choice}2" "$HOME/.var/usb"
-    else
-        # If no partitions, mount the entire device
-        sudo mount "/dev/$choice" "$HOME/.var/usb"
+echo "Available removable disk devices:"
+select device in $removable_devices; do
+    if [ -n "$device" ]; then
+        mount_point="$HOME/.var/usb/"
+        mkdir -p "$mount_point"
+        sudo mount "$device" "$mount_point"
+        echo "Disk mounted at $mount_point"
+        exit 0
     fi
-    
-    echo "Drive mounted at $HOME/.var/usb"
-}
+done
 
-select_device
+echo "No device selected."
