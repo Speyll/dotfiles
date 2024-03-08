@@ -18,7 +18,7 @@ alias \
 	la="ls -A --color=auto" \
 	llt="ls -latrG"
 
-# XBPS and pkg aliases.
+# xbps and pkg aliases.
 alias \
 	xbs="sudo xbps-install" \
 	xbr="sudo xbps-remove -Rv"
@@ -28,7 +28,12 @@ alias \
 	apti="sudo apt-get install --no-install-recommends" \
 	aptr="sudo apt-get --purge autoremove"
 
-# Flatpak aliases.
+# zypper aliases.
+alias \
+    zyi="sudo zypper install --no-recommends" \
+    zyr="sudo zypper remove --clean-deps --orphaned --no-confirm"
+
+# flatpak aliases.
 alias \
 	flinst="sudo flatpak install" \
 	flrem="sudo flatpak uninstall" \
