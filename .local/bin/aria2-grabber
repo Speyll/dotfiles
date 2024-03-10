@@ -17,59 +17,30 @@ DOWNLOAD_DIR="/media/ST500/pron/dump/0toEncode"
 
 # Function to check if a link is already downloaded
 is_link_downloaded() {
-    local link="$1"
-    grep -qF "$link" "$DOWNLOADED_FILE"
+    grep -qF "$1" "$DOWNLOADED_FILE"
 }
 
-# Function to add a link to the text file
-add_link_to_file() {
+# Function to add a link to the text file and start download
+add_link_and_download() {
     local link="$1"
-
-    # Check if the link is already downloaded
-    if is_link_downloaded "$link"; then
-        notify-send --expire-time=5000 "Link Already Downloaded" "$link"
-        return
-    fi
-
-    # Check if the link is already in the file
-    if grep -qF "$link" "$TEXT_FILE"; then
-        return
-    fi
-
-    printf '%s\n' "$link" >> "$TEXT_FILE"
-    notify-send --expire-time=5000 "Link Added" "$link"
-}
-
-# Function to run aria2c with the links in the text file
-run_bulk_download() {
-    # Only run if there are new links to download
-    if [ -s "$TEXT_FILE" ]; then
+    if ! is_link_downloaded "$link"; then
+        echo "$link" >> "$TEXT_FILE"
+        notify-send --expire-time=5000 "Link Added" "$link"
         aria2c --dir="$DOWNLOAD_DIR" --input-file="$TEXT_FILE" -j3
         cat "$TEXT_FILE" >> "$DOWNLOADED_FILE"
-        > "$TEXT_FILE" # Clear the links.txt file
+        > "$TEXT_FILE"
+    else
+        notify-send --expire-time=5000 "Link Already Downloaded" "$link"
     fi
 }
 
 # Main loop to listen to the clipboard and add links
-OLD_LINK=""
+old_link=""
 while true; do
-    # Get the clipboard content using wl-paste
-    NEW_LINK=$(wl-paste -n)
-
-    # Check if the clipboard content has changed and is not empty
-    if [ -n "$OLD_LINK" ] && [ "$NEW_LINK" != "$OLD_LINK" ]; then
-        # Check if it's a valid link (you can add more checks if needed)
-        if [[ $NEW_LINK =~ ^https?:// ]]; then
-            # Append the link to the text file if not added already
-            add_link_to_file "$NEW_LINK"
-
-            # Run aria2c with the links in the text file
-            run_bulk_download
-        fi
+    new_link=$(wl-paste -n)
+    if [ "$new_link" != "$old_link" ] && [[ "$new_link" =~ ^https?:// ]]; then
+        add_link_and_download "$new_link"
+        old_link="$new_link"
     fi
-
-    # Update the old link
-    OLD_LINK="$NEW_LINK"
-
     sleep 1
 done
