@@ -163,7 +163,7 @@ bar:
                     - string: {text: "{ipv4}", foreground: *fg, left-margin: 4}
 
     - network:
-        name: wlp7s0
+        name: wlp2s0
         poll-interval: 1000
         content:
           map:
@@ -184,12 +184,12 @@ bar:
         content:
           map:
             default:
-              - string: {text: , foreground: *aqua, font: *awesome, on-click: "foot -T alsamixer alsamixer"}
-              - string: {text: "{volume}%", left-margin: 4, on-click: "foot -T alsamixer alsamixer"}
+              - string: {text: , foreground: *aqua, font: *awesome, on-click: "pavucontrol"}
+              - string: {text: "{volume}%", left-margin: 4, on-click: "pavucontrol"}
             conditions:
               muted:
-                - string: {text: , foreground: *aqua, font: *awesome, on-click: "foot alsamixer"}
-                - string: {text: "muted", left-margin: 4, on-click: "foot alsamixer"}
+                - string: {text: , foreground: *aqua, font: *awesome, on-click: "pavucontrol"}
+                - string: {text: "muted", left-margin: 4, on-click: "pavucontrol"}
 
     - clock:
         time-format: "%H:%M"

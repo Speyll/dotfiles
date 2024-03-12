@@ -4,7 +4,7 @@
 options=" Shutdown\n Suspend\n Reboot\n Lock"
 
 # Use dmenu to display the options and get the user's choice
-choice=$(echo "$options" | tofi -c "$HOME/.config/tofi/config-power")
+choice=$(echo "$options" | tofi)
 
 # Process the user's choice
 case "$choice" in

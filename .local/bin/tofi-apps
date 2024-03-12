@@ -4,7 +4,7 @@
 options=" Terminal\n File Manager\n Librewolf"
 
 # Use Tofi to create a menu with the options
-choice=$(echo "$options" | tofi -c "$HOME/.config/tofi/config-apps")
+choice=$(echo "$options" | tofi)
 
 # Check the user's choice and launch the corresponding application
 case "$choice" in
