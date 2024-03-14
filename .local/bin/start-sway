@@ -21,9 +21,11 @@ echo "Sway session started: $(date)"
 
 # Environment variable settings
 ## QT Related
-# export QT_QPA_PLATFORM=wayland-egl
+export QT_QPA_PLATFORM=wayland-egl
 export QT_QPA_PLATFORMTHEME=qt5ct
 export QT_WAYLAND_DISABLE_WINDOWDECORATION="1"
+export ELM_DISPLAY=wl
+export SDL_VIDEODRIVER=wayland
 
 ## GTK RELATED
 export GTK_USE_PORTAL=0
@@ -38,6 +40,7 @@ export WLR_NO_HARDWARE_CURSORS=1
 ## XDG
 export XDG_SESSION_DESKTOP=sway
 export XDG_CURRENT_DESKTOP=sway
+export XDG_SESSION_TYPE=wayland
 export XDG_DATA_DIRS="$HOME/.local/share/flatpak/exports/share:/var/lib/flatpak/exports/share:/usr/local/share:/usr/share"
 
 # Remove "Couldn't register with accessibility bus: Did not receive a reply." warnings

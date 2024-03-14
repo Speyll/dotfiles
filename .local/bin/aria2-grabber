@@ -7,7 +7,7 @@ TEXT_FILE="$HOME/downloads/links.txt"
 DOWNLOADED_FILE="$HOME/downloads/downloaded_links.txt"
 
 # Set the download directory
-DOWNLOAD_DIR="/media/ST500/pron/dump/0toEncode"
+DOWNLOAD_DIR="/media/BX200/pron/dump/0toEncode"
 
 # Create an empty links.txt file if it doesn't exist
 : >> "$TEXT_FILE"

@@ -123,18 +123,20 @@ bar:
                 - string: {text: , font: *awesome, foreground: *aqua}
                 - string: {text: "{ipv4}", foreground: *fg, left-margin: 4}
 
-    - alsa:
-        card: default
-        mixer: Master
+    - pipewire:
         content:
-          map:
-            default:
-              - string: {text: , foreground: *aqua, font: *awesome, on-click: "foot -T alsamixer alsamixer"}
-              - string: {text: "{volume}%", left-margin: 4, on-click: "foot -T alsamixer alsamixer"}
-            conditions:
-              muted:
-                - string: {text: , foreground: *aqua, font: *awesome, on-click: "foot alsamixer"}
-                - string: {text: "muted", left-margin: 4, on-click: "foot alsamixer"}
+          list:
+            items:
+              - map:
+                  conditions:
+                    type == "sink":
+                      - string: {text: "", foreground: *aqua, font: *awesome, on-click: "pavucontrol"}
+                      - string: {text: "{linear_volume}%", left-margin: 4, right-margin: 4, on-click: "pavucontrol"}
+              - map:
+                  conditions:
+                    type == "source":
+                      - string: {text: "", foreground: *aqua, font: *awesome, left-margin: 4, on-click: "pavucontrol"}
+                      - string: {text: "{linear_volume}%", left-margin: 4, on-click: "pavucontrol"}
 
     - clock:
         time-format: "%H:%M"
