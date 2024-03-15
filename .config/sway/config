@@ -7,20 +7,14 @@ set $mod Mod4
 set $term foot
 set $menu tofi-run | xargs swaymsg exec --
 
-# Sound system
-exec $HOME/.config/sway/start-pipewire.sh
+# Start a bunch of stuff
+exec $HOME/.config/autostart/autostart.sh
 
 # Idle configuration
 # exec swayidle -w \
 #          timeout 300 'swaylock -f -c 000000' \
 #          timeout 600 'swaymsg "output * power off"' resume 'swaymsg "output * power on"' \
 #          before-sleep 'swaylock -f -c 000000'
-
-# Notifications
-exec command -v mako && sh -c "pkill -x mako; mako &"
-
-# Night light
-exec command -v wlsunset && sh -c "pkill -x wlsunset; wlsunset -l 36.7 -L 3.08 &"
 
 # Inputs
 ## Trackpad
@@ -140,9 +134,6 @@ bindsym $mod+agrave scratchpad show
 
 # Customization
 
-## Wallpaper
-output * bg $HOME/pictures/wall.jpg fill
-
 ## Cursor
 seat seat0 xcursor_theme Breeze_Snow
 
@@ -178,10 +169,10 @@ client.urgent            $yellow         $yellow          $fg      $yellow    $y
 #  height 24
 #  separator_symbol |
 #  font pango:monospace 12px
-#  status_command $HOME/.config/sway/start-bar.sh
+#  status_command $HOME/.config/sway/sway-start-bar.sh
 #}
 
-exec_always sh -c "pkill -x yambar; yambar -c .config/yambar/config-sway.yml &"
+exec_always sh -c "pkill -x yambar; yambar -c .config/yambar/sway-config.yml &"
 
 ## Borders
 default_border pixel 2
