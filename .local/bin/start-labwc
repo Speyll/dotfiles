@@ -49,6 +49,10 @@ export NO_AT_BRIDGE=1
 # Cleanup older sessions
 rm "$HOME"/.cache/*.wob
 
+# Set cursor
+gsettings set org.gnome.desktop.interface cursor-theme Breeze_Snow
+seat seat0 xcursor_theme Breeze_Snow
+
 # Start sway using dbus-run-session for improved compatibility
 #exec dbus-launch --sh-syntax --exit-with-session labwc
 dbus-run-session labwc
