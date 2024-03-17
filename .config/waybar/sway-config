@@ -112,5 +112,6 @@
     "custom/poweroff": {
         "format": "",
         "on-click": "tofi-power",
+        "tooltip": false,
     }
 }

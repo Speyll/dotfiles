@@ -78,7 +78,7 @@ button:hover {
 }
 
 #workspaces button {
-    padding: 0;
+    padding: 0 5px 0 5px;
     color: @text;
     background-color: @bgLight;
 }
@@ -89,14 +89,13 @@ button:hover {
 }
 
 #workspaces button.focused {
-    padding: 0;
     color: @bg;
     background-color: @accent;
 }
 
 #workspaces button.urgent {
-    padding: 0;
-    color: @yellow;
+    color: @bg;
+    background-color: @yellow;
 }
 
 #window {
@@ -200,7 +199,7 @@ tooltip {
 tooltip label {
     padding: 0;
     margin: 0;
-    background-color: @bg;
+    background-color: inherit;
     color: @text;
 }
 
