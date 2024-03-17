@@ -172,7 +172,8 @@ client.urgent            $yellow         $yellow          $fg      $yellow    $y
 #  status_command $HOME/.config/sway/sway-start-bar.sh
 #}
 
-exec_always sh -c "pkill -x yambar; yambar -c .config/yambar/sway-config.yml &"
+#exec_always sh -c "pkill -x yambar; yambar -c .config/yambar/sway-config.yml &"
+exec_always sh -c "pkill -x waybar; waybar -c .config/waybar/sway-config -s .config/waybar/sway-style.css >/dev/null 2>&1 &"
 
 ## Borders
 default_border pixel 2

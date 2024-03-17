@@ -1,0 +1,216 @@
+@define-color bg rgba(34, 37, 41, 0.75);
+@define-color bgLight rgba(70, 73, 73, 0.75);
+@define-color text rgba(214, 214, 214, 1);
+@define-color textLight rgba(219, 213, 188, 1);
+@define-color accent rgba(120, 182, 173, 1);
+@define-color accentLight rgba(135, 201, 229, 1);
+
+@define-color red rgba(205, 144, 155, 1);
+@define-color dimRed rgba(104, 66, 73, 1);
+@define-color orange rgba(226, 174, 162, 1);
+@define-color dimOrange rgba(112, 73, 65, 1);
+@define-color yellow rgba(219, 213, 188, 1);
+@define-color dimYellow rgba(111, 104, 71, 1);
+@define-color green rgba(120, 182, 173, 1);
+@define-color dimGreen rgba(62, 97, 92, 1);
+@define-color blue rgba(135, 201, 229, 1);
+@define-color dimBlue rgba(56, 73, 79, 1);
+@define-color purple rgba(176, 124, 243, 1);
+@define-color dimPurple rgba(94, 64, 106, 1);
+@define-color grey rgba(203, 205, 205, 1);
+@define-color dimGrey rgba(70, 73, 73, 1);
+
+
+* {
+    font-family: FontAwesome, sans-serif;
+    font-size: 14px;
+}
+
+#waybar {
+    background-color: @bg;
+    color: @text;
+    transition-property: background-color;
+    transition-duration: .2s;
+}
+
+
+window#waybar.hidden {
+    opacity: 0.2;
+}
+
+.modules-right {
+    margin: 0 0 0 4px;
+}
+
+/* If workspaces is the leftmost module, omit left margin */
+.modules-left > widget:first-child > #workspaces {
+    margin-left: 0;
+}
+
+/* If workspaces is the rightmost module, omit right margin */
+.modules-right > widget:last-child > #workspaces {
+    margin-right: 0;
+}
+
+/*
+window#waybar.empty {
+    background-color: transparent;
+}
+window#waybar.solo {
+    background-color: #FFFFFF;
+}
+*/
+
+#workspaces {
+}
+
+button {
+    /* Use box-shadow instead of border so the text isn't offset */
+    box-shadow: inset 0 -3px transparent;
+    /* Avoid rounded borders under each button name */
+    border: none;
+    border-radius: 0;
+}
+
+/* https://github.com/Alexays/Waybar/wiki/FAQ#the-workspace-buttons-have-a-strange-hover-effect */
+button:hover {
+    background: inherit;
+}
+
+#workspaces button {
+    padding: 0;
+    color: @text;
+    background-color: @bgLight;
+}
+
+#workspaces button:hover {
+    color: @bg;
+    background-color: @accentLight;
+}
+
+#workspaces button.focused {
+    padding: 0;
+    color: @bg;
+    background-color: @accent;
+}
+
+#workspaces button.urgent {
+    padding: 0;
+    color: @yellow;
+}
+
+#window {
+    margin: 0 4px 0 4px;
+    color: @yellow;
+}
+
+#clock,
+#language,
+#wireplumber,
+#network,
+#battery,
+#cpu,
+#memory,
+#disk,
+#temperature,
+#backlight,
+#tray {
+    margin: 0 4px 0 4px;
+    padding: 0;
+}
+
+#custom-launcher {
+    margin: 0 4px 0 4px;
+    color: @accent;
+}
+
+#custom-poweroff {
+    padding: 0 4px 0 4px;
+    border-radius: 5px;
+    color: @bg;
+    background-color: @red;
+}
+
+#clock {
+    color: @yellow;
+}
+
+#language {
+    color: @accent;
+}
+
+#wireplumber {
+    color: @blue;
+}
+
+#wireplumber.muted {
+    color: @red;
+}
+
+#network {
+    color: @blue;
+}
+
+#network.disconnected {
+    color: @red;
+}
+
+#cpu {
+    color: @orange;
+}
+
+#memory {
+    color: @orange;
+}
+
+#disk {
+    color: @orange;
+}
+
+#temperature {
+    color: @orange;
+}
+
+#temperature.critical {
+    color: @red;
+}
+
+#backlight {
+    color: @purple;
+}
+
+#battery {
+    color: @purple;
+}
+
+#battery.charging, #battery.plugged {
+    color: @orange;
+}
+
+tooltip {
+    padding: 0;
+    margin: 0;
+    background-color: @bg;
+    color: @text;
+    border-width: 1px;
+    border-color: @accent;
+    border-radius: 5px;
+}
+
+tooltip label {
+    padding: 0;
+    margin: 0;
+    background-color: @bg;
+    color: @text;
+}
+
+#tray {
+}
+
+#tray > .passive {
+    -gtk-icon-effect: dim;
+}
+
+#tray > .needs-attention {
+    -gtk-icon-effect: highlight;
+}

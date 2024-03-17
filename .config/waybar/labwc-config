@@ -1,0 +1,129 @@
+{
+    "layer": "top", // Waybar at top layer
+    "position": "bottom", // Waybar position (top|bottom|left|right)
+    "height": 24, // Waybar height (to be removed for auto height)
+    // "width": 1280, // Waybar width
+    "spacing": 4, // Gaps between modules (4px)
+ 
+    // Choose the order of the modules
+    "modules-left": ["wlr/workspaces", "custom/launcher", "wlr/taskbar"],
+    "modules-center":[],
+    "modules-right": ["tray", "battery", "backlight", "temperature", "cpu", "memory", "network", "wireplumber", "custom/keyboard", "clock", "custom/poweroff"],
+ 
+    // Modules configuration
+    "wlr/workspaces": {
+        "disable-scroll": false,
+        "all-outputs": true,
+        "warp-on-scroll": false,
+        "format": "{name}",
+    },
+
+    "wlr/taskbar": {
+        "format": "{app_id}",
+        "all-outputs": true,
+        "on-click": "minimize-raise",
+        "tooltip": false,
+    },
+
+    "custom/launcher": {
+        "format": "",
+        "on-click": "tofi-apps",
+        "tooltip": false,
+    },
+
+    "sway/scratchpad": {
+        "format": "{icon} {count}",
+        "show-empty": false,
+        "format-icons": ["", ""],
+        "tooltip": true,
+        "tooltip-format": "{app}: {title}"
+    },
+
+    "tray": {
+        "icon-size": 18,
+        "spacing": 4
+    },
+
+    "clock": {
+        "format": " {:%H:%M}",
+        "timezone": "Africa/Algiers",
+        "format-alt": " {:%a %d %b}",
+        "tooltip": false,
+    },
+
+    "custom/keyboard": {
+        "format": " fr/us",
+        "on-click": "~/.config/yambar/xkb-layout.sh",
+        "tooltip": false,
+    },
+
+    "cpu": {
+        "format": " {usage}%",
+        "tooltip": false,
+        "interval": 50,
+    },
+
+    "memory": {
+        "format": " {}%"
+    },
+
+    "temperature": {
+        // "thermal-zone": 2,
+        // "hwmon-path": "/sys/class/hwmon/hwmon2/temp1_input",
+        "critical-threshold": 80,
+        // "format-critical": "{icon} {temperatureC}°C",
+        "format": "{icon} {temperatureC}°C",
+        "format-icons": ["", "", ""],
+        "tooltip": false,
+    },
+
+    "backlight": {
+        // "device": "acpi_video1",
+        "format": " {percent}%",
+        "tooltip": false,
+    },
+
+    "battery": {
+        "states": {
+            // "good": 95,
+            "warning": 30,
+            "critical": 15
+        },
+        "format": "{icon} {capacity}%",
+        "format-charging": "{icon} {capacity}%",
+        "format-plugged": "{icon} {capacity}%",
+        // "format-good": "", // An empty format will hide the module
+        // "format-full": "",
+        "format-icons": ["", "", "", "", ""]
+    },
+
+    "network": {
+        // "interface": "wlp2*", // (Optional) To force the use of this interface
+        "format-wifi": " {signalStrength}%",
+        "format-ethernet": "",
+        "tooltip-format": " {essid}",
+        "format-linked": " {ifname} (No IP)",
+        "format-disconnected": "404",
+        "format-alt": " {ipaddr}"
+    },
+
+    "sway/language": {
+        "format": " {}",
+        "on-click": ".config/yambar/sway-switch-keyboard.sh",
+        "tooltip": false,
+    },
+
+    "wireplumber": {
+        "format": " {volume}%",
+        "format-muted": " Muted",
+        "on-click": "pavucontrol",
+        "max-volume": 150,
+        "scroll-step": 0.2,
+        "tooltip": false
+    },
+
+    "custom/poweroff": {
+        "format": "",
+        "on-click": "tofi-power",
+    }
+}

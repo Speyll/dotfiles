@@ -13,7 +13,8 @@ $HOME/.config/autostart/autostart.sh
 #kanshi >/dev/null 2>&1 &
 
 # Launch a panel such as yambar or waybar.
-command -v yambar && yambar -c .config/yambar/labwc-config.yml >/dev/null 2>&1 &
+# command -v yambar && yambar -c .config/yambar/labwc-config.yml >/dev/null 2>&1 &
+command -v waybar && pkill -x waybar; waybar -c .config/waybar/labwc-config -s .config/waybar/labwc-style.css >/dev/null 2>&1 &
 
 # Lock screen after 5 minutes; turn off display after another 5 minutes.
 #
