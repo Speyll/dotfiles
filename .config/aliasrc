@@ -31,7 +31,7 @@ alias \
 # zypper aliases.
 alias \
     zyi="sudo zypper install --no-recommends" \
-    zyr="sudo zypper remove --clean-deps --orphaned --no-confirm"
+    zyr="sudo zypper remove --clean-deps --no-confirm"
 
 # flatpak aliases.
 alias \
