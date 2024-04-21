@@ -1,0 +1,10 @@
+[Desktop Entry]
+Type=Application
+Name=File manager
+Comment=File manager using nnn
+Icon=folder
+Exec=nnn
+Terminal=true
+MimeType=inode/directory;
+Categories=System;FileTools;FileManager;ConsoleOnly;
+Keywords=File;Manager;Management;Explorer;Launcher;

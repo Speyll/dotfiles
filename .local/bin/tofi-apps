@@ -1,0 +1,27 @@
+#!/bin/sh
+
+# Define the menu options with Font Awesome 4 icons
+options=" Terminal\n File Manager\n Librewolf\n Power Menu"
+
+# Use Tofi to create a menu with the options
+choice=$(echo "$options" | tofi)
+
+# Check the user's choice and launch the corresponding application
+case "$choice" in
+    " Terminal")
+        foot
+        ;;
+    " File Manager")
+        foot -T nnn nnn
+        ;;
+    " Librewolf")
+        flatpak run io.gitlab.librewolf-community
+        ;;
+    " Power Menu")
+        tofi-power
+        ;;
+    *)
+        echo "Invalid choice: $choice" >&2
+        exit 1
+        ;;
+esac

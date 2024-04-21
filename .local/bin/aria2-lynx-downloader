@@ -1,0 +1,13 @@
+#!/bin/sh
+
+# Prompt user for URL
+printf "Enter the URL: "
+read url
+
+# Prompt user for pattern to grep
+printf "Enter the pattern to grep: "
+read pattern
+
+# Use lynx to extract links from the URL, grep for the pattern, and pass the result to aria2c
+lynx --dump --listonly --nonumbers --hiddenlinks=ignore "$url" | grep -E "$pattern" | aria2c -i - -c -x 16 -j 4
+

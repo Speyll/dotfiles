@@ -1,0 +1,68 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<openbox_menu>
+<!-- Note: for localization support of menu items "client-menu" has to be removed here -->
+<menu id="client-menu">
+  <item label="Minimize">
+    <action name="Iconify" />
+  </item>
+  <item label="Maximize">
+    <action name="ToggleMaximize" />
+  </item>
+  <item label="Fullscreen">
+    <action name="ToggleFullscreen" />
+  </item>
+  <item label="Decorations">
+    <action name="ToggleDecorations" />
+  </item>
+  <item label="AlwaysOnTop">
+    <action name="ToggleAlwaysOnTop" />
+  </item>
+  <!--
+    Any menu with the id "workspaces" will be hidden
+    if there is only a single workspace available.
+  -->
+  <menu id="workspaces" label="Workspace">
+    <item label="Move left">
+      <action name="SendToDesktop" to="left" />
+    </item>
+    <item label="Move right">
+      <action name="SendToDesktop" to="right" />
+    </item>
+  </menu>
+  <item label="Close">
+    <action name="Close" />
+  </item>
+</menu>
+
+<menu id="root-menu">
+  <item label="Web browser">
+    <action name="Execute" command="librewolf" />
+  </item>
+  <item label="File Manager">
+    <action name="Execute" command="pcmanfm-qt" />
+  </item>
+  <item label="Terminal">
+    <action name="Execute" command="foot" />
+  </item>
+  <item label="Reconfigure">
+    <action name="Reconfigure" />
+  </item>
+  <item label="Exit">
+    <action name="Exit" />
+  </item>
+  <item label="Power Menu">
+    <action name="Execute" command="tofi-power" />
+  </item>
+</menu>
+
+<menu id="some-custom-menu">
+  <item label="Reconfigure">
+    <action name="Reconfigure" />
+  </item>
+  <item label="Exit">
+    <action name="Exit" />
+  </item>
+</menu>
+
+</openbox_menu>

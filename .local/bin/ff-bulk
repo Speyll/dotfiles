@@ -1,0 +1,31 @@
+#!/bin/bash
+
+target_fps=30
+
+mkdir -p "encVids"
+
+for file in *.mp4 *.mkv *.ts *.mov *.avi; do
+    if [[ -f $file && ! -f "encVids/${file%.*}.mp4" ]]; then
+        echo "Encoding $file to encVids/${file%.*}.mp4..."
+
+        original_fps=$(ffprobe -v error -select_streams v:0 -show_entries stream=r_frame_rate -of default=noprint_wrappers=1:nokey=1 "$file")
+        if (( $(echo "$original_fps > $target_fps" | bc -l) )); then
+            fps=$target_fps
+        else
+            fps=$original_fps
+        fi
+
+        ffmpeg -i "$file" -c:v libx265 -r "$fps" -vf "scale='if(gt(ih,iw),min(720,iw),min(1280,iw))':'if(gt(ih,iw),min(1280,ih),min(720,ih))':force_original_aspect_ratio=decrease:force_divisible_by=2" -preset faster -profile:v main -level:v 4.0 -c:a libopus -tile-columns 3 -g 240 -threads 15 -sws_flags lanczos -movflags +faststart -color_primaries bt709 -color_trc bt709 -colorspace bt709 "encVids/${file%.*}.mp4"
+
+        if [ $? -eq 0 ]; then
+            echo "Encoding successful for $file."
+        else
+            echo "Error encoding $file."
+        fi
+    elif [[ -f "encVids/${file%.*}.mp4" ]]; then
+        echo "Output file encVids/${file%.*}.mp4 already exists. Skipping encoding for $file."
+    fi
+done
+
+# Shut down the computer when the script finishes
+# shutdown -h now

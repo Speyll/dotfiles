@@ -1,0 +1,68 @@
+#!/bin/bash
+
+# Define the mount point
+MOUNT_POINT="$HOME/.var/usb"
+
+# Define colors for better output formatting
+GREEN='\033[0;32m'
+RED='\033[0;31m'
+YELLOW='\033[0;33m'
+NC='\033[0m' # No Color
+
+# Function to mount the selected device
+mount_device() {
+    local device="$1"
+    local mount_point="$MOUNT_POINT"
+
+    # Create the mount point directory if it doesn't exist
+    mkdir -p "$mount_point"
+
+    # Mount the device
+    if sudo mount "$device" "$mount_point"; then
+        echo -e "${GREEN}Disk mounted at $mount_point${NC}"
+    else
+        echo -e "${RED}Failed to mount disk.${NC}"
+        exit 1
+    fi
+}
+
+# Function to unmount the mounted device
+unmount_device() {
+    local mount_point="$MOUNT_POINT"
+
+    # Unmount the device
+    if sudo umount "$mount_point"; then
+        echo -e "${GREEN}Disk unmounted from $mount_point${NC}"
+    else
+        echo -e "${YELLOW}The disk is not currently mounted.${NC}"
+    fi
+}
+
+# Get the list of removable disk devices
+removable_devices=$(lsblk -nrpo name,rm | awk '$2 == 1 {print $1}' | sort -u)
+
+# Check if any removable devices are found
+if [ -z "$removable_devices" ]; then
+    echo -e "${RED}No removable disk devices found.${NC}"
+    exit 1
+fi
+
+# Display available devices
+echo -e "${GREEN}Available removable disk devices:${NC}"
+select device in $removable_devices; do
+    if [ -n "$device" ]; then
+        mount_device "$device"
+        echo ""
+        read -rp "Press Enter to unmount the device when finished, or 'q' to exit: " choice
+        if [ "$choice" = "q" ]; then
+            echo -e "${YELLOW}Exiting...${NC}"
+            exit 0
+        else
+            unmount_device
+            echo -e "${GREEN}Script completed.${NC}"
+            exit 0
+        fi
+    fi
+done
+
+echo -e "${RED}No device selected.${NC}"

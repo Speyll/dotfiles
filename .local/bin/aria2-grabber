@@ -1,0 +1,46 @@
+#!/bin/bash
+
+# Set the path for your text file
+TEXT_FILE="$HOME/downloads/links.txt"
+
+# Set the path for the downloaded links file
+DOWNLOADED_FILE="$HOME/downloads/downloaded_links.txt"
+
+# Set the download directory
+DOWNLOAD_DIR="/media/BX200/pron/dump/0toEncode"
+
+# Create an empty links.txt file if it doesn't exist
+: >> "$TEXT_FILE"
+
+# Create an empty downloaded links file if it doesn't exist
+: >> "$DOWNLOADED_FILE"
+
+# Function to check if a link is already downloaded
+is_link_downloaded() {
+    grep -qF "$1" "$DOWNLOADED_FILE"
+}
+
+# Function to add a link to the text file and start download
+add_link_and_download() {
+    local link="$1"
+    if ! is_link_downloaded "$link"; then
+        echo "$link" >> "$TEXT_FILE"
+        notify-send --expire-time=5000 "Link Added" "$link"
+        aria2c --dir="$DOWNLOAD_DIR" --input-file="$TEXT_FILE" -j3
+        cat "$TEXT_FILE" >> "$DOWNLOADED_FILE"
+        > "$TEXT_FILE"
+    else
+        notify-send --expire-time=5000 "Link Already Downloaded" "$link"
+    fi
+}
+
+# Main loop to listen to the clipboard and add links
+old_link=""
+while true; do
+    new_link=$(wl-paste -n)
+    if [ "$new_link" != "$old_link" ] && [[ "$new_link" =~ ^https?:// ]]; then
+        add_link_and_download "$new_link"
+        old_link="$new_link"
+    fi
+    sleep 1
+done

@@ -1,0 +1,2 @@
+#!/bin/sh
+cliphist list | tofi -c $HOME/.config/tofi/config-emoji | cliphist decode | wl-copy

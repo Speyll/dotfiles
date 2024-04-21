@@ -1,0 +1,258 @@
+@define-color bg rgba(40, 40, 40, 0.75);
+@define-color bgLight rgba(70, 73, 73, 0.75);
+@define-color text rgba(214, 214, 214, 1);
+@define-color textLight rgba(219, 213, 188, 1);
+@define-color accent rgba(66,123,88, 1);
+@define-color accentLight rgba(135, 201, 229, 1);
+
+@define-color red rgba(205, 144, 155, 1);
+@define-color dimRed rgba(104, 66, 73, 1);
+@define-color orange rgba(226, 174, 162, 1);
+@define-color dimOrange rgba(112, 73, 65, 1);
+@define-color yellow rgba(219, 213, 188, 1);
+@define-color dimYellow rgba(111, 104, 71, 1);
+@define-color green rgba(120, 182, 173, 1);
+@define-color dimGreen rgba(62, 97, 92, 1);
+@define-color blue rgba(135, 201, 229, 1);
+@define-color dimBlue rgba(56, 73, 79, 1);
+@define-color purple rgba(176, 124, 243, 1);
+@define-color dimPurple rgba(94, 64, 106, 1);
+@define-color grey rgba(203, 205, 205, 1);
+@define-color dimGrey rgba(70, 73, 73, 1);
+
+
+* {
+    font-family: FontAwesome, sans-serif;
+    font-size: 14px;
+    min-height: 0;
+    border-radius: 0;
+    padding: 0;
+    margin: 0;
+}
+
+#waybar {
+    background-color: @bg;
+    color: @text;
+    margin: 4px 0 4px 0;
+}
+
+
+button {
+    box-shadow: none; /* Remove predefined box-shadow */
+    text-shadow: none; /* Remove predefined text-shadow */
+    background: none; /* Remove predefined background color (white) */
+    transition: none; /* Disable predefined animations */
+    border: none;
+}
+
+button:hover {
+    box-shadow: none; /* Remove predefined box-shadow */
+    text-shadow: none; /* Remove predefined text-shadow */
+    background: none; /* Remove predefined background color (white) */
+    transition: none; /* Disable predefined animations */
+    border: none;
+}
+
+tooltip {
+    padding: 0;
+    margin: 0;
+    background-color: @bg;
+    color: @text;
+    border-width: 1px;
+    border-color: @accent;
+    border-radius: 5px;
+}
+
+tooltip label {
+    padding: 0;
+    margin: 0;
+    background-color: inherit;
+    color: @text;
+}
+
+.modules-left {
+    background-color: inherit;
+    border-radius: 0;
+}
+
+.modules-center {
+    background-color: inherit;
+    border-radius: 0;
+}
+
+.modules-right {
+    background-color: inherit;
+    border-radius: 0;
+}
+
+/* If workspaces is the leftmost module, omit left margin */
+.modules-left > widget:first-child > #workspaces {
+    margin-left: 0;
+}
+
+/* If workspaces is the rightmost module, omit right margin */
+.modules-right > widget:last-child > #workspaces {
+    margin-right: 0;
+}
+
+#one {
+background-color: inherit;
+padding: 0 2px 0 2px;
+border-radius: 0 0 8px 0;
+}
+
+#two {
+background-color: inherit;
+padding: 0 2px 0 2px;
+border-radius: 8px 0 0 8px;
+}
+
+#workspaces {
+margin: 0 0 0 4px;
+}
+
+#workspaces button {
+border-radius: 4px;
+padding: 0 2px 0 2px;
+color: @text;
+background-color: transparent;
+}
+
+#workspaces button:hover {
+color: @text;
+background-color: @bgLight;
+}
+
+#workspaces button.focused {
+color: @bg;
+background-color: @accent;
+}
+
+#workspaces button.urgent {
+color: @bg;
+background-color: @yellow;
+}
+
+#window {
+padding: 0 4px 0 4px;
+color: @yellow;
+}
+
+#clock,
+#language,
+#wireplumber,
+#network,
+#bluetooth,
+#battery,
+#cpu,
+#memory,
+#disk,
+#temperature,
+#backlight,
+#taskbar {
+margin: 0 4px 0 4px;
+padding: 0;
+}
+
+#custom-launcher {
+margin: 0 4px 0 4px;
+color: @text;
+}
+
+#clock {
+color: @text;
+}
+
+#language {
+color: @text;
+}
+
+#wireplumber {
+color: @text;
+}
+
+#wireplumber.muted {
+color: @yellow;
+}
+
+#network {
+color: @text;
+}
+
+#network.disconnected {
+color: @red;
+}
+
+#cpu {
+color: @text;
+}
+
+#memory {
+color: @text;
+}
+
+#disk {
+color: @text;
+}
+
+#temperature {
+color: @text;
+}
+
+#temperature.critical {
+color: @red;
+}
+
+#backlight {
+color: @text;
+}
+
+#battery {
+color: @text;
+}
+
+#battery.charging, #battery.plugged {
+color: @red;
+}
+
+window#waybar.hidden {
+    opacity: 0.2;
+}
+
+#tray {
+background-color: @bg;
+margin: 0 4px 0 4px;
+padding: 0 4px 0 4px;
+border-radius: 8px;
+}
+
+#taskbar button {
+margin: 0 2px 0 2px;
+padding: 0 6px 0 4px;
+border-radius: 2px;
+color: @text;
+background-color: @bg;
+}
+
+#taskbar button:hover {
+color: @text;
+background-color: @dimBlue;
+}
+
+#taskbar button.minimized {
+color: @text;
+background-color: @bgLight;
+}
+
+#taskbar button.active {
+color: rgb(40, 40, 40);
+background-color: @accent;
+}
+
+#tray > .passive {
+-gtk-icon-effect: dim;
+}
+
+#tray > .needs-attention {
+-gtk-icon-effect: highlight;
+}

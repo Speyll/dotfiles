@@ -1,0 +1,204 @@
+# Set output
+output HDMI-A-1 mode 1920x1080@59.940Hz adaptive_sync enable
+
+# Global Variables
+set $mod Mod4
+set $term foot
+set $menu tofi-run | xargs swaymsg exec --
+
+# Updating dbus
+exec --no-startup-id dbus-update-activation-environment --all
+
+# Start a bunch of stuff
+exec $HOME/.config/autostart/autostart.sh
+
+# Listen for clipboard change
+exec --no-startup-id wl-paste --watch cliphist store &
+
+# Inputs
+## Mouse
+input "type:pointer" {
+  dwt enabled
+  natural_scroll disabled
+  accel_profile "flat"
+  pointer_accel 0
+}
+
+## Trackpad
+input "type:touchpad" {
+  dwt enabled
+  tap enabled
+  natural_scroll enabled
+  middle_emulation enabled
+}
+
+## Keyboard default layout
+input "type:keyboard" {
+  xkb_layout fr,us
+  xkb_options grp:rctrl_rshift_toggle
+  xkb_numlock enabled
+}
+
+# Key bindings
+## Basics
+bindsym $mod+Return exec $term
+bindsym $mod+Shift+q kill
+bindsym $mod+d exec $menu
+bindsym $mod+Shift+c reload
+bindsym $mod+Shift+e exec swaynag -t warning -m 'You pressed the exit shortcut. Do you really want to exit sway? This will end your Wayland session.' -B 'Yes, exit sway' 'swaymsg exit'
+
+## Personal
+bindsym $mod+Shift+n exec foot -T nnn nnn
+bindsym $mod+Shift+b exec librewolf
+bindsym $mod+semicolon exec bemoji
+bindsym $mod+comma exec clip-manager
+
+## Moving around
+bindsym $mod+Left focus left
+bindsym $mod+Down focus down
+bindsym $mod+Up focus up
+bindsym $mod+Right focus right
+bindsym $mod+Shift+Left move left
+bindsym $mod+Shift+Down move down
+bindsym $mod+Shift+Up move up
+bindsym $mod+Shift+Right move right
+
+## Workspaces
+#### Moving to a new workspace
+bindsym $mod+ampersand workspace number 1
+bindsym $mod+eacute workspace number 2
+bindsym $mod+quotedbl workspace number 3
+bindsym $mod+apostrophe workspace number 4
+bindsym $mod+parenleft workspace number 5
+bindsym $mod+minus workspace number 6
+bindsym $mod+egrave workspace number 7
+bindsym $mod+underscore workspace number 8
+bindsym $mod+ccedilla workspace number 9
+
+#### Send windows to a new workspace
+bindsym $mod+Shift+ampersand move container to workspace number 1
+bindsym $mod+Shift+eacute move container to workspace number 2
+bindsym $mod+Shift+quotedbl move container to workspace number 3
+bindsym $mod+Shift+apostrophe move container to workspace number 4
+bindsym $mod+Shift+parenleft move container to workspace number 5
+bindsym $mod+Shift+minus move container to workspace number 6
+bindsym $mod+Shift+egrave move container to workspace number 7
+bindsym $mod+Shift+underscore move container to workspace number 8
+bindsym $mod+Shift+ccedilla move container to workspace number 9
+
+## Keyboard special keys
+### Volume
+bindsym XF86AudioRaiseVolume exec amixer sset Master 5%+
+bindsym XF86AudioLowerVolume exec amixer sset Master 5%-
+bindsym XF86AudioMute exec amixer sset Master toggle
+
+### Brightness
+bindsym XF86MonBrightnessDown exec brightnessctl set 5%-
+bindsym XF86MonBrightnessUp exec brightnessctl set +5%
+
+### Screenshot to clipboard
+bindsym Print exec grim - | wl-copy
+bindsym $mod+Print exec grim
+
+### Screenshot specified screen area to clipboard
+bindsym $mod+Shift+s exec grim -g "$(slurp)" - | wl-copy
+
+### Screenshot the focused monitor to clipboard
+bindsym $mod+Shift+Print exec grim -o $(swaymsg -t get_outputs | jq -r '.[] | select(.focused) | .name') - | wl-copy
+
+## Layouts
+bindsym $mod+v splith
+bindsym $mod+h splitv
+bindsym $mod+m layout stacking
+bindsym $mod+t layout tabbed
+bindsym $mod+e layout toggle split
+bindsym $mod+f fullscreen
+bindsym $mod+s sticky
+bindsym $mod+Shift+f floating toggle
+
+## Drag floating windows by holding down $mod and left mouse button.
+## Resize them with right mouse button + $mod.
+## Change normal to inverse to use left mouse button.
+floating_modifier $mod normal
+
+## Resizing containers:
+mode "resize" {
+  bindsym Left resize shrink width 10px
+  bindsym Down resize grow height 10px
+  bindsym Up resize shrink height 10px
+  bindsym Right resize grow width 10px
+  bindsym Return mode "default"
+  bindsym Escape mode "default"
+}
+bindsym $mod+r mode "resize"
+
+## Enable automatic spiral layout
+# for_window [app_id=".*"] split toggle
+# default_orientation vertical
+
+## Scratchpad:
+bindsym $mod+Shift+agrave move scratchpad
+bindsym $mod+agrave scratchpad show
+
+# Customization
+
+## Cursor
+seat seat0 xcursor_theme Breeze_Snow 24
+
+## Color variables
+set $bg     #282828BF
+set $fg     #ebdbb2
+set $aqua   #427b58
+set $yellow #fabd2f
+set $brown  #3c3836
+
+## Window colors
+#class                   #border         #background     #text     #indicator #child_border
+client.focused           $aqua           $aqua            $brown   $aqua      $aqua
+client.focused_inactive  $brown          $brown           $fg      $brown     $brown
+client.unfocused         $brown          $brown           $fg      $brown     $brown
+client.urgent            $yellow         $yellow          $fg      $yellow    $yellow
+
+## Bar
+#bar {
+#  colors {
+#    background $bg
+#    statusline $fg
+#    separator $aqua
+
+#    #class             #border     #background     #text
+#    focused_workspace  $aqua     $aqua           $bg
+#    active_workspace   $aqua     $brown          $aqua
+#    inactive_workspace $brown    $brown          $fg
+#    urgent_workspace   $yellow   $yellow         $brown
+#  }
+#
+#  position bottom
+#  height 24
+#  separator_symbol |
+#  font pango:monospace 12px
+#  status_command $HOME/.config/sway/sway-start-bar.sh
+#}
+
+#exec_always sh -c "pkill -x yambar; yambar -c .config/yambar/sway-config.yml &"
+exec_always sh -c "pkill -x waybar; waybar -c .config/waybar/sway-config -s .config/waybar/sway-style.css >/dev/null 2>&1 &"
+
+## Borders
+default_border pixel 2
+default_floating_border pixel 2
+smart_borders off
+#smart_borders no_gaps
+
+## Titlebar
+titlebar_padding 2
+title_align center
+titlebar_border_thickness 2
+
+## Gaps
+smart_gaps off
+gaps inner 2
+gaps outer 2
+
+# External rules
+include $HOME/.config/sway/config.d/*
+include /etc/sway/config.d/*

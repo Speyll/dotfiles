@@ -1,0 +1,356 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+  This is a very simple config file with many options missing. For a complete
+  set of options with comments, see docs/rc.xml.all
+-->
+<labwc_config>
+  <core>
+    <decoration>server</decoration>
+    <gap>4</gap>
+    <adaptiveSync>yes</adaptiveSync>
+    <reuseOutputMode>yes</reuseOutputMode>
+  </core>
+  <theme>
+    <name>Groovy</name>
+    <keepBorder>no</keepBorder>
+    <cornerRadius>0</cornerRadius>
+    <font place="ActiveWindow">
+      <name>sans</name>
+      <size>10</size>
+      <slant>normal</slant>
+      <weight>normal</weight>
+    </font>
+    <font place="MenuItem">
+      <name>sans</name>
+      <size>10</size>
+      <slant>normal</slant>
+      <weight>normal</weight>
+    </font>
+    <font place="OnScreenDisplay">
+      <name>sans</name>
+      <size>10</size>
+      <slant>normal</slant>
+      <weight>normal</weight>
+    </font>
+  </theme>
+  <windowSwitcher show="yes" preview="yes" outlines="no">
+    <fields>
+      <field content="type" width="25%" />
+      <field content="identifier" width="25%" />
+      <field content="title" width="25%" />
+    </fields>
+  </windowSwitcher>
+  <!-- edge strength is in pixels -->
+  <resistance>
+    <screenEdgeStrength>20</screenEdgeStrength>
+  </resistance>
+  <!-- Show a simple resize and move indicator -->
+  <resize popupShow="Never" />
+  <focus>
+    <followMouse>no</followMouse>
+    <followMouseRequiresMovement>yes</followMouseRequiresMovement>
+    <raiseOnFocus>yes</raiseOnFocus>
+  </focus>
+  <!-- Set range to 0 to disable window snapping completely -->
+  <snapping>
+    <range>1</range>
+    <topMaximize>yes</topMaximize>
+  </snapping>
+  <desktops>
+    <popupTime>1000</popupTime>
+    <names>
+      <name>1</name>
+      <name>2</name>
+      <name>3</name>
+      <name>4</name>
+    </names>
+  </desktops>
+  <regions>
+    <region name="top-left" x="0%" y="0%" height="50%" width="50%" />
+    <region name="top" x="0%" y="0%" height="50%" width="100%" />
+    <region name="top-right" x="50%" y="0%" height="50%" width="50%" />
+    <region name="left" x="0%" y="0%" height="100%" width="50%" />
+    <region name="center" x="20%" y="20%" height="60%" width="60%" />
+    <region name="right" x="50%" y="0%" height="100%" width="50%" />
+    <region name="bottom-left" x="0%" y="50%" height="50%" width="50%" />
+    <region name="bottom" x="0%" y="50%" height="50%" width="100%" />
+    <region name="bottom-right" x="50%" y="50%" height="50%" width="50%" />
+  </regions>
+  <keyboard>
+    <default />
+    <!-- Switch to another workspace -->
+    <keybind key="W-ampersand">
+      <action name="GoToDesktop" to="1" />
+    </keybind>
+    <keybind key="W-eacute">
+      <action name="GoToDesktop" to="2" />
+    </keybind>
+    <keybind key="W-quotedbl">
+      <action name="GoToDesktop" to="3" />
+    </keybind>
+    <keybind key="W-apostrophe">
+      <action name="GoToDesktop" to="4" />
+    </keybind>
+    <keybind key="W-C-Right">
+      <action name="GoToDesktop" to="right" wrap="yes" />
+    </keybind>
+    <keybind key="W-C-Left">
+      <action name="GoToDesktop" to="left" wrap="yes" />
+    </keybind>
+
+    <!-- Send to another workspace -->
+    <keybind key="W-S-1">
+      <action name="SendToDesktop" to="1" />
+    </keybind>
+    <keybind key="W-S-2">
+      <action name="SendToDesktop" to="2" />
+    </keybind>
+    <keybind key="W-S-3">
+      <action name="SendToDesktop" to="3" />
+    </keybind>
+    <keybind key="W-S-4">
+      <action name="SendToDesktop" to="4" />
+    </keybind>
+
+    <keybind key="W-Return">
+      <action name="Execute" command="foot" />
+    </keybind>
+    <keybind key="W-S-n">
+      <action name="Execute" command="foot -T nnn nnn" />
+    </keybind>
+    <keybind key="W-semicolon">
+      <action name="Execute" command="bemoji" />
+    </keybind>
+    <keybind key="W-comma">
+      <action name="Execute" command="clip-manager" />
+    </keybind> 
+    <keybind key="W-d">
+      <action name="Execute" command="tofi-wm" />
+    </keybind>
+    <keybind key="A-F4">
+      <action name="Close" />
+    </keybind>
+    <keybind key="W-S-q">
+      <action name="Close" />
+    </keybind>
+    <keybind key="W-space">
+      <action name="ToggleMaximize" />
+    </keybind>
+    <keybind key="W-c">
+      <action name="SnapToRegion" region="center" />
+    </keybind>
+
+    <keybind key="A-Up"><action name="MoveToEdge" direction="up" /></keybind>
+    <keybind key="A-Left"><action name="MoveToEdge" direction="left" /></keybind>
+    <keybind key="A-Right"><action name="MoveToEdge" direction="right" /></keybind>
+    <keybind key="A-Down"><action name="MoveToEdge" direction="down" /></keybind>
+
+    <keybind key="W-Up"><action name="SnapToEdge" direction="up" /></keybind>
+    <keybind key="W-Left"><action name="SnapToEdge" direction="left" /></keybind>
+    <keybind key="W-Right"><action name="SnapToEdge" direction="right" /></keybind>
+    <keybind key="W-Down"><action name="SnapToEdge" direction="down" /></keybind>
+
+    <!-- Special keys -->
+    <keybind key="XF86_AudioLowerVolume">
+      <action name="Execute" command="amixer sset Master 5%-" />
+    </keybind>
+    <keybind key="XF86_AudioRaiseVolume">
+      <action name="Execute" command="amixer sset Master 5%+" />
+    </keybind>
+    <keybind key="XF86_AudioMute">
+      <action name="Execute" command="amixer sset Master toggle" />
+    </keybind>
+    <keybind key="XF86_MonBrightnessUp">
+      <action name="Execute" command="brightnessctl set +5%" />
+    </keybind>
+    <keybind key="XF86_MonBrightnessDown">
+      <action name="Execute" command="brightnessctl set 5%-" />
+    </keybind>
+
+    <keybind key="Print">
+      <action name="Execute" command="grim-copy" />
+    </keybind>
+    <keybind key="W-Print">
+      <action name="Execute" command="grim" />
+    </keybind>
+    <keybind key="W-S-s">
+      <action name="Execute" command="grim-slurp" />
+    </keybind>
+
+    <keybind key="W-KP_7">
+      <action name="SnapToRegion" region="top-left" />
+    </keybind>
+    <keybind key="W-KP_8">
+      <action name="SnapToRegion" region="top" />
+    </keybind>
+    <keybind key="W-KP_9">
+      <action name="SnapToRegion" region="top-right" />
+    </keybind>
+    <keybind key="W-KP_4">
+      <action name="SnapToRegion" region="left" />
+    </keybind>
+    <keybind key="W-KP_5">
+      <action name="SnapToRegion" region="center" />
+    </keybind>
+    <keybind key="W-KP_6">
+      <action name="SnapToRegion" region="right" />
+    </keybind>
+    <keybind key="W-KP_1">
+      <action name="SnapToRegion" region="bottom-left" />
+    </keybind>
+    <keybind key="W-KP_2">
+      <action name="SnapToRegion" region="bottom" />
+    </keybind>
+    <keybind key="W-KP_3">
+      <action name="SnapToRegion" region="bottom-right" />
+    </keybind>
+  </keyboard>
+
+  <mouse>
+    <default />
+    <doubleClickTime>500</doubleClickTime>
+    <scrollFactor>1.0</scrollFactor>
+    <context name="Frame">
+      <mousebind button="W-Left" action="Press">
+        <action name="Focus" />
+        <action name="Raise" />
+      </mousebind>
+      <mousebind button="W-Left" action="Drag">
+        <action name="Move" />
+      </mousebind>
+      <mousebind button="W-Right" action="Press">
+        <action name="Focus" />
+        <action name="Raise" />
+      </mousebind>
+      <mousebind button="W-Right" action="Drag">
+        <action name="Resize" />
+      </mousebind>
+    </context>
+    <context name="Top">
+      <mousebind button="Left" action="Drag">
+        <action name="Resize" />
+      </mousebind>
+    </context>
+    <context name="Left">
+      <mousebind button="Left" action="Drag">
+        <action name="Resize" />
+      </mousebind>
+    </context>
+    <context name="Right">
+      <mousebind button="Left" action="Drag">
+        <action name="Resize" />
+      </mousebind>
+    </context>
+    <context name="Bottom">
+      <mousebind button="Left" action="Drag">
+        <action name="Resize" />
+      </mousebind>
+    </context>
+    <context name="TRCorner">
+      <mousebind button="Left" action="Drag">
+        <action name="Resize" />
+      </mousebind>
+    </context>
+    <context name="BRCorner">
+      <mousebind button="Left" action="Drag">
+        <action name="Resize" />
+      </mousebind>
+    </context>
+    <context name="TLCorner">
+      <mousebind button="Left" action="Drag">
+        <action name="Resize" />
+      </mousebind>
+    </context>
+    <context name="BLCorner">
+      <mousebind button="Left" action="Drag">
+        <action name="Resize" />
+      </mousebind>
+    </context>
+    <context name="TitleBar">
+      <mousebind button="Left" action="Press">
+        <action name="Focus" />
+        <action name="Raise" />
+      </mousebind>
+      <mousebind button="Right" action="Click">
+        <action name="Focus" />
+        <action name="Raise" />
+        <action name="ShowMenu" menu="client-menu" />
+      </mousebind>
+    </context>
+    <context name="Title">
+      <mousebind button="Left" action="Drag">
+        <action name="Move" />
+      </mousebind>
+      <mousebind button="Left" action="DoubleClick">
+        <action name="ToggleMaximize" />
+      </mousebind>
+    </context>
+    <context name="Maximize">
+      <mousebind button="Left" action="Click">
+        <action name="Focus" />
+        <action name="Raise" />
+        <action name="ToggleMaximize" />
+      </mousebind>
+    </context>
+    <context name="WindowMenu">
+      <mousebind button="Left" action="Click">
+        <action name="ShowMenu" menu="client-menu" />
+      </mousebind>
+    </context>
+    <context name="Iconify">
+      <mousebind button="Left" action="Click">
+        <action name="Iconify" />
+      </mousebind>
+    </context>
+    <context name="Close">
+      <mousebind button="Left" action="Click">
+        <action name="Close" />
+      </mousebind>
+    </context>
+    <context name="Client">
+      <mousebind button="Left" action="Press">
+        <action name="Focus" />
+        <action name="Raise" />
+      </mousebind>
+      <mousebind button="Middle" action="Press">
+        <action name="Focus" />
+        <action name="Raise" />
+      </mousebind>
+      <mousebind button="Right" action="Press">
+        <action name="Focus" />
+        <action name="Raise" />
+      </mousebind>
+    </context>
+    <context name="Root">
+      <mousebind button="Left" action="Press">
+        <action name="" menu="" />
+      </mousebind>
+      <mousebind button="Right" action="Press">
+        <action name="ShowMenu" menu="root-menu" />
+      </mousebind>
+      <mousebind button="Middle" action="Press">
+        <action name="" menu="" />
+      </mousebind>
+      <mousebind direction="Left" action="Scroll">
+        <action name="GoToDesktop" to="left" wrap="yes" />
+      </mousebind>
+      <mousebind direction="Right" action="Scroll">
+        <action name="GoToDesktop" to="right" wrap="yes" />
+      </mousebind>
+    </context>
+  </mouse>
+  <libinput>
+    <device category="">
+      <naturalScroll>no</naturalScroll>
+      <leftHanded>no</leftHanded>
+      <pointerSpeed>0.0</pointerSpeed>
+      <accelProfile>flat</accelProfile>
+      <tap>yes</tap>
+      <tapButtonMap>1mr</tapButtonMap>
+      <tapAndDrag>yes</tapAndDrag>
+      <dragLock>yes</dragLock>
+      <middleEmulation>yes</middleEmulation>
+      <disableWhileTyping>yes</disableWhileTyping>
+    </device>
+  </libinput>
+</labwc_config>

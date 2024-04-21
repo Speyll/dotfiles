@@ -1,0 +1,20 @@
+#!/bin/bash
+
+# Prompt for aspect ratio
+read -p "Enter the aspect ratio (e.g., 0.56:1): " aspect_ratio
+
+# Prompt for input file name
+read -p "Enter the input file name (with extension): " input_file
+
+# Extract input file name without extension
+filename=$(basename -- "$input_file")
+filename_noext="${filename%.*}"
+
+# Output file name with "_cropped" appended
+output_file="${filename_noext}_cropped.mp4"
+
+# Crop the video
+ffmpeg -i "$input_file" -vf "crop='min(iw,ih*$aspect_ratio)':ih" "$output_file"
+
+echo "Video cropped successfully. Output saved as: $output_file"
+

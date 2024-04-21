@@ -1,0 +1,45 @@
+# Global Settings
+max-history=5
+sort=-time
+font=monospace 12
+text-alignment=center
+
+# Style Options
+## Size
+width=300
+height=100
+
+## Position
+anchor=bottom-right
+outer-margin=0
+margin=4
+padding=10
+
+## Border
+border-size=0
+border-radius=15
+
+## Colors
+background-color=#282828BF
+text-color=#ebdbb2
+border-color=#427b58
+progress-color=over #fabd2f
+
+## Icons
+icons=1
+icon-location=left
+max-icon-size=64
+icon-path=/usr/share/icons/breeze
+
+# Modes
+[grouped]
+format=<b>%s</b> (%g)
+background-color=#282828BF
+text-color=#ebdbb2
+
+[urgency=critical]
+border-color=#fabd2f
+text-color=#ebdbb2
+
+[mode=do-not-disturb]
+invisible=1

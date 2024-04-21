@@ -1,0 +1,13 @@
+## Set output
+wlr-randr --output HDMI-A-1 --mode 1920x1080@59.939999Hz --adaptive-sync enabled &
+
+## General autostart
+$HOME/.config/autostart/autostart.sh
+
+## Clipboard management
+pkill -x cliphist
+wl-paste --watch cliphist store &
+
+# Launch a panel such as yambar or waybar.
+# command -v yambar && yambar -c .config/yambar/labwc-config.yml >/dev/null 2>&1 &
+command -v waybar && pkill -x waybar; waybar -c .config/waybar/labwc-config -s .config/waybar/labwc-style.css >/dev/null 2>&1 &

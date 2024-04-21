@@ -1,0 +1,59 @@
+#!/bin/sh
+# Colorize commands when possible.
+alias \
+	ls="ls -shA --color=auto" \
+	dir="dir --color=auto" \
+	vdir="vdir --color=auto" \
+	grep="grep --color=auto" \
+	fgrep="fgrep --color=auto" \
+	egrep="egrep --color=auto" \
+	diff="diff --color=auto" \
+	ccat="highlight --out-format=ansi" \
+	dfg="df -BG" \
+	dfm="df -BM" \
+
+# Some more ls aliases.
+alias \
+	ll="ls -l --color=auto" \
+	la="ls -A --color=auto" \
+	llt="ls -latrG"
+
+# xbps and pkg aliases.
+alias \
+	xbs="sudo xbps-install" \
+	xbr="sudo xbps-remove -Rv"
+
+# apt aliases.
+alias \
+	apti="sudo apt-get install --no-install-recommends" \
+	aptr="sudo apt-get --purge autoremove"
+
+# zypper aliases.
+alias \
+    zyi="sudo zypper install --no-recommends" \
+    zyr="sudo zypper remove --clean-deps --no-confirm"
+
+# flatpak aliases.
+alias \
+	flinst="sudo flatpak install" \
+	flrem="sudo flatpak uninstall" \
+	flclean="sudo flatpak uninstall --unused & flatpak repair"
+
+# rsync aliases
+alias \
+	rsync="rsync -avh --progress" \
+	rsync-ssh="rsync -avzh --progress -e ssh" \
+	rsync-net="rsync -avzh --progress"
+
+# Use neovim for vim if present.
+command -v nvim >/dev/null && alias vim="nvim" vimdiff="nvim -d"
+
+# Verbosity and settings that you pretty much just always are going to want.
+alias \
+	cp="cp -iv" \
+	mv="mv -iv" \
+	rm="rm -vI" \
+	mkd="mkdir -pv"
+
+# Tmux
+tmux="tmux -f ${XDG_CONFIG_HOME:-$HOME/.config}/tmux/tmux.conf"

@@ -1,0 +1,23 @@
+[Added Associations]
+image/jpeg=qimgv.desktop;
+image/png=qimgv.desktop;
+image/webp=qimgv.desktop;
+image/gif=img.desktop;
+
+[Default Applications]
+text/*=text.desktop;
+application/x-shellscript=text.desktop;
+application/octet-stream=text.desktop;
+application/x-wine-extension-ini=text.desktop;
+image/*=img.desktop;
+video/*=video.desktop;
+audio/*=video.desktop;
+x-scheme-handler/magnet=torrent.desktop;
+application/x-bittorrent=torrent.desktop;
+x-scheme-handler/mailto=mail.desktop;
+application/postscript=pdf.desktop;
+application/pdf=pdf.desktop;
+application/rss+xml=rss.desktop;
+x-scheme-handler/lbry=lbry.desktop;
+inode/directory=file.desktop;
+

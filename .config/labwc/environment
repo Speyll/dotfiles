@@ -1,0 +1,3 @@
+# Set two keyboard layouts and toggle between them using alt+shift
+XKB_DEFAULT_LAYOUT=fr,us
+XKB_DEFAULT_OPTIONS=grp:rctrl_rshift_toggle

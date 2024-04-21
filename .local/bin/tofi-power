@@ -1,0 +1,27 @@
+#!/bin/sh
+
+# Define the options for the power menu with Font Awesome icons
+options=" Shutdown\n Suspend\n Reboot\n Lock"
+
+# Use dmenu to display the options and get the user's choice
+choice=$(echo "$options" | tofi)
+
+# Process the user's choice
+case "$choice" in
+    " Shutdown")
+        # Power off the system
+        sudo poweroff
+        ;;
+    " Suspend")
+        # Suspend the system
+        sudo halt
+        ;;
+    " Reboot")
+        # Suspend the system
+        sudo reboot now
+        ;;
+    " Lock")
+        # Lock the screen using swaylock (for SwayWM)
+        swaylock -c 000000
+        ;;
+esac
