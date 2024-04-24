@@ -15,8 +15,15 @@
   <item label="Decorations">
     <action name="ToggleDecorations" />
   </item>
-  <item label="AlwaysOnTop">
+  <item label="On top">
     <action name="ToggleAlwaysOnTop" />
+  </item>
+  <item label="On Bottom">
+    <action name="ToggleAlwaysOnBottom" />
+  </item>
+
+  <item label="Sticky">
+    <action name="ToggleOmnipresent" />
   </item>
   <!--
     Any menu with the id "workspaces" will be hidden
@@ -37,7 +44,7 @@
 
 <menu id="root-menu">
   <item label="Web browser">
-    <action name="Execute" command="librewolf" />
+    <action name="Execute" command="flatpak run io.gitlab.librewolf-community" />
   </item>
   <item label="File Manager">
     <action name="Execute" command="pcmanfm-qt" />

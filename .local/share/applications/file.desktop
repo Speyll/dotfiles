@@ -1,7 +1,7 @@
 [Desktop Entry]
 Type=Application
 Name=File manager
-Comment=File manager using nnn
+Comment=File manager
 Icon=folder
 Exec=pcmanfm-qt
 Terminal=false

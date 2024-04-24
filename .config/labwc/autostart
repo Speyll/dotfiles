@@ -6,7 +6,7 @@ $HOME/.config/autostart/autostart.sh
 
 ## Clipboard management
 pkill -x cliphist
-wl-paste --watch cliphist store &
+wl-paste --watch cliphist store -max-items 100 &
 
 # Launch a panel such as yambar or waybar.
 # command -v yambar && yambar -c .config/yambar/labwc-config.yml >/dev/null 2>&1 &

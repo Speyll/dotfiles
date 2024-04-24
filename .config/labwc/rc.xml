@@ -353,4 +353,7 @@
       <disableWhileTyping>yes</disableWhileTyping>
     </device>
   </libinput>
+  <windowRules>
+      <windowRule identifier="imv" serverDecoration="yes"/>
+  </windowRules>
 </labwc_config>

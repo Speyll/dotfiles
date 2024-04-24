@@ -12,7 +12,7 @@ case "$choice" in
         foot
         ;;
     " File Manager")
-        foot -T nnn nnn
+        pcmanfm-qt
         ;;
     " Librewolf")
         flatpak run io.gitlab.librewolf-community

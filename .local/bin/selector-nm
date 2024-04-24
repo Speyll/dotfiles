@@ -7,11 +7,11 @@ show_wifi_networks() {
 
 # Function to connect to a Wi-Fi network
 connect_to_wifi() {
-    nmcli --mode tabular device wifi list | awk 'NR>1 {gsub(/\*/, " (In Use)", $1); print NR-1 ". " $3 " - " $2}'
+    nmcli --fields SSID device wifi | awk 'NR>1 {print NR-1 ". " $1}'
     read -p "Enter the number of the Wi-Fi network to connect to: " choice
 
     # Find the corresponding Wi-Fi network SSID
-    ssid=$(nmcli --mode tabular device wifi list | awk 'NR>1 {if (NR-1 == '$choice') print $3}')
+    ssid=$(nmcli --fields SSID device wifi | awk -v choice="$choice" 'NR == choice+1 {print $1}')
 
     if [ -n "$ssid" ]; then
         read -s -p "Enter the password for $ssid: " password
@@ -24,22 +24,28 @@ connect_to_wifi() {
     fi
 }
 
-# Function to disconnect from a specific Wi-Fi connection
+# Function to disconnect from the currently connected Wi-Fi network
 disconnect_from_wifi() {
-    nmcli -t -f NAME,UUID,TYPE,DEVICE con show --active | grep wifi | while IFS=: read -r name uuid type device; do
-        echo "$name"
-    done
-    read -p "Enter the name of the Wi-Fi network to disconnect from: " network_name
+    connected_device=$(nmcli --fields SSID device wifi | awk 'NR>1' | sed 's/ //g')
+    if [ -n "$connected_device" ]; then
+        nmcli device disconnect "$connected_device"
+        echo "Disconnected from Wi-Fi network: $connected_device"
+    else
+        echo "No Wi-Fi network is currently connected."
+    fi
+}
 
-    # Disconnect from the specified Wi-Fi network
-    nmcli c down "$network_name"
+# Function to show current connection status
+show_current_status() {
+    nmcli -f NAME,UUID,TYPE,DEVICE,AUTOCONNECT connection show
 }
 
 # Main menu
 echo "1. Show available Wi-Fi networks"
 echo "2. Connect to a Wi-Fi network"
 echo "3. Disconnect from a Wi-Fi network"
-read -p "Enter your choice (1, 2, or 3): " choice
+echo "4. Show current connection status"
+read -p "Enter your choice (1, 2, 3, or 4): " choice
 
 case $choice in
     1)
@@ -51,7 +57,11 @@ case $choice in
     3)
         disconnect_from_wifi
         ;;
+    4)
+        show_current_status
+        ;;
     *)
         echo "Invalid choice. Exiting."
         ;;
 esac
+

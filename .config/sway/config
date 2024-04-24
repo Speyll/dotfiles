@@ -4,7 +4,7 @@ output HDMI-A-1 mode 1920x1080@59.940Hz adaptive_sync enable
 # Global Variables
 set $mod Mod4
 set $term foot
-set $menu tofi-run | xargs swaymsg exec --
+set $menu tofi-drun | xargs swaymsg exec --
 
 # Updating dbus
 exec --no-startup-id dbus-update-activation-environment --all
@@ -13,7 +13,7 @@ exec --no-startup-id dbus-update-activation-environment --all
 exec $HOME/.config/autostart/autostart.sh
 
 # Listen for clipboard change
-exec --no-startup-id wl-paste --watch cliphist store &
+exec --no-startup-id wl-paste --watch cliphist store -max-items 150 &
 
 # Inputs
 ## Mouse
