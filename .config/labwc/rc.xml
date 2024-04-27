@@ -35,9 +35,9 @@
   </theme>
   <windowSwitcher show="yes" preview="yes" outlines="no">
     <fields>
-      <field content="type" width="25%" />
-      <field content="identifier" width="25%" />
-      <field content="title" width="25%" />
+      <field content="type" width="20%" />
+      <field content="identifier" width="40%" />
+      <field content="title" width="40%" />
     </fields>
   </windowSwitcher>
   <!-- edge strength is in pixels -->

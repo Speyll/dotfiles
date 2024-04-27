@@ -58,7 +58,7 @@
     },
 
     "wlr/taskbar": {
-        "format": "{icon} {app_id}",
+        "format": "{icon} {name}",
         "icon-size": 14,
         "icon-theme": "breeze",
         "tooltip": false,
