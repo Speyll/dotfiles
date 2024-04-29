@@ -1,5 +1,8 @@
 ## Set output
-wlr-randr --output HDMI-A-1 --mode 1920x1080@59.939999Hz --adaptive-sync enabled &
+wlr-randr --output HDMI-A-1 --mode 1920x1080@60.000000hz --adaptive-sync enabled &
+
+## Update dbus
+dbus-update-activation-environment --all &
 
 ## General autostart
 $HOME/.config/autostart/autostart.sh
