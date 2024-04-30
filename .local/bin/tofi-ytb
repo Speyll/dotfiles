@@ -1,26 +1,46 @@
 #!/bin/sh
 
-# Get input link using Tofi
-input_link=$(echo "" | tofi --prompt-text="input link: " --require-match=false)
+# Define the menu options
+options="YouTube\nTwitch"
+
+# Use Tofi to create a menu with the options and store the user's choice
+platform_choice=$(echo "$options" | tofi --prompt-text="Choose platform: " --require-match=false)
+
+# Check the user's choice and handle accordingly
+case "$platform_choice" in
+    "YouTube")
+        # Get input link using Tofi
+        input_link=$(echo "" | tofi --prompt-text="Input YouTube link: " --require-match=false)
+        ;;
+    "Twitch")
+        # Ask for channel name and construct Twitch URL
+        channel_name=$(echo "" | tofi --prompt-text="Enter Twitch channel name: " --require-match=false)
+        input_link="https://twitch.tv/$channel_name"
+        ;;
+    *)
+        echo "Invalid choice: $platform_choice" >&2
+        exit 1
+        ;;
+esac
 
 # Define the menu options
 options="Video\nAudio"
 
 # Use Tofi to create a menu with the options and store the user's choice
-choice=$(echo "$options" | tofi --prompt-text="choose option: " --require-match=false)
+media_choice=$(echo "$options" | tofi --prompt-text="Choose media type: " --require-match=false)
 
 # Check the user's choice and handle accordingly
-case "$choice" in
+case "$media_choice" in
     "Video")
         # Launch mpv with the input link for video
-        mpv "$input_link"
+        mpv --pause=no "$input_link"
         ;;
     "Audio")
         # Launch mpv with the input link for audio and disable video
-        (foot -t "MPV Terminal" -e mpv --no-video "$input_link")
-	;;
+        (foot -t "MPV Terminal" -e mpv --pause=no --no-video --volume=100 "$input_link")
+        ;;
     *)
-        echo "Invalid choice: $choice" >&2
+        echo "Invalid choice: $media_choice" >&2
         exit 1
         ;;
 esac
