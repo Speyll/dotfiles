@@ -1,9 +1,12 @@
 local start_time = nil
 local segments = {}
+local osd_message_id = nil
+local osd_persistent = false
 
 function startSegment()
     start_time = mp.get_property_number("time-pos")
-    mp.osd_message("Start of segment set")
+    osd_persistent = true
+    osd_message_id = mp.osd_message("Segment start point set")
 end
 
 function endSegment()
@@ -11,15 +14,18 @@ function endSegment()
     if start_time then
         table.insert(segments, {start = start_time, stop = end_time})
         start_time = nil
-        mp.osd_message("Segment added")
+        osd_persistent = true
+        osd_message_id = mp.osd_message("Segment end point set")
     else
-        mp.osd_message("No start point set")
+        osd_persistent = false
+        osd_message_id = mp.osd_message("No start point set")
     end
 end
 
 function processSegments()
     if #segments == 0 then
-        mp.osd_message("No segments to process")
+        osd_persistent = false
+        osd_message_id = mp.osd_message("No segments to process")
         return
     end
 
@@ -31,7 +37,8 @@ function processSegments()
     -- Get directory of the input video file
     local file_dir = input_file:match("(.*/)")
     if not file_dir then
-        mp.osd_message("Failed to determine video directory")
+        osd_persistent = false
+        osd_message_id = mp.osd_message("Failed to determine video directory")
         return
     end
 
@@ -47,7 +54,8 @@ function processSegments()
     local concat_file_path = string.format("%s/concat.txt", file_dir)
     local concat_file = io.open(concat_file_path, "w")
     if not concat_file then
-        mp.osd_message("Failed to create concat file")
+        osd_persistent = false
+        osd_message_id = mp.osd_message("Failed to create concat file")
         return
     end
 
@@ -61,9 +69,10 @@ function processSegments()
     local output_file = string.format("%s/merged_video.mp4", file_dir)
     local concat_command = string.format('ffmpeg -f concat -safe 0 -i "%s" -c copy "%s"', concat_file_path, output_file)
     print("Executing concat command:", concat_command)
-    mp.osd_message("Merging segments...")
+    osd_persistent = true
+    osd_message_id = mp.osd_message("Merging segments...")
     os.execute(concat_command)
-    mp.osd_message("Segments merged")
+    osd_message_id = mp.osd_message("Segments merged")
 
     -- Clean up
     os.remove(concat_file_path)
@@ -72,10 +81,28 @@ function processSegments()
         os.remove(segment_file)
     end
 
-    mp.osd_message("Segments processed, temporary files deleted")
+    osd_persistent = false
+    osd_message_id = mp.osd_message("Segments processed, temporary files deleted")
+end
+
+function updateOSDMessage(message)
+    if osd_persistent then
+        osd_message_id = mp.osd_message(message, osd_message_id)
+    end
 end
 
 mp.add_key_binding("c", "start_segment", startSegment)
-mp.add_key_binding("v", "end_segment", endSegment)
-mp.add_key_binding("m", "process_segments", processSegments)
+mp.add_key_binding("x", "end_segment", endSegment)
+mp.add_key_binding("z", "process_segments", processSegments)
 
+mp.register_event("shutdown", function()
+    if osd_message_id then
+        mp.osd_message("")
+    end
+end)
+
+mp.add_periodic_timer(0.5, function()
+    if osd_persistent and start_time then
+        updateOSDMessage("Segment in progress...")
+    end
+end)
