@@ -18,7 +18,7 @@ If you are here for my old bspwm setup, you can find it [here](https://github.co
 
   - mainly `labwc` & `wayfire` and somtimes `sway` as window managers (compositors).
   - `foot` Terminal emulator.
-  - `yambar` Status bar.
+  - ~~`yambar`~~ `waybar` Status bar.
   - `tofi` The application launcher menu.
   - `pipewire` Audio server.
   - `grim` For taking screenshots.
