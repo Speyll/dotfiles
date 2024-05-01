@@ -1,16 +1,16 @@
 #!/bin/sh
 
 # Define the menu options
-options="YouTube\nTwitch"
+options="Media\nTwitch"
 
 # Use Tofi to create a menu with the options and store the user's choice
 platform_choice=$(echo "$options" | tofi --prompt-text="Choose platform: " --require-match=false)
 
 # Check the user's choice and handle accordingly
 case "$platform_choice" in
-    "YouTube")
+    "Media")
         # Get input link using Tofi
-        input_link=$(echo "" | tofi --prompt-text="Input YouTube link: " --require-match=false)
+        input_link=$(echo "" | tofi --prompt-text="Input a media link: " --require-match=false)
         ;;
     "Twitch")
         # Ask for channel name and construct Twitch URL

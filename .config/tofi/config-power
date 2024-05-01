@@ -2,16 +2,15 @@
 anchor=bottom-left
 horizontal=false
 width=10%
-height=20%
+height=18%
 exclusive-zone=0
 margin-top=0
 margin-bottom=8
 margin-left=8
 margin-right=0
-num-results=0
 
 # Border
-corner-radius=8
+corner-radius=20
 outline-width=0
 border-width=0
 
@@ -19,11 +18,11 @@ border-width=0
 font=monospace
 font-size=12
 prompt-text=""
-placeholder-text=""
-prompt-padding=0
+placeholder-text="choose your pick:"
+prompt-padding=4
 
 # Colors
-background-color=#282828EE
+background-color=#282828CF
 text-color=#ebdbb2
 
 prompt-color=#427b58
@@ -33,6 +32,7 @@ input-color=#ebdbb2
 #input-background=
 
 selection-color=#427b58
+selection-match-color=#fb4934
 #selection-background=#3c3836EF
 #selection-background-padding=8
 
@@ -42,7 +42,7 @@ outline-color=#282828
 # Layout
 min-input-width=120
 result-spacing=15
-padding-top=0
+padding-top=12
 padding-bottom=0
-padding-left=2
-padding-right=0
+padding-left=8
+padding-right=8
