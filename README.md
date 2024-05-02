@@ -16,9 +16,9 @@ If you are here for my old bspwm setup, you can find it [here](https://github.co
 
 ## Software Used
 
-  - `labwc` or `sway` Window manager.
+  - mainly `labwc` & `wayfire` and somtimes `sway` as window managers (compositors).
   - `foot` Terminal emulator.
-  - `yambar` Status bar.
+  - ~~`yambar`~~ `waybar` Status bar.
   - `tofi` The application launcher menu.
   - `pipewire` Audio server.
   - `grim` For taking screenshots.
@@ -30,7 +30,7 @@ If you are here for my old bspwm setup, you can find it [here](https://github.co
   - `imv` My image viewer.
   - `mako` Notification system.
   - `mpv` Video player.
-  - `nano` Text editor (yes i know that vim exists.)
+  - `nvim` & `nano` Text editor
   - `noto-fonts-emoji`, `noto-fonts-ttf`, `font-hack-ttf`, `font-awesome` Fonts.
 
 If you're interested in a comprehensive list of packages, check out my post-install script for Void Linux, which sets up a highly efficient system. The script is well-documented and available [here](https://gist.github.com/Speyll/b2c46449fb9a9be44f07be3a81f01a2b).
