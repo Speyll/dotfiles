@@ -29,7 +29,7 @@ export TERM=xterm-256color
 export GREP_OPTIONS="--color=always"
 
 # Default programs variables
-export EDITOR="nano"
+export EDITOR="nvim"
 export FILE="nnn"
 export PAGER="less"
 
