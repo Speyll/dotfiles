@@ -4,17 +4,17 @@
 options="Media\nTwitch"
 
 # Use Tofi to create a menu with the options and store the user's choice
-platform_choice=$(echo "$options" | tofi --prompt-text="Choose platform: " --require-match=false)
+platform_choice=$(echo "$options" | fuzzel -d -f monospace:size=14 -w 8 -l 2 -a center)
 
 # Check the user's choice and handle accordingly
 case "$platform_choice" in
     "Media")
         # Get input link using Tofi
-        input_link=$(echo "" | tofi --prompt-text="Input a media link: " --require-match=false)
+        input_link=$(echo "" | fuzzel -d -p "type the link: " -f monospace:size=14 -w 40 -l 0 -a center)
         ;;
     "Twitch")
         # Ask for channel name and construct Twitch URL
-        channel_name=$(echo "" | tofi --prompt-text="Enter Twitch channel name: " --require-match=false)
+        channel_name=$(echo "" | fuzzel -d -p "type twitch name: " -f monospace:size=14 -w 40 -l 0 -a center)
         input_link="https://twitch.tv/$channel_name"
         ;;
     *)
@@ -27,7 +27,7 @@ esac
 options="Video\nAudio"
 
 # Use Tofi to create a menu with the options and store the user's choice
-media_choice=$(echo "$options" | tofi --prompt-text="Choose media type: " --require-match=false)
+media_choice=$(echo "$options" | fuzzel -d -f monospace:size=14 -w 8 -l 2 -a center)
 
 # Check the user's choice and handle accordingly
 case "$media_choice" in

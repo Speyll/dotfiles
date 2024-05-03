@@ -21,13 +21,13 @@ bm_private_mode=${BEMOJI_PRIVATE_MODE:-false}
 bm_limit_recent="$BEMOJI_LIMIT_RECENT"
 
 declare -A default_pickers=(
-	["bemenu"]="bemenu -p 🔍 -i -l 20"
-	["wofi"]="wofi -p 🔍 -i --show dmenu"
-	["rofi"]="rofi -p 🔍 -i -dmenu --kb-custom-1 "Alt+1" --kb-custom-2 "Alt+2""
-	["dmenu"]="dmenu -p 🔍 -i -l 20"
-	["ilia"]="ilia -n -p textlist -l 'Emoji' -i desktop-magnifier"
-	["fuzzel"]="fuzzel -d -p 🔍"
-  ["tofi"]="tofi -c $HOME/.config/tofi/config-emoji"
+	#["bemenu"]="bemenu -p 🔍 -i -l 20"
+	#["wofi"]="wofi -p 🔍 -i --show dmenu"
+	#["rofi"]="rofi -p 🔍 -i -dmenu --kb-custom-1 "Alt+1" --kb-custom-2 "Alt+2""
+	#["dmenu"]="dmenu -p 🔍 -i -l 20"
+	#["ilia"]="ilia -n -p textlist -l 'Emoji' -i desktop-magnifier"
+    #["tofi"]="tofi -c $HOME/.config/tofi/config-emoji"
+	["fuzzel"]="fuzzel -d -f monospace:size=14 -w 30 -l 10 -a bottom-right -B 8 -C 00000000"
 )
 
 # Report usage

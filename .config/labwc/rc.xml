@@ -125,7 +125,7 @@
       <action name="Execute" command="clip-manager" />
     </keybind> 
     <keybind key="W-d">
-      <action name="Execute" command="tofi-wm" />
+      <action name="Execute" command="fuzzel" />
     </keybind>
     <keybind key="A-F4">
       <action name="Close" />
