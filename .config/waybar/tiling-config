@@ -8,9 +8,10 @@
     "fixed-center": false,
     "reload_style_on_change": false,
 
-    "modules-left": ["group/one", "wlr/taskbar"],
+    "modules-left": ["custom/launcher", "sway/workspace"],
     "modules-center": [],
-    "modules-right": ["tray", "group/two"],
+    "modules-right": ["tray", "bluetooth", "network", "wireplumber", "custom/keyboard", "clock"],
+
 
     "group/one": {
         "orientation": "horizontal",
@@ -23,8 +24,6 @@
     "group/two": {
         "orientation": "horizontal",
         "modules": [
-            "battery",
-            "backlight",
             "group/hardware",
             "group/networking",
             "wireplumber",
@@ -35,10 +34,6 @@
 
     "group/hardware": {
         "orientation": "inherit",
-        "drawer": {
-            "transition-duration": 500,
-            "transition-left-to-right": false,
-        },
         "modules": [
             "temperature",
             "cpu",
@@ -48,10 +43,6 @@
 
     "group/networking": {
         "orientation": "inherit",
-        "drawer": {
-            "transition-duration": 500,
-            "transition-left-to-right": false,
-        },
         "modules": [
             "network",
             "bluetooth",
@@ -63,7 +54,7 @@
         "icon-size": 14,
         "icon-theme": "breeze",
         "tooltip": false,
-        "on-click": "minimize-raise",
+        "on-click": "activate",
         "on-click-middle": "close",
     },
 

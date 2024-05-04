@@ -8,9 +8,9 @@
     "fixed-center": false,
     "reload_style_on_change": false,
 
-    "modules-left": ["group/one", "wlr/taskbar"],
+    "modules-left": ["custom/launcher", "wlr/taskbar"],
     "modules-center": [],
-    "modules-right": ["tray", "group/two"],
+    "modules-right": ["tray", "bluetooth", "network", "wireplumber", "custom/keyboard", "clock"],
 
     "group/one": {
         "orientation": "horizontal",
@@ -22,8 +22,6 @@
     "group/two": {
         "orientation": "horizontal",
         "modules": [
-            "battery",
-            "backlight",
             "group/hardware",
             "group/networking",
             "wireplumber",
@@ -34,12 +32,7 @@
 
     "group/hardware": {
         "orientation": "inherit",
-        "drawer": {
-            "transition-duration": 500,
-            "transition-left-to-right": false,
-        },
         "modules": [
-            "temperature",
             "cpu",
             "memory",
         ],
@@ -47,10 +40,6 @@
 
     "group/networking": {
         "orientation": "inherit",
-        "drawer": {
-            "transition-duration": 500,
-            "transition-left-to-right": false,
-        },
         "modules": [
             "network",
             "bluetooth",
@@ -75,7 +64,7 @@
 
     "custom/launcher": {
         "format": "",
-        "on-click": "tofi-apps",
+        "on-click": "fuzz-launcher",
         "tooltip": false
     },
 
@@ -135,11 +124,11 @@
 
     "network": {
         "format-wifi": "<span color=\"#78b6ad\"></span> {signalStrength}%",
-        "format-ethernet": "<span color=\"#78b6ad\"></span>",
-        "tooltip-format": "<span color=\"#78b6ad\"></span> {essid}",
+        "format-ethernet": "<span color=\"#78b6ad\"></span> eth",
         "format-linked": "<span color=\"#78b6ad\"></span> {ifname} (No IP)",
         "format-disconnected": "404",
-        "format-alt": "<span color=\"#78b6ad\"></span> {ipaddr}"
+        "format-alt": "<span color=\"#78b6ad\"></span> {ipaddr}",
+	"tooltip": false,
     },
 
     "custom/keyboard": {
