@@ -3,14 +3,14 @@
 # Define the menu options
 options="Media\nTwitch"
 
-# Use Tofi to create a menu with the options and store the user's choice
+# Use fuzzel to create a menu with the options and store the user's choice
 platform_choice=$(echo "$options" | fuzzel -d -f monospace:size=14 -w 8 -l 2 -a center)
 
 # Check the user's choice and handle accordingly
 case "$platform_choice" in
     "Media")
-        # Get input link using Tofi
-        input_link=$(echo "" | fuzzel -d -p "type the link: " -f monospace:size=14 -w 40 -l 0 -a center)
+        # Get input link from clipboard
+        input_link=$(wl-paste)
         ;;
     "Twitch")
         # Ask for channel name and construct Twitch URL
@@ -26,7 +26,7 @@ esac
 # Define the menu options
 options="Video\nAudio"
 
-# Use Tofi to create a menu with the options and store the user's choice
+# Use fuzzel to create a menu with the options and store the user's choice
 media_choice=$(echo "$options" | fuzzel -d -f monospace:size=14 -w 8 -l 2 -a center)
 
 # Check the user's choice and handle accordingly
@@ -44,4 +44,3 @@ case "$media_choice" in
         exit 1
         ;;
 esac
-
