@@ -127,6 +127,9 @@
     <keybind key="W-d">
       <action name="Execute" command="fuzzel" />
     </keybind>
+    <keybind key="W-S-d">
+      <action name="Execute" command="fuzz-launcher" />
+    </keybind>
     <keybind key="A-F4">
       <action name="Close" />
     </keybind>
