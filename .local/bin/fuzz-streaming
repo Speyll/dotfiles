@@ -37,7 +37,7 @@ case "$media_choice" in
         ;;
     "Audio")
         # Launch mpv with the input link for audio and disable video
-        (foot -t "MPV Terminal" -e mpv --pause=no --no-video --volume=100 "$input_link")
+        (foot -T "MPV Terminal" -e mpv --pause=no --no-video --volume=100 "$input_link")
         ;;
     *)
         echo "Invalid choice: $media_choice" >&2
