@@ -124,7 +124,7 @@
     <keybind key="W-comma">
       <action name="Execute" command="clip-manager" />
     </keybind> 
-    <keybind key="A-Return">
+    <keybind key="W-d">
       <action name="Execute" command="fuzzel" />
     </keybind>
     <keybind key="W-S-Return">
