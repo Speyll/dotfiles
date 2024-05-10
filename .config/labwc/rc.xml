@@ -124,10 +124,10 @@
     <keybind key="W-comma">
       <action name="Execute" command="clip-manager" />
     </keybind> 
-    <keybind key="A-Enter">
+    <keybind key="A-Return">
       <action name="Execute" command="fuzzel" />
     </keybind>
-    <keybind key="W-S-Enter">
+    <keybind key="W-S-Return">
       <action name="Execute" command="fuzz-launcher" />
     </keybind>
     <keybind key="A-F4">
