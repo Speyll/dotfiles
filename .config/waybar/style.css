@@ -22,7 +22,7 @@
 
 
 * {
-    font-family: FontAwesome, sans-serif;
+    font-family: sans-serif;
     font-size: 14px;
     min-height: 0;
     border-radius: 0;
@@ -33,7 +33,7 @@
 #waybar {
     background-color: @bg;
     color: @text;
-    margin: 4px 0 4px 0;
+        margin: 4px 0 4px 0;
 }
 
 
@@ -60,7 +60,7 @@ tooltip {
     color: @text;
     border-width: 1px;
     border-color: @accent;
-    border-radius: 5px;
+        border-radius: 5px;
 }
 
 tooltip label {
@@ -95,47 +95,47 @@ tooltip label {
     margin-right: 0;
 }
 
-#one {
-background-color: inherit;
-padding: 0 2px 0 2px;
-border-radius: 0 0 8px 0;
+#rightWrapper {
+    background-color: inherit;
+    padding: 0 2px 0 2px;
+    border-radius: 0 0 8px 0;
 }
 
-#two {
-background-color: inherit;
-padding: 0 2px 0 2px;
-border-radius: 8px 0 0 8px;
+#leftWrapper {
+    background-color: inherit;
+    padding: 0 2px 0 2px;
+    border-radius: 8px 0 0 8px;
 }
 
 #workspaces {
-margin: 0 0 0 4px;
+    margin: 0 0 0 4px;
 }
 
 #workspaces button {
-border-radius: 4px;
-padding: 0 2px 0 2px;
-color: @text;
-background-color: transparent;
+    border-radius: 4px;
+    padding: 0 2px 0 2px;
+    color: @text;
+    background-color: transparent;
 }
 
 #workspaces button:hover {
-color: @text;
-background-color: @bgLight;
+    color: @text;
+    background-color: @bgLight;
 }
 
 #workspaces button.focused {
-color: @bg;
-background-color: @accent;
+    color: @bg;
+    background-color: @accent;
 }
 
 #workspaces button.urgent {
-color: @bg;
-background-color: @yellow;
+    color: @bg;
+    background-color: @yellow;
 }
 
 #window {
-padding: 0 4px 0 4px;
-color: @yellow;
+    padding: 0 4px 0 4px;
+    color: @yellow;
 }
 
 #clock,
@@ -150,69 +150,69 @@ color: @yellow;
 #temperature,
 #backlight,
 #taskbar {
-margin: 0 4px 0 4px;
-padding: 0;
+    margin: 0 5px 0 5px;
+    padding: 0;
 }
 
 #custom-launcher {
-margin: 0 4px 0 4px;
-color: @text;
+    margin: 0 0 0 4px;
+    color: @text;
 }
 
 #clock {
-color: @text;
+    color: @text;
 }
 
 #language {
-color: @text;
+    color: @text;
 }
 
 #wireplumber {
-color: @text;
+    color: @text;
 }
 
 #wireplumber.muted {
-color: @yellow;
+    color: @yellow;
 }
 
 #network {
-color: @text;
+    color: @text;
 }
 
 #network.disconnected {
-color: @red;
+    color: @red;
 }
 
 #cpu {
-color: @text;
+    color: @text;
 }
 
 #memory {
-color: @text;
+    color: @text;
 }
 
 #disk {
-color: @text;
+    color: @text;
 }
 
 #temperature {
-color: @text;
+    color: @text;
 }
 
 #temperature.critical {
-color: @red;
+    color: @red;
 }
 
 #backlight {
-color: @text;
+    color: @text;
 }
 
 #battery {
-color: @text;
+    color: @text;
 }
 
 #battery.charging, #battery.plugged {
-color: @red;
+    color: @red;
 }
 
 window#waybar.hidden {
@@ -220,39 +220,39 @@ window#waybar.hidden {
 }
 
 #tray {
-background-color: @bg;
-margin: 0 4px 0 4px;
-padding: 0 4px 0 4px;
-border-radius: 8px;
+    margin: 0 3px 0 3px;
+    padding: 0 6px 0 6px;
+    border-radius: 2px;
+    background-color: @bgLight;
 }
 
 #taskbar button {
-margin: 0 2px 0 2px;
-padding: 0 6px 0 4px;
-border-radius: 2px;
-color: @text;
-background-color: @bg;
+    margin: 0 2px 0 2px;
+    padding: 0 4px 0 4px;
+    border-radius: 2px;
+    color: @text;
+    background-color: @bg;
 }
 
 #taskbar button:hover {
-color: @text;
-background-color: @dimBlue;
+    color: @text;
+    background-color: @dimBlue;
 }
 
 #taskbar button.minimized {
-color: @text;
-background-color: @bgLight;
+    color: @text;
+    background-color: @bgLight;
 }
 
 #taskbar button.active {
-color: rgb(40, 40, 40);
-background-color: @accent;
+    color: rgb(40, 40, 40);
+    background-color: @accent;
 }
 
 #tray > .passive {
--gtk-icon-effect: dim;
+    -gtk-icon-effect: dim;
 }
 
 #tray > .needs-attention {
--gtk-icon-effect: highlight;
+    -gtk-icon-effect: highlight;
 }

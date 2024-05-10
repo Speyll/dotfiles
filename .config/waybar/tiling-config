@@ -2,18 +2,17 @@
     "layer": "bottom",
     "position": "bottom",
     "height": 24,
-    "spacing": 4,
+    "spacing": 0,
     "margin": 0,
     "start_hidden": false,
     "fixed-center": false,
     "reload_style_on_change": false,
 
-    "modules-left": ["custom/launcher", "sway/workspace"],
+    "modules-left": ["custom/launcher", "wlr/taskbar"],
     "modules-center": [],
-    "modules-right": ["tray", "bluetooth", "network", "wireplumber", "custom/keyboard", "clock"],
+    "modules-right": ["tray", "group/networking", "group/core"],
 
-
-    "group/one": {
+    "group/leftWrapper": {
         "orientation": "horizontal",
         "modules": [
             "custom/launcher",
@@ -21,31 +20,44 @@
         ],
     },
 
-    "group/two": {
+    "group/rightWrapper": {
         "orientation": "horizontal",
         "modules": [
-            "group/hardware",
             "group/networking",
+            "group/core",
+        ],
+    },
+
+    "group/core": {
+        "orientation": "inherit",
+        "modules": [
             "wireplumber",
             "sway/language",
             "clock",
         ],
     },
 
-    "group/hardware": {
+    "group/networking": {
         "orientation": "inherit",
         "modules": [
-            "temperature",
+            "bluetooth",
+            "network",
+        ],
+    },
+
+    "group/stats": {
+        "orientation": "inherit",
+        "modules": [
             "cpu",
             "memory",
         ],
     },
 
-    "group/networking": {
+    "group/laptop": {
         "orientation": "inherit",
         "modules": [
-            "network",
-            "bluetooth",
+            "battery",
+            "backlight",
         ],
     },
 
@@ -54,7 +66,7 @@
         "icon-size": 14,
         "icon-theme": "breeze",
         "tooltip": false,
-        "on-click": "activate",
+        "on-click": "minimize-raise",
         "on-click-middle": "close",
     },
 
@@ -66,53 +78,75 @@
     },
 
     "custom/launcher": {
-        "format": "",
-        "on-click": "tofi-apps",
+        "format": "<span color=\"#78b6ad\" size='medium'></span>",
+        "on-click": "fuzz-launcher",
         "tooltip": false
     },
 
-    "sway/workspaces": {
-        "disable-scroll": false,
+    "wlr/workspaces": {
         "all-outputs": true,
-        "warp-on-scroll": false,
         "format": "{name}"
     },
 
-    "bluetooth": {
-        "format": "<span color=\"#78b6ad\"></span> {status}",
-        "format-disabled": "",
-        "format-connected": "<span color=\"#78b6ad\"></span> {num_connections}",
-        "format-alt-connected": "<span color=\"#78b6ad\"></span> {device_alias}",
-        "tooltip-format-connected": "<span color=\"#78b6ad\"></span> {device_enumerate}",
-        "tooltip-format-enumerate-connected": "<span color=\"#78b6ad\"></span> {device_alias}"
-    },
-
     "clock": {
-        "format": "<span color=\"#78b6ad\"></span> {:%H:%M}",
+        "format": "<span color=\"#78b6ad\" size='medium'></span> {:%H:%M}",
         "timezone": "Africa/Algiers",
-        "format-alt": "<span color=\"#78b6ad\"></span> {:%a %d %b}",
+        "format-alt": "<span color=\"#78b6ad\" size='medium'></span> {:%a %d %b}",
         "tooltip": false
     },
 
+    "custom/keyboard": {
+        "format": "<span color=\"#78b6ad\" size='medium'></span> fr/us",
+        "on-click": "~/.config/waybar/xkb-layout.sh",
+        "tooltip": false,
+    },
+
+    "wireplumber": {
+        "format": "<span color=\"#78b6ad\" size='medium'></span> {volume}%",
+        "format-muted": "<span color=\"#78b6ad\" size='medium'></span> Muted",
+        "on-click": "pavucontrol",
+        "max-volume": 150,
+        "scroll-step": 0.2,
+        "tooltip": false
+    },
+
+    "network": {
+        "format-wifi": "<span color=\"#78b6ad\" size='medium'></span> {signalStrength}%",
+        "format-ethernet": "<span color=\"#78b6ad\" size='medium'></span> eth",
+        "format-linked": "<span color=\"#78b6ad\" size='medium'></span> {ifname} (No IP)",
+        "format-disconnected": "404",
+        "format-alt": "<span color=\"#78b6ad\" size='medium'></span> {ipaddr}",
+	"tooltip": false,
+    },
+
+    "bluetooth": {
+        "format": "<span color=\"#78b6ad\" size='medium'></span> {status}",
+        "format-disabled": "",
+        "format-connected": "<span color=\"#78b6ad\" size='medium'></span> {num_connections}",
+        "format-alt-connected": "<span color=\"#78b6ad\"size='medium'></span> {device_alias}",
+        "tooltip-format-connected": "<span color=\"#78b6ad\" size='medium'size='medium'></span> {device_enumerate}",
+        "tooltip-format-enumerate-connected": "<span color=\"#78b6ad\" size='medium'></span> {device_alias}"
+    },
+ 
     "cpu": {
-        "format": "<span color=\"#78b6ad\"></span> {usage}%",
+        "format": "<span color=\"#78b6ad\" size='medium'></span> {usage}%",
         "tooltip": false,
         "interval": 50
     },
 
     "memory": {
-        "format": "<span color=\"#78b6ad\"></span> {}%"
+        "format": "<span color=\"#78b6ad\" size='medium'></span> {}%"
     },
 
     "temperature": {
         "critical-threshold": 80,
         "format": "{icon} {temperatureC}°C",
-        "format-icons": ["<span color=\"#78b6ad\"></span>", "<span color=\"#78b6ad\"></span>", "<span color=\"#78b6ad\"></span>"],
+        "format-icons": ["<span color=\"#78b6ad\" size='medium'></span>", "<span color=\"#78b6ad\" size='medium'></span>", "<span color=\"#78b6ad\" size='medium'></span>"],
         "tooltip": false
     },
 
     "backlight": {
-        "format": "<span color=\"#78b6ad\"></span> {percent}%",
+        "format": "<span color=\"#78b6ad\" size='medium'></span> {percent}%",
         "tooltip": false
     },
 
@@ -124,30 +158,19 @@
         "format": "{icon} {capacity}%",
         "format-charging": "{icon} {capacity}%",
         "format-plugged": "{icon} {capacity}%",
-        "format-icons": ["<span color=\"#78b6ad\"></span>", "<span color=\"#78b6ad\"></span>", "<span color=\"#78b6ad\"></span>", "<span color=\"#78b6ad\"></span>", "<span color=\"#78b6ad\"></span>"]
+        "format-icons": ["<span color=\"#78b6ad\" size='medium'></span>", "<span color=\"#78b6ad\" size='medium'></span>", "<span color=\"#78b6ad\" size='medium'></span>", "<span color=\"#78b6ad\" size='medium'></span>", "<span color=\"#78b6ad\" size='medium'></span>"]
     },
 
-    "network": {
-        "format-wifi": "<span color=\"#78b6ad\"></span> {signalStrength}%",
-        "format-ethernet": "<span color=\"#78b6ad\"></span>",
-        "tooltip-format": "<span color=\"#78b6ad\"></span> {essid}",
-        "format-linked": "<span color=\"#78b6ad\"></span> {ifname} (No IP)",
-        "format-disconnected": "404",
-        "format-alt": "<span color=\"#78b6ad\"></span> {ipaddr}"
+    "sway/workspaces": {
+        "disable-scroll": false,
+        "all-outputs": true,
+        "warp-on-scroll": false,
+        "format": "{name}"
     },
 
     "sway/language": {
         "format": "<span color=\"#78b6ad\"></span> {}",
         "on-click": ".config/waybar/sway-switch-keyboard.sh",
-        "tooltip": false
-    },
-
-    "wireplumber": {
-        "format": "<span color=\"#78b6ad\"></span> {volume}%",
-        "format-muted": " Muted",
-        "on-click": "pavucontrol",
-        "max-volume": 150,
-        "scroll-step": 0.2,
         "tooltip": false
     },
 }
