@@ -59,7 +59,7 @@
     <action name="Exit" />
   </item>
   <item label="Power Menu">
-    <action name="Execute" command="tofi-power" />
+    <action name="Execute" command="fuzz-power" />
   </item>
 </menu>
 
