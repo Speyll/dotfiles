@@ -60,4 +60,4 @@ Additionally, there are other handy scripts available in `.local/bin`
 
 ## Video Showcase
 
-![Video](https://piped.video/watch?v=CeIX-siHCe8)
+![Video](https://youtu.be/CeIX-siHCe8)
