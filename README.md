@@ -12,7 +12,7 @@ If you are here for my old bspwm setup, you can find it [here](https://github.co
 
 ## Screenshot
 
-![Screenshot](https://i.ibb.co/b1NdnXK/grim.webp)
+![Screenshot](https://i.ibb.co/TvdZp1D/grimoptimized.webp)
 
 ## Software Used
 
