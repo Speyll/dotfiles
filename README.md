@@ -19,7 +19,7 @@ If you are here for my old bspwm setup, you can find it [here](https://github.co
   - mainly `labwc` & `wayfire` and somtimes `sway` as window managers (compositors).
   - `foot` Terminal emulator.
   - ~~`yambar`~~ `waybar` Status bar.
-  - `tofi` The application launcher menu.
+  - `fuzzel` The application launcher menu.
   - `pipewire` Audio server.
   - `grim` For taking screenshots.
   - `slurp` To select regions for screenshot capture.
@@ -28,7 +28,7 @@ If you are here for my old bspwm setup, you can find it [here](https://github.co
   - `wl-clipboard` For clipboard management.
   - `cliphist` To access clipboard history.
   - `imv` My image viewer.
-  - `mako` Notification system.
+  - `fnott` Notification system.
   - `mpv` Video player.
   - `nvim` & `nano` Text editor
   - `noto-fonts-emoji`, `noto-fonts-ttf`, `font-hack-ttf`, `font-awesome` Fonts.
