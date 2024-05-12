@@ -21,7 +21,8 @@ alias \
 # xbps and pkg aliases.
 alias \
 	xbs="sudo xbps-install" \
-	xbr="sudo xbps-remove -Rv"
+	xbr="sudo xbps-remove -Rv" \
+    xbq="xbps-query -Rs"
 
 # apt aliases.
 alias \
@@ -35,9 +36,9 @@ alias \
 
 # flatpak aliases.
 alias \
-	flinst="sudo flatpak install" \
-	flrem="sudo flatpak uninstall" \
-	flclean="sudo flatpak uninstall --unused & flatpak repair"
+	flinst="flatpak install" \
+	flrem="flatpak uninstall" \
+	flclean="flatpak uninstall --unused & flatpak repair"
 
 # rsync aliases
 alias \
