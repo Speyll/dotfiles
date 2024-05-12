@@ -56,4 +56,8 @@ I've crafted special scripts to simplify environment variable setup for both Lab
 - `start-labwc`: Use this script to launch Labwc with the configured environment variables.
 - `start-sway`: Use this script to launch Sway with the appropriate configurations.
 
-Additionally, there are other handy scripts available in `.local/bin`.
+Additionally, there are other handy scripts available in `.local/bin`
+
+## Video Showcase
+
+![Video](https://piped.video/watch?v=CeIX-siHCe8)
