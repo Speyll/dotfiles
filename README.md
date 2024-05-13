@@ -53,6 +53,7 @@ Note: I use an **AZERTY** keyboard, so some keybindings may differ. For example,
 
 I've crafted special scripts to simplify environment variable setup for both Labwc and Sway. These scripts streamline the process of launching your preferred window manager with the right configurations.
 
+- `start-wayfire`: Use this script to launch Wayfire with the configured environment variables.
 - `start-labwc`: Use this script to launch Labwc with the configured environment variables.
 - `start-sway`: Use this script to launch Sway with the appropriate configurations.
 
