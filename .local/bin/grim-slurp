@@ -1,2 +1,14 @@
 #!/bin/sh
-grim -g "$(slurp)" - | wl-copy
+if pidof -o %PPID -x "$0"; then
+  exit 0
+fi
+
+screenshot=$(mktemp --suffix=.png)
+grim "${screenshot}"
+imv -f "${screenshot}" &
+imv_pid=$!
+#sleep 0.1
+second_screenshot=$(mktemp --suffix=.png)
+grim -g "$(slurp)" - | wl-copy -t image/png
+kill -9 ${imv_pid}
+rm "${screenshot}" 
