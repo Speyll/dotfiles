@@ -1,6 +1,6 @@
 [options]
 background = 282828
-overlay = true
+overlay = false
 overlay_font = monospace:14
 overlay_text_color = 689D6A
 overlay_background_color = 282828
