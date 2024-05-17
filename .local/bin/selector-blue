@@ -1,47 +1,69 @@
-#!/bin/sh
+#!/bin/bash
+
+# Ensure the Bluetooth controller is on
+bluetoothctl power on
+
+# Start scanning for available Bluetooth devices
+bluetoothctl scan on & sleep 5
+
+# Attempt to stop scanning, handling potential errors
+if ! bluetoothctl scan off 2>/dev/null; then
+    echo "Warning: Failed to stop discovery. Proceeding anyway."
+fi
 
 # Get the list of Bluetooth devices
 devices=$(bluetoothctl devices)
 
+# Debugging: Print the devices variable to check its content
+echo "Devices found: $devices"
+
 # Check if there are any devices
-if [ -n "$devices" ]; then
-    i=1
-    # Loop through the devices and display them
-    printf "%s\n" "$devices" | while read -r device; do
-        device_mac=$(echo "$device" | awk '{print $2}')
-        device_name=$(bluetoothctl info "$device_mac" | awk -F 'Name: ' '/Name/ {print $2}')
-        
-        if [ -n "$device_name" ]; then
-            printf "%s. %s (%s)\n" "$i" "$device_name" "$device_mac"
-        else
-            printf "%s. %s\n" "$i" "$device_mac"
-        fi
-        
-        i=$((i + 1))
-    done
-
-    # Prompt the user to select a Bluetooth device
-    printf "Enter the number of the Bluetooth device to connect to: "
-    read choice
-
-    # Find the corresponding Bluetooth device MAC address
-    device_mac=$(printf "%s\n" "$devices" | awk -v choice="$choice" '/Device/ {if (NR == choice) print $2}')
-
-    # Check if the user entered a valid choice
-    if [ -n "$device_mac" ]; then
-        # Check if the Bluetooth adapter is powered
-        if [ "$(bluetoothctl show | awk '/Powered/ {print $2}')" = "yes" ]; then
-            # Connect to the selected Bluetooth device with a brief delay
-            sleep 2
-            bluetoothctl connect "$device_mac"
-            exit 0
-        else
-            echo "Bluetooth adapter is not powered. Please ensure it is powered on."
-            exit 1
-        fi
-    fi
+if [ -z "$devices" ]; then
+    echo "No Bluetooth devices found."
+    exit 1
 fi
 
-# If no valid device was selected or no devices are available
-echo "Invalid selection. No connection was made."
-exit 1
+# Display the devices and create an associative array for easy selection
+declare -A device_map
+i=1
+while read -r device; do
+    device_mac=$(echo "$device" | awk '{print $2}')
+    device_name=$(bluetoothctl info "$device_mac" | awk -F 'Name: ' '/Name/ {print $2}')
+    
+    if [ -z "$device_name" ]; then
+        device_name="$device_mac"
+    fi
+    
+    printf "%s. %s (%s)\n" "$i" "$device_name" "$device_mac"
+    device_map["$i"]="$device_mac"
+    i=$((i + 1))
+done <<< "$devices"
+
+# Prompt the user to select a Bluetooth device
+read -p "Enter the number of the Bluetooth device to connect to: " choice
+
+# Find the corresponding Bluetooth device MAC address
+device_mac=${device_map["$choice"]}
+
+# Check if the user entered a valid choice
+if [ -z "$device_mac" ]; then
+    echo "Invalid selection. No connection was made."
+    exit 1
+fi
+
+# Check if the Bluetooth adapter is powered
+if [ "$(bluetoothctl show | awk '/Powered/ {print $2}')" != "yes" ]; then
+    echo "Bluetooth adapter is not powered. Please ensure it is powered on."
+    exit 1
+fi
+
+# Connect to the selected Bluetooth device with a brief delay
+sleep 2
+bluetoothctl connect "$device_mac" > /dev/null 2>&1
+
+if [ $? -eq 0 ]; then
+    echo "Connection successful"
+else
+    echo "Failed to connect to $device_mac"
+fi
+

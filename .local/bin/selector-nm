@@ -26,7 +26,7 @@ connect_to_wifi() {
 
 # Function to disconnect from the currently connected Wi-Fi network
 disconnect_from_wifi() {
-    connected_device=$(nmcli --fields SSID device wifi | awk 'NR>1' | sed 's/ //g')
+    connected_device=$(nmcli -g SSID device wifi | sed '/^\s*$/d')
     if [ -n "$connected_device" ]; then
         nmcli device disconnect "$connected_device"
         echo "Disconnected from Wi-Fi network: $connected_device"
@@ -48,20 +48,10 @@ echo "4. Show current connection status"
 read -p "Enter your choice (1, 2, 3, or 4): " choice
 
 case $choice in
-    1)
-        show_wifi_networks
-        ;;
-    2)
-        connect_to_wifi
-        ;;
-    3)
-        disconnect_from_wifi
-        ;;
-    4)
-        show_current_status
-        ;;
-    *)
-        echo "Invalid choice. Exiting."
-        ;;
+    1) show_wifi_networks ;;
+    2) connect_to_wifi ;;
+    3) disconnect_from_wifi ;;
+    4) show_current_status ;;
+    *) echo "Invalid choice. Exiting." ;;
 esac
 
