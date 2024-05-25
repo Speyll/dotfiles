@@ -14,7 +14,7 @@ LOGFILE="$HOME/.cache/wsession-errors"
 exec > "$LOGFILE" 2>&1
 
 # Log the script start time
-echo "Labwc session started: $(date)"
+echo "Wayfire session started: $(date)"
 
 # Enable debug mode (remove this line for production use)
 # set -x

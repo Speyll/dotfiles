@@ -1,0 +1,27 @@
+#!/bin/env bash
+
+file_path="${1:-$(pwd)}"
+
+choice=$(printf '1: Copy Path\n2: Copy File\n3: Open With...' | fuzzel --dmenu --log-level=none)
+
+[[ -z $choice ]] && exit 0;
+
+choice=$(printf "%s" "$choice" | cut -d: -f1)
+
+function get_program() {
+    type=$(file -b --mime-type "$file_path")
+    programs=( $(gio mime "$type" | tail -n +2 | grep '.desktop' | sort | uniq | awk '{$1=$1};1') )
+    program=$(printf '%s\n' "${programs[@]}" | fuzzel --dmenu --log-level=none)
+    find /usr/share/applications/ ~/.local/share/applications/ -name "$program" -print -quit
+}
+
+case "$choice" in
+    1) wl-copy "$file_path"
+       exit;;
+    2) wl-copy < "$file_path"
+       exit;;
+    3) gio launch $(get_program) "$file_path"
+       exit;;
+        
+esac
+

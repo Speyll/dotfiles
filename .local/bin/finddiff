@@ -1,0 +1,19 @@
+#!/bin/bash
+
+dir1=$1
+dir2=$2
+
+# Create temporary files for file lists
+tmp1=$(mktemp)
+tmp2=$(mktemp)
+
+# List all files in both directories, stripping leading directories
+find "$dir1" -type f | sed "s|^$dir1/||" | sort > "$tmp1"
+find "$dir2" -type f | sed "s|^$dir2/||" | sort > "$tmp2"
+
+# Find files that are in dir1 but not in dir2
+comm -23 "$tmp1" "$tmp2"
+
+# Clean up temporary files
+rm "$tmp1" "$tmp2"
+
