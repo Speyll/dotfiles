@@ -18,7 +18,7 @@ case "$choice" in
         ;;
     " Reboot")
         # Suspend the system
-        sudo reboot now
+        sudo reboot
         ;;
     " Lock")
         # Lock the screen using swaylock (for SwayWM)

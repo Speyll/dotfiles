@@ -1,26 +1,26 @@
 #!/bin/sh
 
 # Define the menu options with Font Awesome 4 icons
-options=" Stream\n Terminal\n Explorer\n Browser\n Power"
+options="📺 Stream\n🖥️ Terminal\n🗃️ Explorer\n🌍 Browser\n🔌 Power"
 
 # Use Tofi to create a menu with the options
 choice=$(echo "$options" | fuzzel -d -f FontAwesome:size=15 -w 7 -l 5 -a center)
 
 # Check the user's choice and launch the corresponding application
 case "$choice" in
-    " Stream")
+    "📺 Stream")
         fuzz-streaming
         ;;
-    " Terminal")
+    "🖥️ Terminal")
         foot
         ;;
-    " Explorer")
+    "🗃️ Explorer")
         pcmanfm-qt
         ;;
-    " Browser")
+    "🌍 Browser")
         flatpak run io.gitlab.librewolf-community
         ;;
-    " Power")
+    "🔌 Power")
         fuzz-power
         ;;
     *)

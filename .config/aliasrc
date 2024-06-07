@@ -37,8 +37,8 @@ alias \
 # flatpak aliases.
 alias \
 	flinst="flatpak install" \
-	flrem="flatpak uninstall" \
-	flclean="flatpak uninstall --unused & flatpak repair"
+	flrem="flatpak uninstall --delete-data" \
+	flclean="flatpak uninstall --unused --delete-data & flatpak repair"
 
 # rsync aliases
 alias \
