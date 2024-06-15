@@ -58,7 +58,6 @@ xterm*|rxvt*|foot*)
     ;;
 esac
 
-
 # Alias definition
 if [ -f ~/.config/aliasrc ]; then
     . ~/.config/aliasrc

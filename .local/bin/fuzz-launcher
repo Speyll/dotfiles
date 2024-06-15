@@ -1,30 +1,36 @@
 #!/bin/sh
 
-# Define the menu options with Font Awesome 4 icons
+# Define the menu options with emojis
 options="📺 Stream\n🖥️ Terminal\n🗃️ Explorer\n🌍 Browser\n🔌 Power"
 
-# Use Tofi to create a menu with the options
-choice=$(echo "$options" | fuzzel -d -f FontAwesome:size=15 -w 7 -l 5 -a center)
+# Display the menu and get the user's choice
+choice=$(echo "$options" | fuzzel -d -f monospace:size=14 -w 12 -l 5 -a center)
 
-# Check the user's choice and launch the corresponding application
+# Function to launch the chosen application
+launch_app() {
+    command -v "$1" >/dev/null 2>&1 && exec "$@" || { echo "$1 not found" >&2; exit 1; }
+}
+
+# Check the user's choice and call the launch_app function
 case "$choice" in
     "📺 Stream")
-        fuzz-streaming
+        launch_app fuzz-streaming
         ;;
     "🖥️ Terminal")
-        foot
+        launch_app foot
         ;;
     "🗃️ Explorer")
-        pcmanfm-qt
+        launch_app pcmanfm-qt
         ;;
     "🌍 Browser")
-        flatpak run io.gitlab.librewolf-community
+        launch_app flatpak run io.gitlab.librewolf-community
         ;;
     "🔌 Power")
-        fuzz-power
+        launch_app fuzz-power
         ;;
     *)
         echo "Invalid choice: $choice" >&2
         exit 1
         ;;
 esac
+

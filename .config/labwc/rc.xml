@@ -207,6 +207,9 @@
     <keybind key="W-KP_3">
       <action name="SnapToRegion" region="bottom-right" />
     </keybind>
+    <keybind key="W-x">
+      <action name="ToggleAlwaysOnTop" />
+    </keybind>
   </keyboard>
 
   <mouse>

@@ -75,6 +75,6 @@ export NNN_OPTS="dH"
 #export LIBGL_ALWAYS_SOFTWARE=1 alacritty
 
 # Autologin on tty1
-if [ -z "$DISPLAY" ] && [ "$(fgconsole)" -eq 1 ]; then
-    start-wayfire
-fi
+#if [ -z "$DISPLAY" ] && [ "$(fgconsole)" -eq 1 ]; then
+    #start-wayfire
+#fi
