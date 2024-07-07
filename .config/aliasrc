@@ -58,3 +58,6 @@ alias \
 
 # Tmux
 tmux="tmux -f ${XDG_CONFIG_HOME:-$HOME/.config}/tmux/tmux.conf"
+
+# Python local server
+pyserv="python3 -m http.server"
