@@ -47,6 +47,45 @@ export XDG_DATA_DIRS="$HOME/.local/share/flatpak/exports/share:/var/lib/flatpak/
 # Remove "Couldn't register with accessibility bus: Did not receive a reply." warnings
 export NO_AT_BRIDGE=1
 
+# user-session socket has already been set up, but it's not available in a
+# current environment
+if [ -z "$DBUS_SESSION_BUS_ADDRESS" ] && \
+  [ -n "$XDG_RUNTIME_DIR" ] && \
+  [ "$XDG_RUNTIME_DIR" = "/run/user/`id -u`" ] && \
+  [ -S "$XDG_RUNTIME_DIR/bus" ]; then
+  DBUS_SESSION_BUS_ADDRESS="unix:path=$XDG_RUNTIME_DIR/bus"
+  export DBUS_SESSION_BUS_ADDRESS
+fi
+
+# X11-related env variables are exported in case we switch sessions between
+# X11 and Wayland. Maybe it's unnecessary though
+dbus-update-activation-environment --verbose DBUS_SESSION_BUS_ADDRESS
+
+
+# launch dbus if it isn't launched yet
+if [ -z "$DBUS_SESSION_BUS_ADDRESS" ]; then
+  eval $(/usr/bin/dbus-launch --exit-with-session --sh-syntax)
+fi
+
+# unset unnecessary env variables safely in a subshell and export environment
+# to dbus
+if [ -n "$DBUS_SESSION_BUS_ADDRESS" ]; then
+  (
+    unset XDG_SEAT
+    unset XDG_SESSION_ID
+    unset XDG_VTNR
+    dbus-update-activation-environment --verbose --all
+  )
+fi
+
+# unset variables from the old sessions which might interfere with the new one
+unset SWAYSOCK I3SOCK WAYLAND_DISPLAY DISPLAY
+
+# dbus-update-activation-environment --systemd works only if systemd --user
+# is available on dbus, so as a kind of workaround and/or safeguard, we'll
+# export it once again
+systemctl --user import-environment
+
 # Cleanup older sessions
 rm "$HOME"/.cache/*.wob
 

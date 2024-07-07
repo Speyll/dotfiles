@@ -10,7 +10,7 @@ mount_sshfs() {
 
     case $choice in
         1)
-            sshfs lyes@192.168.100.13:/home/lyes /mnt/sshfs/
+            sshfs lyes@192.168.100.13:/home/lyes /mnt/home/
             ;;
         2)
             sshfs lyes@192.168.100.13:/media /mnt/sshfs/
