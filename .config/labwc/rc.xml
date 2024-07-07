@@ -210,6 +210,9 @@
     <keybind key="W-x">
       <action name="ToggleAlwaysOnTop" />
     </keybind>
+    <keybind key="W-C-Backspace">
+      <action name="Exit" />
+    </keybind>   
   </keyboard>
 
   <mouse>
