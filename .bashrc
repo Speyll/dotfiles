@@ -9,7 +9,8 @@ case $- in
 esac
 
 # History settings
-HISTCONTROL=ignoreboth
+HISTCONTROL=ignorespace:ignoredups:erasedups
+PROMPT_COMMAND='history -a; history -c; history -r'
 shopt -s histappend
 HISTSIZE=1000
 HISTFILESIZE=2000
