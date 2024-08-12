@@ -55,7 +55,7 @@
   <item label="Reconfigure">
     <action name="Reconfigure" />
   </item>
-  <item label="Exit">
+  <item label="Exit labwc">
     <action name="Exit" />
   </item>
   <item label="Power Menu">
