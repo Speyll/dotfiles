@@ -227,7 +227,7 @@
 		</keybind>
 	</keyboard>
 	<mouse>
-        <!-- <default /> -->
+        <default />
 		<doubleClickTime>500</doubleClickTime>
 		<scrollFactor>1.0</scrollFactor>
 		<context name="Frame">
@@ -241,7 +241,7 @@
             <mousebind button="A-Left" action="Drag">
 				<action name="None" />
                 </mousebind>
-            <mousebind button="A-Left">
+            <mousebind button="A-Left" action="Press">
 				<action name="None" />
 			</mousebind>
 			<mousebind button="W-Right" action="Press">
