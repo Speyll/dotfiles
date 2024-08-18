@@ -10,7 +10,7 @@
 
     "modules-left": ["custom/launcher", "wlr/taskbar"],
     "modules-center": [],
-    "modules-right": ["tray", "group/networking", "group/core"],
+    "modules-right": ["tray", "group/status", "group/networking", "group/core"],
 
     "group/leftWrapper": {
         "orientation": "horizontal",
@@ -32,7 +32,6 @@
         "orientation": "inherit",
         "modules": [
             "wireplumber",
-            "custom/keyboard",
             "clock",
         ],
     },
@@ -40,8 +39,15 @@
     "group/networking": {
         "orientation": "inherit",
         "modules": [
-            "bluetooth",
             "network",
+        ],
+    },
+
+    "group/status": {
+        "orientation": "inherit",
+        "modules": [
+            "custom/wlsunset",
+        "custom/keyboard",
         ],
     },
 
@@ -49,7 +55,7 @@
         "orientation": "inherit",
         "modules": [
             "cpu",
-            "memory",
+        "memory",
         ],
     },
 
@@ -101,13 +107,19 @@
         "tooltip": false,
     },
 
+    "custom/wlsunset": {
+        "format": "<span color=\"#78b6ad\" size='medium'></span> nitl",
+        "on-click-right": "bash ~/.config/waybar/scripts/sun-toggle.sh",
+        "tooltip": false,
+    },
+
     "wireplumber": {
         "format": "<span color=\"#78b6ad\" size='medium'></span> {volume}%",
         "format-muted": "<span color=\"#78b6ad\" size='medium'></span> Muted",
         "on-click": "pavucontrol",
         "max-volume": 150,
         "scroll-step": 0.2,
-        "tooltip": false
+        "tooltip": false,
     },
 
     "network": {
@@ -124,7 +136,7 @@
         "format-disabled": "",
         "format-connected": "<span color=\"#78b6ad\" size='medium'></span> {num_connections}",
         "format-alt-connected": "<span color=\"#78b6ad\"size='medium'></span> {device_alias}",
-        "tooltip-format-connected": "<span color=\"#78b6ad\" size='medium'size='medium'></span> {device_enumerate}",
+        "tooltip-format-connected": "<span color=\"#78b6ad\" 'size='medium'></span> {device_enumerate}",
         "tooltip-format-enumerate-connected": "<span color=\"#78b6ad\" size='medium'></span> {device_alias}"
     },
  
@@ -160,4 +172,5 @@
         "format-plugged": "{icon} {capacity}%",
         "format-icons": ["<span color=\"#78b6ad\" size='medium'></span>", "<span color=\"#78b6ad\" size='medium'></span>", "<span color=\"#78b6ad\" size='medium'></span>", "<span color=\"#78b6ad\" size='medium'></span>", "<span color=\"#78b6ad\" size='medium'></span>"]
     },
+
 }

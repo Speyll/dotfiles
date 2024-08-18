@@ -149,7 +149,9 @@ tooltip label {
 #disk,
 #temperature,
 #backlight,
-#taskbar {
+#custom-keyboard,
+#custom-wlsunset,
+#taskbar{
     margin: 0 5px 0 5px;
     padding: 0;
 }
