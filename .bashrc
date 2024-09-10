@@ -10,7 +10,7 @@ esac
 
 # History settings
 HISTCONTROL=ignorespace:ignoredups:erasedups
-PROMPT_COMMAND='history -a; history -c; history -r'
+PROMPT_COMMAND='history -a'
 shopt -s histappend
 HISTSIZE=1000
 HISTFILESIZE=2000

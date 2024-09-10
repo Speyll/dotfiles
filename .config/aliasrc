@@ -61,3 +61,6 @@ tmux="tmux -f ${XDG_CONFIG_HOME:-$HOME/.config}/tmux/tmux.conf"
 
 # Python local server
 pyserv="python3 -m http.server"
+
+# Clear dups from bash history
+alias cleanup-history="tac $HOME/.bash_history | awk '!seen[\$0]++' | tac > /tmp/.bash_history_tmp && mv /tmp/.bash_history_tmp $HOME/.bash_history"
