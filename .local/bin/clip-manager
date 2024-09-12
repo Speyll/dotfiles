@@ -1,2 +1,2 @@
 #!/bin/sh
-cliphist list | fuzzel -d -f monospace:size=14 -w 30 -l 10 -a bottom-right -B 8 -C 00000000 | cliphist decode | wl-copy
+cliphist list | fuzzel -d -f monospace:size=14 -w 30 -l 10 -a bottom-right --x-margin 8 --y-margin 8 | cliphist decode | wl-copy
