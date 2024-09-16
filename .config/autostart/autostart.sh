@@ -3,6 +3,9 @@
 # Update DBus session
 dbus-update-activation-environment --all &
 
+# Start polkit agent
+/usr/libexec/polkit-gnome-authentication-agent-1 &
+
 # Set output and adaptive sync
 wlr-randr --output HDMI-A-1 --mode 1920x1080@60.000000 --adaptive-sync enabled &
 
@@ -28,8 +31,8 @@ waybar -c $HOME/.config/waybar/stacking-config -s $HOME/.config/waybar/style.css
 
 # Set wallpaper with swaybg or mpvpaper
 #swaybg --mode fill -i "$HOME/pictures/walls/wall.jpg" &
-swaybg -i $(find $HOME/pictures/walls/*.jpg -type f | shuf -n1) -m fill &
-#mpvpaper -vsp -o "no-audio pause=no --loop --ytdl-format='bestvideo[height<=1080]+bestaudio/best'" '*' "$HOME/pictures/walls/wall.mp4" &
+#swaybg -i $(find $HOME/pictures/walls/*.jpg -type f | shuf -n1) -m fill &
+mpvpaper -vsp -o "no-audio pause=no --loop --ytdl-format='bestvideo[height<=1080]+bestaudio/best'" '*' "$HOME/pictures/walls/wall.mp4" &
 
 # Set cursor theme
 gsettings set org.gnome.desktop.interface cursor-theme Breeze_Snow &
