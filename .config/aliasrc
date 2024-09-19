@@ -1,33 +1,33 @@
 #!/bin/sh
 # Colorize commands when possible.
 alias \
-	ls="ls -shA --color=auto" \
-	dir="dir --color=auto" \
-	vdir="vdir --color=auto" \
-	grep="grep --color=auto" \
-	fgrep="fgrep --color=auto" \
-	egrep="egrep --color=auto" \
-	diff="diff --color=auto" \
-	ccat="highlight --out-format=ansi" \
-	dfg="df -BG" \
-	dfm="df -BM" \
+    ls="ls -shA --color=auto" \
+    dir="dir --color=auto" \
+    vdir="vdir --color=auto" \
+    grep="grep --color=auto" \
+    fgrep="fgrep --color=auto" \
+    egrep="egrep --color=auto" \
+    diff="diff --color=auto" \
+    ccat="highlight --out-format=ansi" \
+    dfg="df -BG" \
+    dfm="df -BM" \
 
 # Some more ls aliases.
 alias \
-	ll="ls -l --color=auto" \
-	la="ls -A --color=auto" \
-	llt="ls -latrG"
+    ll="ls -l --color=auto" \
+    la="ls -A --color=auto" \
+    llt="ls -latrG"
 
 # xbps and pkg aliases.
 alias \
-	xbs="sudo xbps-install" \
-	xbr="sudo xbps-remove -Rv" \
+    xbs="sudo xbps-install" \
+    xbr="sudo xbps-remove -Rv" \
     xbq="xbps-query -Rs"
 
 # apt aliases.
 alias \
-	apti="sudo apt-get install --no-install-recommends" \
-	aptr="sudo apt-get --purge autoremove"
+    apti="sudo apt-get install --no-install-recommends" \
+    aptr="sudo apt-get --purge autoremove"
 
 # zypper aliases.
 alias \
@@ -36,25 +36,25 @@ alias \
 
 # flatpak aliases.
 alias \
-	flinst="flatpak install" \
-	flrem="flatpak uninstall --delete-data" \
+    flinst="flatpak install" \
+    flrem="flatpak uninstall --delete-data" \
     flclean="flatpak uninstall --unused --delete-data -y && flatpak repair"
 
 # rsync aliases
 alias \
-	rsync="rsync -avh --progress" \
-	rsync-ssh="rsync -avzh --progress -e ssh" \
-	rsync-net="rsync -avzh --progress"
+    rsync="rsync -avh --progress" \
+    rsync-ssh="rsync -avzh --progress -e ssh" \
+    rsync-net="rsync -avzh --progress"
 
 # Use neovim for vim if present.
 command -v nvim >/dev/null && alias vim="nvim" vimdiff="nvim -d"
 
 # Verbosity and settings that you pretty much just always are going to want.
 alias \
-	cp="cp -iv" \
-	mv="mv -iv" \
-	rm="rm -vI" \
-	mkd="mkdir -pv"
+    cp="cp -iv" \
+    mv="mv -iv" \
+    rm="rm -vI" \
+    mkd="mkdir -pv"
 
 # Tmux
 alias tmux="tmux -f ${XDG_CONFIG_HOME:-$HOME/.config}/tmux/tmux.conf"
