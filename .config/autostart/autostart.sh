@@ -33,6 +33,7 @@ waybar -c $HOME/.config/waybar/stacking-config -s $HOME/.config/waybar/style.css
 #swaybg --mode fill -i "$HOME/pictures/walls/wall.jpg" &
 swaybg -i $(find $HOME/pictures/walls/*.jpg -type f | shuf -n1) -m fill &
 #mpvpaper -vsp -o "no-audio pause=no --loop --ytdl-format='bestvideo[height<=1080]+bestaudio/best'" '*' "$HOME/pictures/walls/wall.mp4" &
+#mpvpaper -vsp -o "no-audio pause=no --loop --ytdl-format='bestvideo[height<=1080]+bestaudio/best'" '*' $(find $HOME/pictures/walls/*.mp4 -type f | shuf -n1) &
 
 # Set cursor theme
 gsettings set org.gnome.desktop.interface cursor-theme Breeze_Snow &
