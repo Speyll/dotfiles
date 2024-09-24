@@ -8,9 +8,9 @@
     "fixed-center": false,
     "reload_style_on_change": false,
 
-    "modules-left": ["custom/launcher", "wlr/taskbar"],
+    "modules-left": ["sway/workspaces", "wlr/taskbar"],
     "modules-center": [],
-    "modules-right": ["tray", "group/status", "group/networking", "group/core"],
+    "modules-right": ["tray", "group/laptop", "group/status", "group/networking", "group/core"],
 
     "group/leftWrapper": {
         "orientation": "horizontal",
