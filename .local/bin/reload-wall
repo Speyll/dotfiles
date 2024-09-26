@@ -1,0 +1,46 @@
+#!/bin/sh
+
+# Kill previous instances of swaybg or mpvpaper
+pkill swaybg
+pkill mpvpaper
+
+# Prompt user for choice once: image or video
+echo "(1) swaybg (random image) | (2) mpvpaper (random video)"
+read -r choice
+
+# Main loop for reloading or confirming
+while true; do
+    # Kill any previous instances of swaybg or mpvpaper
+    pkill swaybg
+    pkill mpvpaper
+
+    # Set background based on initial choice
+    case "$choice" in
+        1)
+            nohup swaybg -i "$(find "$HOME/pictures/walls" -type f -name "*.jpg" | shuf -n 1)" -m fill > /dev/null 2>&1 &
+            ;;
+        2)
+            nohup mpvpaper -vsp -o "no-audio pause=no --loop --ytdl-format='bestvideo[height<=1080]+bestaudio/best'" '*' "$(find "$HOME/pictures/walls" -type f -name "*.mp4" | shuf -n 1)" > /dev/null 2>&1 &
+            ;;
+        *)
+            echo "Invalid choice."
+            exit 1
+            ;;
+    esac
+
+    # Ask for reload or confirm, no need to press Enter
+    echo "(r)eload or (y)es to confirm"
+    stty -echo -icanon time 0 min 0  # Set to immediately capture keypress without Enter
+    while :; do
+        action=$(dd bs=1 count=1 2>/dev/null)
+        if [ "$action" = "r" ]; then
+            echo "Reloading..."
+            break
+        elif [ "$action" = "y" ]; then
+            echo "Background confirmed."
+            stty sane  # Reset terminal settings
+            exit 0
+        fi
+    done
+done
+
