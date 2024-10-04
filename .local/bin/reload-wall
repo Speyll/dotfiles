@@ -1,8 +1,27 @@
 #!/bin/sh
 
-# Kill previous instances of swaybg or mpvpaper
-pkill swaybg
-pkill mpvpaper
+# Cache file lists
+IMG_FILES=$(find "$HOME/pictures/walls" -type f -name "*.jpg")
+VID_FILES=$(find "$HOME/pictures/walls" -type f -name "*.mp4")
+
+# Kill previous instance of the currently running background process
+kill_bg() {
+    if pgrep swaybg > /dev/null; then
+        pkill swaybg
+    elif pgrep mpvpaper > /dev/null; then
+        pkill mpvpaper
+    fi
+}
+
+# Function to set background using swaybg
+set_swaybg() {
+    nohup swaybg -i "$(echo "$IMG_FILES" | shuf -n 1)" -m fill > /dev/null 2>&1 &
+}
+
+# Function to set wallpaper using mpvpaper
+set_mpvpaper() {
+    nohup mpvpaper -vsp -o "no-audio pause=no --loop --ytdl-format='bestvideo[height<=1080]+bestaudio/best'" '*' "$(echo "$VID_FILES" | shuf -n 1)" > /dev/null 2>&1 &
+}
 
 # Prompt user for choice once: image or video
 echo "(1) swaybg (random image) | (2) mpvpaper (random video)"
@@ -10,17 +29,16 @@ read -r choice
 
 # Main loop for reloading or confirming
 while true; do
-    # Kill any previous instances of swaybg or mpvpaper
-    pkill swaybg
-    pkill mpvpaper
+    # Kill only the active background process
+    kill_bg
 
     # Set background based on initial choice
     case "$choice" in
         1)
-            nohup swaybg -i "$(find "$HOME/pictures/walls" -type f -name "*.jpg" | shuf -n 1)" -m fill > /dev/null 2>&1 &
+            set_swaybg
             ;;
         2)
-            nohup mpvpaper -vsp -o "no-audio pause=no --loop --ytdl-format='bestvideo[height<=1080]+bestaudio/best'" '*' "$(find "$HOME/pictures/walls" -type f -name "*.mp4" | shuf -n 1)" > /dev/null 2>&1 &
+            set_mpvpaper
             ;;
         *)
             echo "Invalid choice."
@@ -30,7 +48,7 @@ while true; do
 
     # Ask for reload or confirm, no need to press Enter
     echo "(r)eload or (y)es to confirm"
-    stty -echo -icanon time 0 min 0  # Set to immediately capture keypress without Enter
+    stty -echo -icanon time 0 min 0
     while :; do
         action=$(dd bs=1 count=1 2>/dev/null)
         if [ "$action" = "r" ]; then
@@ -38,9 +56,8 @@ while true; do
             break
         elif [ "$action" = "y" ]; then
             echo "Background confirmed."
-            stty sane  # Reset terminal settings
+            stty sane
             exit 0
         fi
     done
 done
-
