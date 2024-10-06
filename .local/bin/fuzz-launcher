@@ -1,10 +1,10 @@
 #!/bin/sh
 
 # Define the menu options with emojis
-options="📺 Stream\n🖥️ Terminal\n🗃️ Explorer\n🌍 Browser\n🔌 Power"
+options="📺 Stream\n🖥️ Terminal\n🗃️ Explorer\n🌍 Browser\n📦 More\n🔌 Power"
 
 # Display the menu and get the user's choice
-choice=$(echo "$options" | fuzzel -d -f monospace:size=14 -w 12 -l 5 -a center)
+choice=$(echo "$options" | fuzzel -d -f monospace:size=14 -w 13 -l 6 -a center)
 
 # Function to launch the chosen application
 launch_app() {
@@ -24,6 +24,9 @@ case "$choice" in
         ;;
     "🌍 Browser")
         launch_app flatpak run io.gitlab.librewolf-community
+        ;;
+    "📦 More")
+        launch_app fuzzel
         ;;
     "🔌 Power")
         launch_app fuzz-power
