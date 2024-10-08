@@ -41,8 +41,8 @@ window.inactive.title.bg.color: #282828
 window.label.text.justify: left
 window.active.label.bg: parentrelative
 window.inactive.label.bg: parentrelative
-window.active.label.text.color: #282828
-window.inactive.label.text.color: #bdae93
+window.active.label.text.color: #689d6a
+window.inactive.label.text.color: #282828
 
 !! Window borders
 border.width: 1
@@ -74,7 +74,7 @@ window.active.button.iconify.unpressed.image.color: #282828
 window.active.button.iconify.toggled.pressed.image.color: #282828
 window.active.button.iconify.toggled.unpressed.image.color: #282828
 
-window.active.button.max.pressed.image.color: #282828  
+window.active.button.max.pressed.image.color: #282828
 window.active.button.max.disabled.image.color: #626880
 window.active.button.max.unpressed.image.color: #282828
 window.active.button.max.toggled.pressed.image.color: #282828
@@ -119,16 +119,16 @@ window.inactive.button.menu.toggled.unpressed.image.color: #ebdbb2
 !! OSD
 osd.bg: flat
 
-osd.border.width: 2
-osd.window-switcher.width: 600
-osd.window-switcher.padding: 0
-osd.window-switcher.item.padding.x: 2
-osd.window-switcher.item.padding.y: 2
+osd.border.width: 1
+osd.window-switcher.width: 500
+osd.window-switcher.padding: 14
+osd.window-switcher.item.padding.x: 4
+osd.window-switcher.item.padding.y: 4
 osd.window-switcher.item.active.border.width: 2
-osd.workspace-switcher.boxes.width: 15
-osd.workspace-switcher.boxes.height: 15
+osd.workspace-switcher.boxes.width: 16
+osd.workspace-switcher.boxes.height: 16
 
-osd.border.color: #689d6a 
+osd.border.color: #689d6a
 osd.bg.color: #282828
 osd.label.text.color: #ebdbb2
 
