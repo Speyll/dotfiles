@@ -38,10 +38,10 @@ window.active.title.bg.color: #689d6a
 window.inactive.title.bg.color: #282828
 
 !! Titlebar text
-window.label.text.justify: left
+window.label.text.justify: center
 window.active.label.bg: parentrelative
 window.inactive.label.bg: parentrelative
-window.active.label.text.color: #689d6a
+window.active.label.text.color: #689d6a 
 window.inactive.label.text.color: #282828
 
 !! Window borders
