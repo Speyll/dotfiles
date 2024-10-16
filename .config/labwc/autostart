@@ -1,2 +1,2 @@
-## General autostart
-$HOME/.config/autostart/autostart.sh
+# Autostart
+$HOME/.config/autostart/autostart.sh &

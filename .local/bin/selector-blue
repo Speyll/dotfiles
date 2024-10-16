@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/bin/sh
 
 # Ensure the Bluetooth controller is on
 bluetoothctl power on
@@ -23,27 +23,41 @@ if [ -z "$devices" ]; then
     exit 1
 fi
 
-# Display the devices and create an associative array for easy selection
-declare -A device_map
+# Display the devices and store them in a temporary file
+temp_file=$(mktemp)
 i=1
-while read -r device; do
+
+echo "$devices" | while read -r device; do
     device_mac=$(echo "$device" | awk '{print $2}')
     device_name=$(bluetoothctl info "$device_mac" | awk -F 'Name: ' '/Name/ {print $2}')
-    
+
     if [ -z "$device_name" ]; then
         device_name="$device_mac"
     fi
-    
+
+    printf "%s: %s\n" "$device_mac" "$device_name" >> "$temp_file"
     printf "%s. %s (%s)\n" "$i" "$device_name" "$device_mac"
-    device_map["$i"]="$device_mac"
     i=$((i + 1))
-done <<< "$devices"
+done
 
 # Prompt the user to select a Bluetooth device
-read -p "Enter the number of the Bluetooth device to connect to: " choice
+printf "Enter the number of the Bluetooth device to connect to: "
+read -r choice
 
-# Find the corresponding Bluetooth device MAC address
-device_mac=${device_map["$choice"]}
+# Find the corresponding Bluetooth device MAC address from the temp file
+device_mac=""
+line_num=1
+
+while IFS=':' read -r mac _; do
+    if [ "$line_num" -eq "$choice" ]; then
+        device_mac="$mac"
+        break
+    fi
+    line_num=$((line_num + 1))
+done < "$temp_file"
+
+# Clean up the temporary file
+rm "$temp_file"
 
 # Check if the user entered a valid choice
 if [ -z "$device_mac" ]; then
@@ -59,11 +73,8 @@ fi
 
 # Connect to the selected Bluetooth device with a brief delay
 sleep 2
-bluetoothctl connect "$device_mac" > /dev/null 2>&1
-
-if [ $? -eq 0 ]; then
+if bluetoothctl connect "$device_mac" > /dev/null 2>&1; then
     echo "Connection successful"
 else
     echo "Failed to connect to $device_mac"
 fi
-

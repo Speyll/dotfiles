@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/bin/sh
 
 # Function to display available Wi-Fi networks
 show_wifi_networks() {
@@ -7,14 +7,17 @@ show_wifi_networks() {
 
 # Function to connect to a Wi-Fi network
 connect_to_wifi() {
+    # List available networks with numbering
     nmcli --fields SSID device wifi | awk 'NR>1 {print NR-1 ". " $1}'
-    read -p "Enter the number of the Wi-Fi network to connect to: " choice
+    printf "Enter the number of the Wi-Fi network to connect to: "
+    read -r choice
 
     # Find the corresponding Wi-Fi network SSID
     ssid=$(nmcli --fields SSID device wifi | awk -v choice="$choice" 'NR == choice+1 {print $1}')
 
     if [ -n "$ssid" ]; then
-        read -s -p "Enter the password for $ssid: " password
+        printf "Enter the password for %s: " "$ssid"
+        read -r password
         echo
 
         # Attempt to connect to the Wi-Fi network
@@ -45,9 +48,10 @@ echo "1. Show available Wi-Fi networks"
 echo "2. Connect to a Wi-Fi network"
 echo "3. Disconnect from a Wi-Fi network"
 echo "4. Show current connection status"
-read -p "Enter your choice (1, 2, 3, or 4): " choice
+printf "Enter your choice (1, 2, 3, or 4): "
+read -r choice
 
-case $choice in
+case "$choice" in
     1) show_wifi_networks ;;
     2) connect_to_wifi ;;
     3) disconnect_from_wifi ;;

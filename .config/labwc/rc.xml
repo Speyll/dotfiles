@@ -120,7 +120,7 @@
             <action name="Execute" command="foot" />
             </keybind>
         <keybind key="W-S-n">
-            <action name="Execute" command="foot -T nnn nnn" />
+            <action name="Execute" command="foot -T lf lf" />
             </keybind>
         <keybind key="W-semicolon">
             <action name="Execute" command="bemoji" />

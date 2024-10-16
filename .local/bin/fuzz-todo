@@ -1,4 +1,4 @@
-#!/usr/bin/env sh
+#!/bin/sh
 
 # Main cache file
 cache_file="$HOME/.cache/todo.cache"

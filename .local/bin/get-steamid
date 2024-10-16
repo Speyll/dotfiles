@@ -1,16 +1,21 @@
-#!/bin/bash
+#!/bin/sh
+
 steamapps="$HOME/.steam/steam/steamapps"
-echo -n "\
--------------------------------------------------------------------------
-Looking through ${steamapps}/compatdata/ ...
--------------------------------------------------------------------------
-Proton    App ID      Name
-"
+
+# Print header
+printf "Looking through %s/compatdata/ ...\n" "$steamapps"
+printf "Proton    App ID      Name\n"
+
+# Loop through all directories in compatdata
 for x in "$steamapps"/compatdata/*; do
-    id=${x##*/}
-    name=$(sed -n '/^\s*"name"\s*/ s///p' "$steamapps"/appmanifest_"$id".acf 2> /dev/null)
-    printf "%-8s  %-10s  %s\n" \
-        "$(< "$x"/version)" \
-        "$id" \
-        "${name:-this is not a Steam app?}"
+    id=$(basename "$x")  # Extract the App ID from the directory name
+    # Extract the app name from the .acf file, suppressing errors
+    name=$(sed -n '/^\s*"name"\s*/ s/.*"\(.*\)"/\1/p' "$steamapps/appmanifest_$id.acf" 2>/dev/null)
+
+    # Get version or default to "N/A"
+    version=$(cat "$x/version" 2>/dev/null || echo "N/A")  
+
+    # Print the information, using a default message if name is empty
+    printf "%-8s  %-10s  %s\n" "$version" "$id" "${name:-this is not a Steam app?}"
 done
+

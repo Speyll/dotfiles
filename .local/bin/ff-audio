@@ -1,32 +1,31 @@
-#!/bin/bash
+#!/bin/sh
 
 # Create a directory for the extracted audio files
-mkdir -p extAudios
+mkdir -p extaudios
 
 # Loop through all video files in the current directory
-for video in *.mp4 *.mkv *.avi *.mov; do
+for video in *.mp4 *.mkv *.avi *.mov *.webm; do
     # Check if the file exists
-    if [[ -f "$video" ]]; then
+    if [ -f "$video" ]; then
         # Extract a frame as cover art 5 minutes into the video
         cover_art="${video%.*}_cover.jpg"
         ffmpeg -y -i "$video" -ss 00:05:00 -vframes 1 "$cover_art"
         echo "Extracted cover art from $video"
 
-        # Extract the audio without re-encoding into M4A
+        # Extract the audio without re-encoding into m4a
         output_audio="${video%.*}.m4a"
         ffmpeg -y -i "$video" -vn -c:a copy "$output_audio"
         echo "Extracted audio from $video without re-encoding"
 
-        # Embed the cover art into the M4A file
-        output_with_cover="extAudios/${video%.*}.m4a"
-        ffmpeg -y -i "$output_audio" -i "$cover_art" -map 0:a -map 1 -c copy -metadata:s:v title="Album cover" -metadata:s:v comment="Cover (front)" -disposition:v:0 attached_pic "$output_with_cover"
+        # Embed the cover art into the m4a file
+        output_with_cover="extaudios/${video%.*}.m4a"
+        ffmpeg -y -i "$output_audio" -i "$cover_art" -map 0:a -map 1 -c copy -metadata:s:v title="album cover" -metadata:s:v comment="cover (front)" -disposition:v:0 attached_pic "$output_with_cover"
         echo "Embedded cover art into $output_with_cover"
-        
+
         # Clean up: remove the original audio file and cover art
         rm "$output_audio" "$cover_art"
     fi
 done
 
-echo "All audio files have been extracted and moved to the extAudios directory."
-
+echo "All audio files have been extracted and moved to the extaudios directory."
 

@@ -1,11 +1,34 @@
-#!/bin/bash
+#!/bin/sh
 
-read -p "commit: " commit
-git checkout --orphan test
-git add -A
-git commit -am "$commit"
-git branch -D main
-git branch -m main
-git push -f origin main
-git gc --aggressive --prune=all
-git push --set-upstream origin main
+# Prompt for commit message
+printf "Commit message: "
+read -r commit
+
+# Check if commit message is empty
+[ -z "$commit" ] && { echo "Commit message cannot be empty."; exit 1; }
+
+# Create a new orphan branch named 'test'
+git checkout --orphan test || { echo "Failed to create orphan branch."; exit 1; }
+
+# Stage all changes
+git add -A || { echo "Failed to stage changes."; exit 1; }
+
+# Commit changes
+git commit -m "$commit" || { echo "Failed to commit changes."; exit 1; }
+
+# Delete the old 'main' branch
+git branch -D main || { echo "Failed to delete old 'main' branch."; exit 1; }
+
+# Rename current branch to 'main'
+git branch -m main || { echo "Failed to rename branch to 'main'."; exit 1; }
+
+# Force push the new 'main' branch to the remote
+git push -f origin main || { echo "Failed to push 'main' branch to remote."; exit 1; }
+
+# Garbage collect to clean up unnecessary files
+git gc --aggressive --prune=all || { echo "Failed to run garbage collection."; exit 1; }
+
+# Set upstream for the new 'main' branch
+git push --set-upstream origin main || { echo "Failed to set upstream for 'main' branch."; exit 1; }
+
+echo "Successfully completed all operations."
