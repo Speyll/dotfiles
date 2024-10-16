@@ -66,4 +66,8 @@ alias tmux="tmux -f ${XDG_CONFIG_HOME:-$HOME/.config}/tmux/tmux.conf"
 alias pyserv="python3 -m http.server"
 
 # Clear dups from bash history
-alias cleanup-history="tac $HOME/.bash_history | awk '!seen[\$0]++' | tac > /tmp/.bash_history_tmp && mv /tmp/.bash_history_tmp $HOME/.bash_history"
+alias cleanup-history="awk '!seen[gensub(/[[:space:]]+$/, \"\", \"g\", \$0)]++' \$HOME/.bash_history > /tmp/.bash_history_tmp && mv /tmp/.bash_history_tmp \$HOME/.bash_history"
+
+# Cleanup gamescope leftovers
+alias cleanup-gamescope='pkill -9 -f "wine|wineserver|winedevice.exe|explorer.exe|gamescope-wl"'
+
