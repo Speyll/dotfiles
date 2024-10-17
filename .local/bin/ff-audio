@@ -1,7 +1,7 @@
 #!/bin/sh
 
 # Create a directory for the extracted audio files
-mkdir -p extaudios
+mkdir -p extAudios
 
 # Loop through all video files in the current directory
 for video in *.mp4 *.mkv *.avi *.mov *.webm; do
@@ -18,7 +18,7 @@ for video in *.mp4 *.mkv *.avi *.mov *.webm; do
         echo "Extracted audio from $video without re-encoding"
 
         # Embed the cover art into the m4a file
-        output_with_cover="extaudios/${video%.*}.m4a"
+        output_with_cover="extAudios/${video%.*}.m4a"
         ffmpeg -y -i "$output_audio" -i "$cover_art" -map 0:a -map 1 -c copy -metadata:s:v title="album cover" -metadata:s:v comment="cover (front)" -disposition:v:0 attached_pic "$output_with_cover"
         echo "Embedded cover art into $output_with_cover"
 
@@ -27,5 +27,5 @@ for video in *.mp4 *.mkv *.avi *.mov *.webm; do
     fi
 done
 
-echo "All audio files have been extracted and moved to the extaudios directory."
+echo "All audio files have been extracted and moved to the extAudios directory."
 
