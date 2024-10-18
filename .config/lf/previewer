@@ -1,0 +1,34 @@
+#!/bin/sh
+
+# Directory to store thumbnails
+thumbnail_dir="/tmp/lf-thumbnails"
+
+# Create the directory if it doesn't exist
+mkdir -p "$thumbnail_dir"
+
+# Get the base filename of the file being previewed
+base_filename=$(basename "$1")
+thumbnail="$thumbnail_dir/$base_filename.jpg"
+
+# Check the MIME type of the file
+case "$(file -Lb --mime-type -- "$1")" in
+  image/*)
+    # Display image using Chafa with Sixel output
+    chafa -f sixel -s "$2x$3" --animate off --polite on "$1"
+    exit 1
+    ;;
+  text/*)
+    # Display text content
+    cat "$1"
+    ;;
+  video/*)
+    # Check if thumbnail already exists
+    if [ ! -f "$thumbnail" ]; then
+        ffmpegthumbnailer -i "$1" -o "$thumbnail" -s 0
+    fi
+    # Display the generated thumbnail using Chafa
+    chafa -f sixel -s "$2x$3" --animate off --polite on "$thumbnail"
+    exit 1
+    ;;
+esac
+
