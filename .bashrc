@@ -72,3 +72,8 @@ if ! shopt -oq posix; then
     . /etc/bash_completion
   fi
 fi
+
+# Automatically start tmux if not already inside a session
+if [[ -z "$TMUX" ]] && [[ $- == *i* ]]; then
+    tmux attach-session -t auto || tmux new-session -s auto
+fi
