@@ -206,7 +206,9 @@
     },
 
     "sway/window": {
-        "format": "{<span color=\"#78b6ad\" size='medium'></span> title}",
+        "format": "{title}",
+        "icon": true,
+        "icon-size": 14,
         "max-length": 50,
         "tooltip": false,
         "rewrite": {
