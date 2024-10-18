@@ -10,7 +10,7 @@
 
     "modules-left": ["custom/launcher", "wlr/taskbar"],
     "modules-center": [],
-    "modules-right": ["tray", "group/status", "group/networking", "group/core"],
+    "modules-right": ["tray", "group/laptop", "group/status", "group/networking", "group/core"],
 
     "group/leftWrapper": {
         "orientation": "horizontal",
@@ -68,12 +68,20 @@
     },
 
     "wlr/taskbar": {
-        "format": "{icon} {name}",
+        "format": "{icon} {title}",
         "icon-size": 14,
         "icon-theme": "breeze",
         "tooltip": false,
         "on-click": "minimize-raise",
         "on-click-middle": "close",
+        "rewrite": {
+            "Firefox Web Browser": "Firefox",
+            "mpv Media Player": "mpv",
+            "^(.{8}).+$": "$1…",
+        },
+        "app_ids-mapping": {
+            "imv": "img"
+        },
     },
 
     "tray": {
@@ -128,7 +136,7 @@
         "format-linked": "<span color=\"#78b6ad\" size='medium'></span> {ifname} (No IP)",
         "format-disconnected": "404",
         "format-alt": "<span color=\"#78b6ad\" size='medium'></span> {ipaddr}",
-	"tooltip": false,
+        "tooltip": false,
     },
 
     "bluetooth": {
@@ -139,7 +147,7 @@
         "tooltip-format-connected": "<span color=\"#78b6ad\" 'size='medium'></span> {device_enumerate}",
         "tooltip-format-enumerate-connected": "<span color=\"#78b6ad\" size='medium'></span> {device_alias}"
     },
- 
+
     "cpu": {
         "format": "<span color=\"#78b6ad\" size='medium'></span> {usage}%",
         "tooltip": false,

@@ -107,28 +107,28 @@ tooltip label {
     border-radius: 8px 0 0 8px;
 }
 
-#workspaces {
+#workspaces, #tags {
     margin: 0 0 0 4px;
 }
 
-#workspaces button {
+#workspaces button, #tags button {
     border-radius: 4px;
     padding: 0 2px 0 2px;
     color: @text;
     background-color: transparent;
 }
 
-#workspaces button:hover {
+#workspaces button:hover, #tags button:hover {
     color: @text;
     background-color: @bgLight;
 }
 
-#workspaces button.focused {
+#workspaces button.focused, #tags button.focused {
     color: @bg;
     background-color: @accent;
 }
 
-#workspaces button.urgent {
+#workspaces button.urgent, #tags button.urgent {
     color: @bg;
     background-color: @yellow;
 }

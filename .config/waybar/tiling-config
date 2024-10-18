@@ -8,7 +8,7 @@
     "fixed-center": false,
     "reload_style_on_change": false,
 
-    "modules-left": ["sway/workspaces", "wlr/taskbar"],
+    "modules-left": ["custom/launcher", "group/sway", "group/river"],
     "modules-center": [],
     "modules-right": ["tray", "group/laptop", "group/status", "group/networking", "group/core"],
 
@@ -67,13 +67,37 @@
         ],
     },
 
+    "group/sway": {
+        "orientation": "inherit",
+        "modules": [
+            "sway/workspaces",
+            "sway/window",
+        ],
+    },
+
+    "group/river": {
+        "orientation": "inherit",
+        "modules": [
+            "river/tags",
+            "river/window",
+        ],
+    },
+
     "wlr/taskbar": {
-        "format": "{icon} {name}",
+        "format": "{icon} {title}",
         "icon-size": 14,
         "icon-theme": "breeze",
         "tooltip": false,
         "on-click": "minimize-raise",
         "on-click-middle": "close",
+        "rewrite": {
+            "Firefox Web Browser": "Firefox",
+            "mpv Media Player": "mpv",
+            "^(.{8}).+$": "$1…",
+        },
+        "app_ids-mapping": {
+            "imv": "img"
+        },
     },
 
     "tray": {
@@ -128,7 +152,7 @@
         "format-linked": "<span color=\"#78b6ad\" size='medium'></span> {ifname} (No IP)",
         "format-disconnected": "404",
         "format-alt": "<span color=\"#78b6ad\" size='medium'></span> {ipaddr}",
-	"tooltip": false,
+        "tooltip": false,
     },
 
     "bluetooth": {
@@ -139,7 +163,7 @@
         "tooltip-format-connected": "<span color=\"#78b6ad\" size='medium'></span> {device_enumerate}",
         "tooltip-format-enumerate-connected": "<span color=\"#78b6ad\" size='medium'></span> {device_alias}"
     },
- 
+
     "cpu": {
         "format": "<span color=\"#78b6ad\" size='medium'></span> {usage}%",
         "tooltip": false,
@@ -177,7 +201,20 @@
         "disable-scroll": false,
         "all-outputs": true,
         "warp-on-scroll": false,
-        "format": "{name}"
+        "format": "{name}",
+        "persistent-workspaces": {
+            "1": [], "2": [], "3": [], "4": [], "5": [],},
+    },
+},
+
+    "sway/window": {
+        "format": "<span color=\"#78b6ad\" size='medium'></span> {title}",
+        "max-length": 50,
+        "tooltip": false,
+        "rewrite": {
+            "Firefox Web Browser": "Firefox",
+            "mpv Media Player": "mpv",
+        },
     },
 
     "sway/language": {
@@ -185,4 +222,13 @@
         "on-click": ".config/waybar/sway-switch-keyboard.sh",
         "tooltip": false
     },
-}
+
+    "river/tags": {
+        "num-tags": 9,
+    },
+
+    "river/window": {
+        "tooltip": false,
+        "format": "<span color=\"#78b6ad\" size='medium'></span> {}",
+    },
+},
