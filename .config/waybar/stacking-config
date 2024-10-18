@@ -47,7 +47,7 @@
         "orientation": "inherit",
         "modules": [
             "custom/wlsunset",
-        "custom/keyboard",
+            "custom/keyboard",
         ],
     },
 
@@ -55,7 +55,7 @@
         "orientation": "inherit",
         "modules": [
             "cpu",
-        "memory",
+            "memory",
         ],
     },
 
@@ -111,14 +111,13 @@
 
     "custom/keyboard": {
         "format": "<span color=\"#78b6ad\" size='medium'></span> fr/us",
-        "on-click": "~/.config/waybar/xkb-layout.sh",
         "tooltip": false,
     },
 
     "custom/wlsunset": {
         "format": "<span color=\"#78b6ad\" size='medium'></span> nitl",
-        "on-click-right": "bash ~/.config/waybar/scripts/sun-toggle.sh",
-        "tooltip": false,
+         "on-click-right": "dash ~/.config/waybar/scripts/sun-toggle.sh",
+         "tooltip": false,
     },
 
     "wireplumber": {
