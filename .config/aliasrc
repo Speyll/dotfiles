@@ -59,6 +59,9 @@ alias \
     clear="tput clear" \
     reset="tput reset"
 
+# Git alias
+alias gcl='git clone --depth 1'
+
 # Tmux
 alias tmux="tmux -f ${XDG_CONFIG_HOME:-$HOME/.config}/tmux/tmux.conf"
 
@@ -70,4 +73,3 @@ alias cleanup-history="awk '!seen[gensub(/[[:space:]]+$/, \"\", \"g\", \$0)]++' 
 
 # Cleanup gamescope leftovers
 alias cleanup-gamescope='pkill -9 -f "wine|wineserver|winedevice.exe|explorer.exe|gamescope-wl"'
-
