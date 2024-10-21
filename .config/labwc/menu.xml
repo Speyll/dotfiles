@@ -1,75 +1,29 @@
 <?xml version="1.0" encoding="UTF-8"?>
-
 <openbox_menu>
-<!-- Note: for localization support of menu items "client-menu" has to be removed here -->
-<menu id="client-menu">
-  <item label="Minimize">
-    <action name="Iconify" />
-  </item>
-  <item label="Maximize">
-    <action name="ToggleMaximize" />
-  </item>
-  <item label="Fullscreen">
-    <action name="ToggleFullscreen" />
-  </item>
-  <item label="Decorations">
-    <action name="ToggleDecorations" />
-  </item>
-  <item label="On top">
-    <action name="ToggleAlwaysOnTop" />
-  </item>
-  <item label="On Bottom">
-    <action name="ToggleAlwaysOnBottom" />
-  </item>
-
-  <item label="Sticky">
-    <action name="ToggleOmnipresent" />
-  </item>
-  <!--
-    Any menu with the id "workspaces" will be hidden
-    if there is only a single workspace available.
-  -->
-  <menu id="workspaces" label="Workspace">
-    <item label="Move left">
-      <action name="SendToDesktop" to="left" />
-    </item>
-    <item label="Move right">
-      <action name="SendToDesktop" to="right" />
-    </item>
-  </menu>
-  <item label="Close">
-    <action name="Close" />
-  </item>
-</menu>
-
-<menu id="root-menu">
-  <item label="Web browser">
-    <action name="Execute" command="flatpak run io.gitlab.librewolf-community" />
-  </item>
-  <item label="File Manager">
-    <action name="Execute" command="pcmanfm-qt" />
-  </item>
-  <item label="Terminal">
-    <action name="Execute" command="foot" />
-  </item>
-  <item label="Reconfigure">
-    <action name="Reconfigure" />
-  </item>
-  <item label="Exit labwc">
-    <action name="Exit" />
-  </item>
-  <item label="Power Menu">
-    <action name="Execute" command="fuzz-power" />
-  </item>
-</menu>
-
-<menu id="some-custom-menu">
-  <item label="Reconfigure">
-    <action name="Reconfigure" />
-  </item>
-  <item label="Exit">
-    <action name="Exit" />
-  </item>
-</menu>
-
+    <menu id="client-menu">
+        <menu id="window" label="Window">
+        <item label="Minimize"><action name="Iconify" /></item>
+        <item label="Maximize"><action name="ToggleMaximize" /></item>
+        <item label="Fullscreen"><action name="ToggleFullscreen" /></item>
+        </menu>
+        <item label="Decorations"><action name="ToggleDecorations" /></item>
+        <item label="On top"><action name="ToggleAlwaysOnTop" /></item>
+        <item label="On Bottom"><action name="ToggleAlwaysOnBottom" /></item>
+        <menu id="workspaces" label="Workspace">
+            <item label="Move Left"><action name="SendToDesktop" to="left" /></item>
+            <item label="Move Right"><action name="SendToDesktop" to="right" /></item>
+            <separator />
+            <item label="Always Visible"><action name="ToggleOmnipresent" /></item>
+        </menu>
+    </menu>
+    <menu id="root-menu">
+        <item label="Web browser"><action name="Execute" command="flatpak run io.gitlab.librewolf-community" /></item>
+        <item label="File Manager"><action name="Execute" command="pcmanfm-qt" /></item>
+        <item label="Terminal"><action name="Execute" command="foot" /></item>
+        <menu id="tasks" label="Tasks">
+            <item label="Reconfigure"><action name="Reconfigure" /></item>
+            <item label="Exit"><action name="Exit" /></item>
+            <item label="Power Menu"><action name="Execute" command="fuzz-power" /></item>
+        </menu>
+    </menu>
 </openbox_menu>
