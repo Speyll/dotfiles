@@ -1,7 +1,7 @@
 #!/bin/sh
 
 # Define the menu options with emojis
-options="📺 Stream\n🖥️ Terminal\n🗃️ Explorer\n🌍 Browser\n📦 More\n🔌 Power"
+options="🖥️ Terminal\n🗃️ Explorer\n🌍 Browser\n📦 More\n⌨️ Keyboard\n🔌 Power"
 
 # Display the menu and get the user's choice
 choice=$(echo "$options" | fuzzel -d -f monospace:size=14 -w 13 -l 6 -a center)
@@ -11,11 +11,17 @@ launch_app() {
     command -v "$1" >/dev/null 2>&1 && exec "$@" || { echo "$1 not found" >&2; exit 1; }
 }
 
-# Check the user's choice and call the launch_app function
+# Function to toggle the virtual keyboard (wvkbd-mobintl)
+toggle_keyboard() {
+    if pgrep -x "wvkbd-mobintl" > /dev/null; then
+        pkill wvkbd-mobintl
+    else
+        wvkbd-mobintl &
+    fi
+}
+
+# Check the user's choice and call the respective functions
 case "$choice" in
-    "📺 Stream")
-        launch_app fuzz-streaming
-        ;;
     "🖥️ Terminal")
         launch_app foot
         ;;
@@ -28,6 +34,9 @@ case "$choice" in
     "📦 More")
         launch_app fuzzel
         ;;
+    "⌨️ Keyboard")
+        toggle_keyboard
+        ;;
     "🔌 Power")
         launch_app fuzz-power
         ;;
@@ -36,4 +45,3 @@ case "$choice" in
         exit 1
         ;;
 esac
-
