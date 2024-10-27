@@ -8,6 +8,7 @@ return {
                 show_index = false,        -- show buffer indexes (not the actual buffer numbers) in bufferline
             },
             theme = 'custom',
+            -- Start flavours
             custom_theme = {
                 text = {gui = "#282828", cterm = "235", cterm16 = "0"},
                 normal = {gui = "#83a598", cterm = "109", cterm16 = "6"},
@@ -17,10 +18,11 @@ return {
                 inactive_cursor = {gui = "NONE", cterm = "NONE", cterm16 = "NONE"},
                 inactive_menu = {gui = "NONE", cterm = "NONE", cterm16 = "NONE"},
                 visual = {gui = "#8ec07c", cterm = "108", cterm16 = "6"},
-                command = {gui = "#b16286", cterm = "132", cterm16 = "5"},
+                command = {gui = "#d3869b", cterm = "132", cterm16 = "5"},
                 alt_text = {gui = "#ebdbb2", cterm = "223", cterm16 = "7"},
                 warning = {gui = "#fb4934", cterm = "167", cterm16 = "1"},
             },
+            -- End flavours
             sections = {         -- define sections
                 {class = 'mode', item = require('hardline.parts.mode').get_item},
                 {class = 'high', item = require('hardline.parts.git').get_item, hide = 100},

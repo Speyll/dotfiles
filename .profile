@@ -44,7 +44,6 @@ export NOTMUCH_CONFIG="${XDG_CONFIG_HOME:-$HOME/.config}/notmuch-config"
 export GTK2_RC_FILES="${XDG_CONFIG_HOME:-$HOME/.config}/gtk-2.0/gtkrc-2.0"
 export LESSHISTFILE="-"
 export WGETRC="${XDG_CONFIG_HOME:-$HOME/.config}/wget/wgetrc"
-export INPUTRC="${XDG_CONFIG_HOME:-$HOME/.config}/inputrc"
 export TMUX_TMPDIR="$XDG_RUNTIME_DIR"
 export WINEPREFIX="$1;2C{XDG_DATA_HOME:-$HOME/.local/share}/wineprefixes/default"
 export KODI_DATA="${XDG_DATA_HOME:-$HOME/.local/share}/kodi"
@@ -75,5 +74,5 @@ export NNN_OPTS="dH"
 
 # Autologin on tty1
 #if [ -z "$DISPLAY" ] && [ "$(fgconsole)" -eq 1 ]; then
-    #start-wayfire
+    #start-labwc
 #fi

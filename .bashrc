@@ -45,7 +45,7 @@ fi
 
 ## Set the prompt based on color support
 if [ "$color_prompt" = yes ]; then
-    PS1='[\[\e[96m\]\A\[\e[0m\]][\[\e[94m\]\h\[\e[0m\]][\[\e[93m\]\w\[\e[0m\]]\$ '
+    PS1='[\[\e[32m\]\A\[\e[0m\]][\[\e[34m\]\h\[\e[0m\]][\[\e[33m\]\w\[\e[0m\]]\$ '
 else
     PS1='[\A][\h\][\w]\$ '
 fi
@@ -53,7 +53,7 @@ fi
 ## If this is an xterm set the title to user@host:dir
 case "$TERM" in
 xterm*|rxvt*|foot*)
-    PS1='[\[\e[96m\]\A\[\e[0m\]][\[\e[94m\]\h\[\e[0m\]][\[\e[93m\]\w\[\e[0m\]]\$ '
+    PS1='[\[\e[32m\]\A\[\e[0m\]][\[\e[34m\]\h\[\e[0m\]][\[\e[33m\]\w\[\e[0m\]]\$ '
     ;;
 *)
     ;;
@@ -72,3 +72,12 @@ if ! shopt -oq posix; then
     . /etc/bash_completion
   fi
 fi
+
+# Function to search command history with fzf
+fzf_history() {
+  local selected_command
+  selected_command=$(history | fzf | awk '{$1=""; print substr($0,2)}')
+  if [[ -n $selected_command ]]; then
+    eval "$selected_command"
+  fi
+}

@@ -131,7 +131,7 @@
     },
 
     "custom/wlsunset": {
-        "format": "<span color=\"#78b6ad\" size='medium'></span> nitl",
+        "format": "<span color=\"#78b6ad\" size='medium'></span> nitl",
         "on-click-right": "dash ~/.config/waybar/scripts/sun-toggle.sh",
         "tooltip": false,
     },

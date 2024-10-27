@@ -1,0 +1,3 @@
+$include /etc/inputrc
+
+"\C-h": "fzf_history"

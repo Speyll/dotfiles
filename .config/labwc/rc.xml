@@ -8,7 +8,7 @@
     </core>
 
     <theme>
-        <name>Groovy</name>
+        <name>Base16</name>
         <titlebar>
             <layout>icon:iconify,max,close</layout>
             <showTitle>no</showTitle>

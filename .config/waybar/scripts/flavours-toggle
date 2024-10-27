@@ -1,0 +1,10 @@
+#!/bin/sh
+
+current_theme=$(flavours current)
+
+if echo "$current_theme" | grep -q "gruvbox-dark-medium"; then
+    flavours apply gruvbox-light-medium
+else
+    flavours apply gruvbox-dark-medium
+fi
+

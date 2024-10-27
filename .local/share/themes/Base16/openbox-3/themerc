@@ -1,124 +1,90 @@
-!! Menu background
-menu.items.bg: flat
-menu.items.bg.color: #282828
-menu.overlap.x: 0
-menu.overlap.y: 0
-
-!! Menu text
-menu.items.justify: left
-menu.items.text.color: #ebdbb2
-menu.items.disabled.text.color: #928374
-
-!! Menu separator
-menu.separator.width: 0
-menu.separator.padding.width: 4
-menu.separator.padding.height: 2
-menu.separator.color: #282828
-
-!! Menu border
-menu.border.width: 0
-menu.border.color: #689d6a
-
-!! Menu headers
-menu.title.bg: flat
-menu.title.bg.color: #689d6a
-menu.title.text.color: #ebdbb2
-menu.title.text.justify: center
-
-!! Selected menu item
-menu.items.active.bg: flat
-menu.items.active.bg.color: #689d6a
-menu.items.active.text.color: #282828
-
-!! Titlebar
-titlebar.height: 6
-window.active.title.bg: flat
-window.inactive.title.bg: flat
-window.active.title.bg.color: #689d6a
+!! Colors
+!! Start flavours
+!! Window colors
+window.active.title.bg.color: #8ec07c
 window.inactive.title.bg.color: #282828
-
-!! Titlebar text
-window.label.text.justify: center
-window.active.label.bg: parentrelative
-window.inactive.label.bg: parentrelative
-window.active.label.text.color: #689d6a 
+window.active.label.text.color: #8ec07c
 window.inactive.label.text.color: #282828
-
-!! Window borders
-border.width: 1
-window.active.border.color: #689d6a
+window.active.border.color: #8ec07c
 window.inactive.border.color: #282828
-
-!! Window buttons
-window.active.button.hover.bg: parentrelative
-window.active.button.pressed.bg: parentrelative
-window.active.button.disabled.bg: parentrelative
-window.active.button.unpressed.bg: parentrelative
-
-window.inactive.button.hover.bg: parentrelative
-window.inactive.button.pressed.bg: parentrelative
-window.inactive.button.disabled.bg: parentrelative
-window.inactive.button.unpressed.bg: parentrelative
-
-window.active.button.toggled.hover.bg: parentrelative
-window.active.button.toggled.pressed.bg: parentrelative
-window.active.button.toggled.unpressed.bg: parentrelative
-
-window.inactive.button.toggled.hover.bg: parentrelative
-window.inactive.button.toggled.pressed.bg: parentrelative
-window.inactive.button.toggled.unpressed.bg: parentrelative
-
 window.active.button.iconify.pressed.image.color: #282828
-window.active.button.iconify.disabled.image.color: #626880
+window.active.button.iconify.disabled.image.color: #83a598
 window.active.button.iconify.unpressed.image.color: #282828
 window.active.button.iconify.toggled.pressed.image.color: #282828
 window.active.button.iconify.toggled.unpressed.image.color: #282828
-
 window.active.button.max.pressed.image.color: #282828
-window.active.button.max.disabled.image.color: #626880
+window.active.button.max.disabled.image.color: #83a598
 window.active.button.max.unpressed.image.color: #282828
 window.active.button.max.toggled.pressed.image.color: #282828
 window.active.button.max.toggled.unpressed.image.color: #282828
-
 window.active.button.close.pressed.image.color: #282828
-window.active.button.close.disabled.image.color: #626880
+window.active.button.close.disabled.image.color: #83a598
 window.active.button.close.unpressed.image.color: #282828
 window.active.button.close.toggled.pressed.image.color: #282828
 window.active.button.close.toggled.unpressed.image.color: #282828
-
 window.active.button.menu.pressed.image.color: #282828
-window.active.button.menu.disabled.image.color: #626880
+window.active.button.menu.disabled.image.color: #83a598
 window.active.button.menu.unpressed.image.color: #282828
 window.active.button.menu.toggled.pressed.image.color: #282828
 window.active.button.menu.toggled.unpressed.image.color: #282828
-
 window.inactive.button.iconify.pressed.image.color: #ebdbb2
-window.inactive.button.iconify.disabled.image.color: #626880
+window.inactive.button.iconify.disabled.image.color: #83a598
 window.inactive.button.iconify.unpressed.image.color: #ebdbb2
 window.inactive.button.iconify.toggled.pressed.image.color: #ebdbb2
 window.inactive.button.iconify.toggled.unpressed.image.color: #ebdbb2
-
 window.inactive.button.max.pressed.image.color: #ebdbb2
-window.inactive.button.max.disabled.image.color: #626880
+window.inactive.button.max.disabled.image.color: #83a598
 window.inactive.button.max.unpressed.image.color: #ebdbb2
 window.inactive.button.max.toggled.pressed.image.color: #ebdbb2
 window.inactive.button.max.toggled.unpressed.image.color: #ebdbb2
-
 window.inactive.button.close.pressed.image.color: #ebdbb2
-window.inactive.button.close.disabled.image.color: #626880
+window.inactive.button.close.disabled.image.color: #83a598
 window.inactive.button.close.unpressed.image.color: #ebdbb2
 window.inactive.button.close.toggled.pressed.image.color: #ebdbb2
 window.inactive.button.close.toggled.unpressed.image.color: #ebdbb2
-
 window.inactive.button.menu.pressed.image.color: #ebdbb2
-window.inactive.button.menu.disabled.image.color: #626880
+window.inactive.button.menu.disabled.image.color: #83a598
 window.inactive.button.menu.unpressed.image.color: #ebdbb2
 window.inactive.button.menu.toggled.pressed.image.color: #ebdbb2
 window.inactive.button.menu.toggled.unpressed.image.color: #ebdbb2
 
+!! Menu colors
+menu.title.bg.color: #8ec07c
+menu.items.bg.color: #282828
+menu.items.text.color: #ebdbb2
+menu.items.disabled.text.color: #504945
+menu.separator.color: #282828
+menu.border.color: #8ec07c
+menu.title.bg.color: #8ec07c
+menu.title.text.color: #ebdbb2
+menu.items.active.bg.color: #8ec07c
+menu.items.active.text.color: #282828
+
+!! OSD colors
+osd.border.color: #8ec07c
+osd.label.text.color: #ebdbb2
+osd.bg.color: #282828
+!! End flavours
+
+!! Menu Background
+menu.items.bg: flat
+menu.overlap.x: 0
+menu.overlap.y: 0
+
+!! Menu Separator
+menu.separator.width: 0
+menu.separator.padding.width: 4
+menu.separator.padding.height: 2
+
+!! Menu Headers
+menu.title.bg: flat
+menu.title.text.justify: center
+
+!! Menu Border
+menu.border.width: 0
+
 !! OSD
 osd.bg: flat
-
 osd.border.width: 1
 osd.window-switcher.width: 500
 osd.window-switcher.padding: 14
@@ -127,9 +93,3 @@ osd.window-switcher.item.padding.y: 4
 osd.window-switcher.item.active.border.width: 2
 osd.workspace-switcher.boxes.width: 16
 osd.workspace-switcher.boxes.height: 16
-
-osd.border.color: #689d6a
-osd.bg.color: #282828
-osd.label.text.color: #ebdbb2
-
-

@@ -8,10 +8,11 @@
 
 Welcome to my dotfiles repository! This repository contains my personal dotfiles for Unix systems. I strive for efficiency, simplicity and some aesthetics if it's simple enough.
 
-If you are here for my old bspwm setup, you can find it [here](https://github.com/speyll/misc-dotfiles).
+If you are here for my old bspwm, wayfire, sway or river setups you can find it [here](https://github.com/speyll/misc-dotfiles).
 
 ## Screenshot
 
+(outdated needs an update)
 ![Screenshot](https://i.ibb.co/TvdZp1D/grimoptimized.webp)
 
 ## Software Used
@@ -31,7 +32,8 @@ If you are here for my old bspwm setup, you can find it [here](https://github.co
   - `fnott` Notification system.
   - `mpv` Video player.
   - `nvim` & `nano` Text editor
-  - `noto-fonts-emoji`, `noto-fonts-ttf`, `font-hack-ttf`, `font-awesome` Fonts.
+  - `noto-fonts-emoji`, `noto-fonts-ttf`, `noto-fonts-cjk`,`nerd-fonts-symbols-ttf`, `cascadia-mono` Fonts.
+  - `flavours` For setting base16 colors pretty much everywhere.
 
 If you're interested in a comprehensive list of packages, check out my post-install script for Void Linux, which sets up a highly efficient system. The script is well-documented and available [here](https://gist.github.com/Speyll/b2c46449fb9a9be44f07be3a81f01a2b).
 

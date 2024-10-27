@@ -10,6 +10,7 @@ dbus-update-activation-environment --all &
 wlr-randr --output HDMI-A-1 --mode 1920x1080@60.000000 --adaptive-sync enabled &
 
 # Kill Existing Processes
+pkill -x flavours
 pkill -x pipewire
 pkill -x wireplumber
 pkill -x pipewire-pulse
@@ -26,15 +27,17 @@ sleep 1
 wireplumber &
 pipewire-pulse &
 
+# Set Wallpaper and Generate Flavours Theme
+wallpaper_path=$(find $HOME/pictures/walls/*.jpg -type f | shuf -n1)
+swaybg -i "$wallpaper_path" -m fill &
+
+# Generate and apply the Flavours theme based on the wallpaper
+#flavours generate dark "$wallpaper_path"
+#flavours apply generated
+flavours apply gruvbox-dark-medium
+
 # Start Waybar
 waybar -c $HOME/.config/waybar/stacking-config -s $HOME/.config/waybar/style.css &
-# waybar -c $HOME/.config/waybar/tiling-config -s $HOME/.config/waybar/style.css &
-
-# Set Wallpaper
-swaybg -i $(find $HOME/pictures/walls/*.jpg -type f | shuf -n1) -m fill &
-# swaybg --mode fill -i "$HOME/pictures/walls/wall.jpg" &
-# mpvpaper -vsp -o "no-audio pause=no --loop --ytdl-format='bestvideo[height<=1080]+bestaudio/best'" '*' "$HOME/pictures/walls/wall.mp4" &
-# mpvpaper -vsp -o "no-audio pause=no --loop --ytdl-format='bestvideo[height<=1080]+bestaudio/best'" '*' $(find $HOME/pictures/walls/*.mp4 -type f | shuf -n1) &
 
 # Cursor Theme
 gsettings set org.gnome.desktop.interface cursor-theme Breeze_Snow &
@@ -49,3 +52,4 @@ wl-paste --watch cliphist store -max-items 100 &  # Clipboard manager
 /usr/libexec/xdg-desktop-portal &
 /usr/libexec/xdg-desktop-portal-gtk &
 /usr/libexec/xdg-desktop-portal-wlr &
+

@@ -1,0 +1,46 @@
+shell = "bash -c '{}'"
+
+[[item]]
+file = "~/.config/waybar/colors.css"
+template = "waybar"
+hook = "pkill -SIGRTMIN+7 waybar"
+rewrite = true
+
+[[item]]
+file = "~/.config/foot/colors.ini"
+template = "foot"
+hook = "footclient -e 'source ~/.config/foot/colors.ini'"
+rewrite = true
+
+[[items]]
+file = "~/.config/fuzzel/colors.ini"
+template = "fuzzel"
+rewrite = true
+
+[[items]]
+file = "/home/lyes/.local/share/themes/Base16/openbox-3/themerc"
+template = "labwc"
+hook = "labwc -r"
+start= "!! Start flavours"
+end = "!! End flavours"
+
+[[items]]
+file = "/home/lyes/.config/nvim/lua/speyll/plugins/colorscheme.lua"
+template = "nvim"
+hook = "nvim --server /tmp/nvim-server --remote-send ':source ~/.config/nvim/lua/speyll/plugins/colorscheme.lua<CR>:lua require(\"base16-colorscheme\").setup()<CR>'"
+start= "-- Start flavours"
+end = "-- End flavours"
+
+[[items]]
+file = "/home/lyes/.config/nvim/lua/speyll/plugins/nvim-hardline.lua"
+template = "nvim-hardline"
+start= "-- Start flavours"
+end = "-- End flavours"
+
+[[items]]
+file = "~/.config/imv/config"
+template = "imv"
+
+[[items]]
+file = "~/.config/fnott/fnott.ini"
+template = "fnott"

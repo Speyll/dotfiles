@@ -1,12 +1,12 @@
 {
     "layer": "bottom",
-    "position": "bottom",
+    "position": "top",
     "height": 24,
     "spacing": 0,
     "margin": 0,
     "start_hidden": false,
     "fixed-center": false,
-    "reload_style_on_change": false,
+    "reload_style_on_change": true,
 
     "modules-left": ["custom/launcher", "wlr/taskbar"],
     "modules-center": [],
@@ -47,7 +47,6 @@
         "orientation": "inherit",
         "modules": [
             "custom/wlsunset",
-            "custom/keyboard",
         ],
     },
 
@@ -71,7 +70,8 @@
         "format": "{icon} {title}",
         "icon-size": 14,
         "icon-theme": "breeze",
-        "tooltip": false,
+        "tooltip": true,
+        "tooltip-format": "{title}",
         "on-click": "minimize-raise",
         "on-click-middle": "close",
         "rewrite": {
@@ -92,7 +92,7 @@
     },
 
     "custom/launcher": {
-        "format": "<span color=\"#78b6ad\" size='medium'></span>",
+        "format": "",
         "on-click": "fuzz-launcher",
         "tooltip": false
     },
@@ -103,70 +103,80 @@
     },
 
     "clock": {
-        "format": "<span color=\"#78b6ad\" size='medium'></span> {:%H:%M}",
+        "format": "{:%H:%M}",
         "timezone": "Africa/Algiers",
-        "format-alt": "<span color=\"#78b6ad\" size='medium'></span> {:%a %d %b}",
-        "tooltip": false
+        "tooltip": true,
+        "tooltip-format": "{:%a %d %b}",
     },
 
     "custom/keyboard": {
-        "format": "<span color=\"#78b6ad\" size='medium'></span> fr/us",
+        "format": "",
         "tooltip": false,
+        "tooltip-format": "fr/us",
     },
 
     "custom/wlsunset": {
-        "format": "<span color=\"#78b6ad\" size='medium'></span> nitl",
-         "on-click-right": "dash ~/.config/waybar/scripts/sun-toggle.sh",
-         "tooltip": false,
+        "format": "",
+         "on-click": "dash ~/.config/waybar/scripts/flavours-toggle",
+         "on-click-right": "dash ~/.config/waybar/scripts/sun-toggle",
+         "tooltip": true,
+         "tooltip-format": "Night light",
     },
 
     "wireplumber": {
-        "format": "<span color=\"#78b6ad\" size='medium'></span> {volume}%",
-        "format-muted": "<span color=\"#78b6ad\" size='medium'></span> Muted",
+        "format": "",
+        "format-muted": "",
         "on-click": "pavucontrol",
         "max-volume": 150,
         "scroll-step": 0.2,
-        "tooltip": false,
+        "tooltip": true,
+        "tooltip-format": "{volume}%",
     },
 
     "network": {
-        "format-wifi": "<span color=\"#78b6ad\" size='medium'></span> {signalStrength}%",
-        "format-ethernet": "<span color=\"#78b6ad\" size='medium'></span> eth",
-        "format-linked": "<span color=\"#78b6ad\" size='medium'></span> {ifname} (No IP)",
-        "format-disconnected": "404",
-        "format-alt": "<span color=\"#78b6ad\" size='medium'></span> {ipaddr}",
-        "tooltip": false,
+        "format-wifi": "",
+        "format-ethernet": "",
+        "format-linked": "",
+        "format-disconnected": "",
+        "tooltip": true,
+        "tooltip-format": "{ipaddr}",
+        "tooltip-format-disconnected": "Disconnected",
     },
 
     "bluetooth": {
-        "format": "<span color=\"#78b6ad\" size='medium'></span> {status}",
+        "format": "",
         "format-disabled": "",
-        "format-connected": "<span color=\"#78b6ad\" size='medium'></span> {num_connections}",
-        "format-alt-connected": "<span color=\"#78b6ad\"size='medium'></span> {device_alias}",
-        "tooltip-format-connected": "<span color=\"#78b6ad\" 'size='medium'></span> {device_enumerate}",
-        "tooltip-format-enumerate-connected": "<span color=\"#78b6ad\" size='medium'></span> {device_alias}"
+        "format-connected": "",
+        "format-alt-connected": "",
+        "tooltip-format-connected": "{device_enumerate}",
+        "tooltip-format-enumerate-connected": "{device_alias}",
     },
 
     "cpu": {
-        "format": "<span color=\"#78b6ad\" size='medium'></span> {usage}%",
-        "tooltip": false,
-        "interval": 50
+        "format": "",
+        "tooltip": true,
+        "interval": 50,
+        "tooltip-format": "{usage}%",
     },
 
     "memory": {
-        "format": "<span color=\"#78b6ad\" size='medium'></span> {}%"
+        "format": "",
+        "tooltip": true,
+        "tooltip-format": "{percentage}%",
     },
 
     "temperature": {
         "critical-threshold": 80,
-        "format": "{icon} {temperatureC}°C",
-        "format-icons": ["<span color=\"#78b6ad\" size='medium'></span>", "<span color=\"#78b6ad\" size='medium'></span>", "<span color=\"#78b6ad\" size='medium'></span>"],
-        "tooltip": false
+        "format": "{icon}",
+        "format-icons": ["<span size='medium'></span>", "<span size='medium'></span>", "<span size='medium'></span>"],
+        "tooltip": true,
+        "tooltip-format": "{temperatureC}°C",
     },
 
     "backlight": {
-        "format": "<span color=\"#78b6ad\" size='medium'></span> {percent}%",
-        "tooltip": false
+        "format": "",
+        "tooltip": true,
+        "tooltip-format": "{percent}%",
     },
 
     "battery": {
@@ -174,10 +184,12 @@
             "warning": 30,
             "critical": 15
         },
-        "format": "{icon} {capacity}%",
-        "format-charging": "{icon} {capacity}%",
-        "format-plugged": "{icon} {capacity}%",
-        "format-icons": ["<span color=\"#78b6ad\" size='medium'></span>", "<span color=\"#78b6ad\" size='medium'></span>", "<span color=\"#78b6ad\" size='medium'></span>", "<span color=\"#78b6ad\" size='medium'></span>", "<span color=\"#78b6ad\" size='medium'></span>"]
+        "format": "{icon}",
+        "format-charging": "{icon}",
+        "format-plugged": "{icon}",
+        "tooltip": true,
+        "tooltip-format": "{capacity}%",
+        "format-icons": ["", "", "", "", ""],
     },
 
 }
