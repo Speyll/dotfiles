@@ -4,7 +4,8 @@ current_theme=$(flavours current)
 
 if echo "$current_theme" | grep -q "gruvbox-dark-medium"; then
     flavours apply gruvbox-light-medium
+    gsettings set org.gnome.desktop.interface color-scheme prefer-light
 else
     flavours apply gruvbox-dark-medium
+    gsettings set org.gnome.desktop.interface color-scheme prefer-dark
 fi
-

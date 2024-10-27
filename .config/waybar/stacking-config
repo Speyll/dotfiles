@@ -10,7 +10,7 @@
 
     "modules-left": ["custom/launcher", "wlr/taskbar"],
     "modules-center": [],
-    "modules-right": ["tray", "group/laptop", "group/status", "group/networking", "group/core"],
+    "modules-right": ["tray", "group/status", "group/networking", "group/core"],
 
     "group/leftWrapper": {
         "orientation": "horizontal",

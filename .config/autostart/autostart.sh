@@ -35,6 +35,7 @@ swaybg -i "$wallpaper_path" -m fill &
 #flavours generate dark "$wallpaper_path"
 #flavours apply generated
 flavours apply gruvbox-dark-medium
+gsettings set org.gnome.desktop.interface color-scheme prefer-dark
 
 # Start Waybar
 waybar -c $HOME/.config/waybar/stacking-config -s $HOME/.config/waybar/style.css &
