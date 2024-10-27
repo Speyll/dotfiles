@@ -66,6 +66,12 @@ osd.label.text.color: #ebdbb2
 osd.bg.color: #282828
 !! End flavours
 
+!! Title bar
+window.button.height: 18
+window.titlebar.padding.width: 4
+window.titlebar.padding.height: 4
+window.button.spacing: 0
+
 !! Menu Background
 menu.items.bg: flat
 menu.overlap.x: 0

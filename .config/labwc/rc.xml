@@ -17,7 +17,7 @@
         <cornerRadius>0</cornerRadius>
         <font place="ActiveWindow">
             <name>sans</name>
-            <size>0</size>
+            <size>10</size>
             <slant>normal</slant>
             <weight>normal</weight>
         </font>
@@ -111,15 +111,15 @@
 
         <!-- Window management -->
         <keybind key="W-space"><action name="ToggleMaximize" /></keybind>
-        <keybind key="W-c"><action name="SnapToRegion" region="center" /></keybind>
+        <keybind key="W-c"><action name="ToggleSnapToRegion" region="center" /></keybind>
         <keybind key="A-Up"><action name="MoveToEdge" direction="up" /></keybind>
         <keybind key="A-Left"><action name="MoveToEdge" direction="left" /></keybind>
         <keybind key="A-Right"><action name="MoveToEdge" direction="right" /></keybind>
         <keybind key="A-Down"><action name="MoveToEdge" direction="down" /></keybind>
         <keybind key="W-Up"><action name="ToggleMaximize" /></keybind>
-        <keybind key="W-Left"><action name="SnapToEdge" direction="left" /></keybind>
-        <keybind key="W-Right"><action name="SnapToEdge" direction="right" /></keybind>
-        <keybind key="W-Down"><action name="SnapToEdge" direction="down" /></keybind>
+        <keybind key="W-Left"><action name="ToggleSnapToEdge" direction="left" /></keybind>
+        <keybind key="W-Right"><action name="ToggleSnapToEdge" direction="right" /></keybind>
+        <keybind key="W-Down"><action name="ToggleSnapToEdge" direction="down" /></keybind>
 
         <!-- Execute commands -->
         <keybind key="W-Return"><action name="Execute" command="foot" /></keybind>
