@@ -10,9 +10,9 @@
 }
 
 #waybar {
-    background-color: @bg;
-    color: @base06;
-    margin: 4px 0 4px 0;
+    background-color: inherit;
+    color: @base05;
+    border-radius: 6px;
 }
 
 
@@ -36,7 +36,7 @@ tooltip {
     padding: 0;
     margin: 0;
     background-color: @bg;
-    color: @base06;
+    color: @base05;
     border-width: 0px;
     border-color: @base0C;
     border-radius: 8px;
@@ -46,7 +46,7 @@ tooltip label {
     padding: 0;
     margin: 0;
     background-color: inherit;
-    color: @base06;
+    color: @base05;
 }
 
 .modules-left {
@@ -74,18 +74,6 @@ tooltip label {
     margin-right: 0;
 }
 
-#rightWrapper {
-    background-color: inherit;
-    padding: 0 2px 0 2px;
-    border-radius: 0 0 8px 0;
-}
-
-#leftWrapper {
-    background-color: inherit;
-    padding: 0 2px 0 2px;
-    border-radius: 8px 0 0 8px;
-}
-
 #workspaces, #tags {
     margin: 0 0 0 4px;
 }
@@ -93,12 +81,12 @@ tooltip label {
 #workspaces button, #tags button {
     border-radius: 4px;
     padding: 0 2px 0 2px;
-    color: @base06;
+    color: @base05;
     background-color: transparent;
 }
 
 #workspaces button:hover, #tags button:hover {
-    color: @base06;
+    color: @base05;
     background-color: @base01;
 }
 
@@ -123,9 +111,8 @@ tooltip label {
 }
 
 #taskbar button {
-    margin: 0 2px 0 2px;
-    padding: 0 4px 0 4px;
-    border-radius: 2px;
+    padding: 0 5px 0 5px;
+    border-radius: 6px;
     color: @base07;
     background-color: inherit;
 }
@@ -137,7 +124,7 @@ tooltip label {
 
 #taskbar button.minimized {
     color: @base07;
-    background-color: @base03;
+    background-color: @base02;
 }
 
 #taskbar button.active {
@@ -161,13 +148,12 @@ tooltip label {
 #tray {
     margin: 0 6px 0 6px;
     padding: 0;
-    font-weight: 600;
+    font-weight: 500;
 }
 
 #custom-launcher {
-    margin: 0 4px 0 4px;
-    color: @base06;
-    font-weight: 600;
+    padding: 0 6px 0 6px;
+    color: @base05;
 }
 
 #clock,
@@ -180,9 +166,21 @@ tooltip label {
 #temperature,
 #backlight,
 #battery {
-    color: @base06;
+    color: @base05;
 }
 
+#leftWrapper {
+    background-color: @bg;
+    color: @base05;
+    border-radius: 6px;
+}
+
+#rightWrapper {
+    background-color: @bg;
+    color: @base05;
+    padding: 0 4px 0 4px;
+    border-radius: 6px;
+}
 
 #wireplumber.muted,
 #network.disconnected,
@@ -197,8 +195,9 @@ window#waybar.hidden {
 }
 
 #tray {
-    border-radius: 2px;
-    background-color: inherit;
+    padding: 0 4px 0 4px;
+    border-radius: 6px;
+    background-color: @bg;
 }
 
 #tray > .passive {

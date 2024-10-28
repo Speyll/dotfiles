@@ -1,0 +1,92 @@
+#!/bin/sh
+
+# Environment Setup
+dbus-update-activation-environment --all >/dev/null 2>&1 &
+
+# Polkit Agent
+/usr/libexec/polkit-gnome-authentication-agent-1 >/dev/null 2>&1 &
+
+# Output and Display Configuration
+wlr-randr --output HDMI-A-1 --mode 1920x1080@60.000000 --adaptive-sync enabled >/dev/null 2>&1 &
+
+# Kill Existing Processes
+for process in flavours pipewire wireplumber pipewire-pulse mpvpaper swaybg fnott wlsunset cliphist; do
+    pkill -x "$process"
+done
+
+# Start PipeWire and Services
+dbus-run-session pipewire >/dev/null 2>&1 &
+sleep 1
+wireplumber >/dev/null 2>&1 &
+pipewire-pulse >/dev/null 2>&1 &
+
+#!/bin/sh
+
+#!/bin/sh
+
+# Wallpaper Mode Selection
+WALLPAPER_MODE="swaybg-random" # Options: "swaybg", "swaybg-random", "mpvpaper-local", "mpvpaper-online"
+LINK="https://youtu.be/GIky-GXIBVY" # Online video link for mpvpaper-online mode
+
+case "$WALLPAPER_MODE" in
+    swaybg)
+        wallpaper_path="$HOME/pictures/walls/wall.jpg"
+        swaybg --mode fill -i "$wallpaper_path" >/dev/null 2>&1 &
+        ;;
+    swaybg-random)
+        wallpaper_path=$(find "$HOME/pictures/walls/"*.jpg -type f | shuf -n1)
+        swaybg -i "$wallpaper_path" -m fill >/dev/null 2>&1 &
+        ;;
+    mpvpaper-local)
+        mpvpaper -vsp -o "no-audio pause=no --loop --ytdl-format='bestvideo[height<=1080]+bestaudio/best'" '*' "$(find "$HOME/pictures/walls/"*.mp4 -type f | shuf -n1)" >/dev/null 2>&1 &
+        ;;
+    mpvpaper-online)
+        mpvpaper -vsp -o "no-audio pause=no --loop --ytdl-format='bestvideo[height<=1080]+bestaudio/best'" '*' "$LINK" >/dev/null 2>&1 &
+        ;;
+    none) ;;
+esac
+
+# Flavours Theme Selection (choose: auto-detect from wallpaper, fixed theme, or none)
+FLAVOURS_MODE="fixed"
+
+case "$FLAVOURS_MODE" in
+    auto)
+        # Generate and apply the Flavours theme based on the selected wallpaper
+        flavours generate dark "$wallpaper_path" >/dev/null 2>&1
+        flavours apply generated >/dev/null 2>&1 &
+        ;;
+    fixed)
+        flavours apply gruvbox-dark-medium >/dev/null 2>&1 &
+        ;;
+    none) ;;
+esac
+
+# Set GNOME Color Scheme
+gsettings set org.gnome.desktop.interface color-scheme prefer-dark >/dev/null 2>&1 &
+
+# Waybar Configuration (choose: stacking, tiling, or none)
+WAYBAR_MODE="none"
+
+case "$WAYBAR_MODE" in
+    stacking)
+        pkill -x waybar && waybar -c "$HOME/.config/waybar/stacking-config" -s "$HOME/.config/waybar/style.css" >/dev/null 2>&1 &
+        ;;
+    tiling)
+        pkill -x waybar && waybar -c "$HOME/.config/waybar/tiling-config" -s "$HOME/.config/waybar/style.css" >/dev/null 2>&1 &
+        ;;
+    none) ;;
+esac
+
+# Cursor Theme
+gsettings set org.gnome.desktop.interface cursor-theme Breeze_Snow >/dev/null 2>&1 &
+seat seat0 xcursor_theme Breeze_Snow >/dev/null 2>&1 &
+
+# Start Additional Services
+fnott >/dev/null 2>&1 & # Notifications
+wlsunset -l 36.7 -L 3.08 >/dev/null 2>&1 & # Night light
+wl-paste --watch cliphist store -max-items 100 >/dev/null 2>&1 & # Clipboard manager
+
+# Start XDG Desktop Portal Services
+for portal in xdg-desktop-portal xdg-desktop-portal-gtk xdg-desktop-portal-wlr; do
+    /usr/libexec/$portal >/dev/null 2>&1 &
+done

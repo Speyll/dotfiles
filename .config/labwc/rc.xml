@@ -10,32 +10,32 @@
     <theme>
         <name>Base16</name>
         <titlebar>
-            <layout>icon:iconify,max,close</layout>
+            <layout>menu:iconify,max,close</layout>
             <showTitle>no</showTitle>
         </titlebar>
         <keepBorder>no</keepBorder>
-        <cornerRadius>0</cornerRadius>
+        <cornerRadius>3</cornerRadius>
         <font place="ActiveWindow">
-            <name>sans</name>
-            <size>10</size>
+            <name>monospace</name>
+            <size>11</size>
             <slant>normal</slant>
             <weight>normal</weight>
         </font>
         <font place="InactiveWindow">
-            <name>sans</name>
-            <size>10</size>
+            <name>monospace</name>
+            <size>11</size>
             <slant>normal</slant>
             <weight>normal</weight>
         </font>
         <font place="MenuItem">
-            <name>sans</name>
-            <size>10</size>
+            <name>monospace</name>
+            <size>11</size>
             <slant>normal</slant>
             <weight>normal</weight>
         </font>
         <font place="OnScreenDisplay">
-            <name>sans</name>
-            <size>10</size>
+            <name>monospace</name>
+            <size>12</size>
             <slant>normal</slant>
             <weight>bold</weight>
         </font>

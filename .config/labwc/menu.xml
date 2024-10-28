@@ -17,6 +17,7 @@
         </menu>
     </menu>
     <menu id="root-menu">
+        <separator label=" "/>
         <item label="Web browser"><action name="Execute" command="flatpak run io.gitlab.librewolf-community" /></item>
         <item label="File Manager"><action name="Execute" command="pcmanfm-qt" /></item>
         <item label="Terminal"><action name="Execute" command="foot" /></item>

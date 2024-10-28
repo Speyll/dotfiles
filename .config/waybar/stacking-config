@@ -1,16 +1,17 @@
 {
     "layer": "bottom",
-    "position": "top",
-    "height": 24,
+    "position": "bottom",
+    "height": 28,
     "spacing": 0,
-    "margin": 0,
+    "margin": "3 60 3 60",
     "start_hidden": false,
-    "fixed-center": false,
+    "fixed-center": true,
+    "mode": "dock",
     "reload_style_on_change": true,
 
-    "modules-left": ["custom/launcher", "wlr/taskbar"],
+    "modules-left": ["group/leftWrapper"],
     "modules-center": [],
-    "modules-right": ["tray", "group/status", "group/networking", "group/core"],
+    "modules-right": ["tray", "group/rightWrapper"],
 
     "group/leftWrapper": {
         "orientation": "horizontal",
@@ -23,6 +24,7 @@
     "group/rightWrapper": {
         "orientation": "horizontal",
         "modules": [
+            "group/status",
             "group/networking",
             "group/core",
         ],
@@ -67,8 +69,8 @@
     },
 
     "wlr/taskbar": {
-        "format": "{icon} {title}",
-        "icon-size": 14,
+        "format": "{icon}",
+        "icon-size": 20,
         "icon-theme": "breeze",
         "tooltip": true,
         "tooltip-format": "{title}",
