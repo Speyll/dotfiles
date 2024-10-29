@@ -1,0 +1,16 @@
+/*
+Base16 Gruvbox dark, medium
+Scheme author: Dawid Kurek (dawikur@gmail.com), morhetz (https://github.com/morhetz/gruvbox)
+Template author: Tinted Theming (https://github.com/tinted-theming)
+In files gtk-3.0/gtk.css and gtk-3.20/gtk.css, delete section "Default color scheme" and inject this
+*/
+
+@define-color bg_color #282828;
+@define-color fg_color #d5c4a1;
+@define-color base_color #3c3836;
+@define-color text_color #d5c4a1;
+@define-color text_color_disabled #665c54;
+@define-color selected_bg_color #504945;
+@define-color selected_fg_color #d5c4a1;
+@define-color tooltip_bg_color #282828;
+@define-color tooltip_fg_color #d5c4a1;
