@@ -24,6 +24,7 @@
     "group/rightWrapper": {
         "orientation": "horizontal",
         "modules": [
+            "group/laptop",
             "group/status",
             "group/networking",
             "group/core",

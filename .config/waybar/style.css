@@ -75,12 +75,12 @@ tooltip label {
 }
 
 #workspaces, #tags {
-    margin: 0 0 0 4px;
+    margin: 0;
 }
 
 #workspaces button, #tags button {
     border-radius: 4px;
-    padding: 0 2px 0 2px;
+    padding: 0 6px 0 6px;
     color: @base05;
     background-color: transparent;
 }
@@ -102,7 +102,12 @@ tooltip label {
 
 #window {
     padding: 0 4px 0 4px;
-    color: @base08;
+    color: @base07;
+}
+
+#window.empty {
+    padding: 0;
+    background-color: transparent;
 }
 
 #taskbar {
