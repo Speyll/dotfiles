@@ -58,3 +58,14 @@ template = "gtk-flatcolor"
 subtemplate = "gtk-2"
 rewrite = true
 
+[[item]]
+file = "~/.config/sway/config.d/colors"
+template = "sway"
+subtemplate = "colors"
+rewrite = true
+light = false
+hook = "swaymsg reload"
+
+[[item]]
+file = "~/.config/river/init"
+template = "river"
