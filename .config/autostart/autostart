@@ -20,10 +20,6 @@ sleep 1
 wireplumber >/dev/null 2>&1 &
 pipewire-pulse >/dev/null 2>&1 &
 
-#!/bin/sh
-
-#!/bin/sh
-
 # Wallpaper Mode Selection
 WALLPAPER_MODE="swaybg-random" # Options: "swaybg", "swaybg-random", "mpvpaper-local", "mpvpaper-online"
 LINK="https://youtu.be/GIky-GXIBVY" # Online video link for mpvpaper-online mode
