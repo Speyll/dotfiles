@@ -1,36 +1,50 @@
 #!/bin/sh
 
+# Set target FPS
 target_fps=30
 
-mkdir -p "encVids"
+# Check dependencies
+for cmd in ffprobe ffmpeg awk bc; do
+    command -v "$cmd" >/dev/null 2>&1 || {
+        echo >&2 "Error: $cmd is not installed."; exit 1;
+    }
+done
 
-for file in *.mp4 *.mkv *.ts *.mov *.avi *.MP4; do
-    # Check if file exists and is a regular file
-    if [ -f "$file" ] && [ ! -f "encVids/${file%.*}.mp4" ]; then
-        echo "Encoding $file to encVids/${file%.*}.mp4..."
+# Prepare output directory
+output_dir="encVids"
+mkdir -p "$output_dir"
 
-        # Get the original fps using ffprobe
+# Space-separated list of file extensions
+extensions="*.mp4 *.mkv *.ts *.mov *.avi *.MP4"
+
+# Loop over files with specified extensions
+for ext in $extensions; do
+    for file in $ext; do
+        # Check if file exists, is regular, and if output already exists
+        [ -f "$file" ] || continue
+        output_file="$output_dir/${file%.*}.mp4"
+        [ -f "$output_file" ] && echo "Skipping $file: Output already exists." && continue
+        
+        echo "Encoding $file to $output_file..."
+
+        # Extract and calculate original FPS
         original_fps=$(ffprobe -v error -select_streams v:0 -show_entries stream=r_frame_rate -of default=noprint_wrappers=1:nokey=1 "$file")
+        fps=$(echo "$original_fps" | awk -F'/' -v target="$target_fps" '{printf "%d", ($1/$2 > target) ? target : $1/$2}')
 
-        # Convert original_fps from fractional format to float
-        fps=$(echo "$original_fps" | awk -F'/' '{printf "%f", $1/$2}')
-
-        # Determine if we should limit the fps
-        if [ "$(echo "$fps > $target_fps" | bc -l)" -eq 1 ]; then
-            fps=$target_fps
-        fi
-
-        # Run ffmpeg command and check success directly
-        if ffmpeg -i "$file" -c:v libx265 -r "$fps" -vf "scale='if(gt(ih,iw),min(720,iw),min(1280,iw))':'if(gt(ih,iw),min(1280,ih),min(720,ih))':force_original_aspect_ratio=decrease:force_divisible_by=2" -preset faster -profile:v main -level:v 4.0 -c:a libopus -tile-columns 3 -g 240 -threads 15 -sws_flags lanczos -movflags +faststart -color_primaries bt709 -color_trc bt709 -colorspace bt709 "encVids/${file%.*}.mp4"; then
+        # Encode with ffmpeg
+        if ffmpeg -i "$file" -c:v libx265 -preset faster -profile:v main -level:v 4.0 \
+                -r "$fps" \
+                -vf "scale='if(gt(ih,iw),min(720,iw),min(1280,iw))':'if(gt(ih,iw),min(1280,ih),min(720,ih))':force_original_aspect_ratio=decrease:force_divisible_by=2" \
+                -c:a libopus -tile-columns 3 -g 240 -threads 15 \
+                -sws_flags lanczos -movflags +faststart \
+                -color_primaries bt709 -color_trc bt709 -colorspace bt709 \
+                "$output_file"; then
             echo "Encoding successful for $file."
         else
             echo "Error encoding $file."
         fi
-    elif [ -f "encVids/${file%.*}.mp4" ]; then
-        echo "Output file encVids/${file%.*}.mp4 already exists. Skipping encoding for $file."
-    fi
+    done
 done
 
-# Shut down the computer when the script finishes
+# Optional: Shut down the computer when the script finishes
 # shutdown -h now
-
