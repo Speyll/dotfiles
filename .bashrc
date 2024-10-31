@@ -9,11 +9,11 @@ case $- in
 esac
 
 # History settings
-HISTCONTROL=ignorespace:ignoredups:erasedups
-PROMPT_COMMAND='history -a; history -n;'
+export HISTCONTROL=ignorespace:ignoredups:erasedups
+export PROMPT_COMMAND='cleanup-history; history -a; history -n'
+export HISTSIZE=1000
+export HISTFILESIZE=2000
 shopt -s histappend
-HISTSIZE=1000
-HISTFILESIZE=2000
 
 # Enable programmable completion features
 if ! shopt -oq posix; then
@@ -79,22 +79,25 @@ bind -x '"\C-x1": __fzf_history';
 
 __fzf_history ()
 {
-__ehc $(history | fzf --tac --tiebreak=index | perl -ne 'm/^\s*([0-9]+)/ and print "!$1"')
+    # Capture the selected command from history using fzf
+    local selected_cmd
+    selected_cmd=$(history | fzf --tac --tiebreak=index | perl -ne 'm/^\s*([0-9]+)\s*(.*)/ and print "$2"')
+
+    # Check if the selected command is different from the last history entry and the last executed command
+    if [[ -n $selected_cmd && $selected_cmd != "$(history 1 | sed 's/^[ ]*[0-9]*[ ]*//')" ]]; then
+        __ehc "$selected_cmd"
+    fi
 }
 
 __ehc()
 {
-if
-        [[ -n $1 ]]
-then
+    if [[ -n $1 ]]; then
         bind '"\er": redraw-current-line'
-        bind '"\e^": magic-space'
         READLINE_LINE=${READLINE_LINE:+${READLINE_LINE:0:READLINE_POINT}}${1}${READLINE_LINE:+${READLINE_LINE:READLINE_POINT}}
         READLINE_POINT=$(( READLINE_POINT + ${#1} ))
-else
+    else
         bind '"\er":'
-        bind '"\e^":'
-fi
+    fi
 }
 
 # `tm` will allow you to select your tmux session via fzf.
