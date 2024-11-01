@@ -1,11 +1,23 @@
 #!/bin/sh
 
-current_theme=$(flavours current)
+# Path to the temporary file that stores the last applied theme
+THEME_FILE="/tmp/current_theme"
 
-if echo "$current_theme" | grep -q "gruvbox-dark-medium"; then
+# If the file doesn't exist, initialize it with "dark"
+if [ ! -f "$THEME_FILE" ]; then
+    echo "dark" > "$THEME_FILE"
+fi
+
+# Read the last theme from the file
+last_theme=$(cat "$THEME_FILE")
+
+# Toggle between themes based on the last applied theme
+if [ "$last_theme" = "dark" ]; then
     flavours apply gruvbox-light-medium
     gsettings set org.gnome.desktop.interface color-scheme prefer-light
+    echo "light" > "$THEME_FILE"
 else
     flavours apply gruvbox-dark-medium
     gsettings set org.gnome.desktop.interface color-scheme prefer-dark
+    echo "dark" > "$THEME_FILE"
 fi
