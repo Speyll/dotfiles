@@ -21,8 +21,27 @@ wireplumber >/dev/null 2>&1 &
 pipewire-pulse >/dev/null 2>&1 &
 
 # Wallpaper Mode Selection
-WALLPAPER_MODE="swaybg-random" # Options: "swaybg", "swaybg-random", "mpvpaper-local", "mpvpaper-online"
+WALLPAPER_MODE="swaybg-random-online" # Options: "swaybg", "swaybg-random", "mpvpaper-local", "mpvpaper-online" "swaybg-random-online" 
 LINK="https://youtu.be/GIky-GXIBVY" # Online video link for mpvpaper-online mode
+URL_FILE="$HOME/.config/autostart/wallpaper_urls.txt" # File containing wallpaper URLs
+
+# Download a random wallpaper and set it as the background
+download_random_wallpaper() {
+    # Choose a random URL from the URL file
+    wallpaper_url=$(shuf -n1 "$URL_FILE")
+    
+    # Download to a temporary location
+    curl -sL "$wallpaper_url" -o /tmp/wallpaper.jpg
+
+    # Check if download was successful
+    if [ $? -ne 0 ]; then
+        echo "Failed to download wallpaper."
+        exit 1
+    fi
+
+    # Set the downloaded file as wallpaper_path
+    wallpaper_path="/tmp/wallpaper.jpg"
+}
 
 case "$WALLPAPER_MODE" in
     swaybg)
@@ -31,6 +50,10 @@ case "$WALLPAPER_MODE" in
         ;;
     swaybg-random)
         wallpaper_path=$(find "$HOME/pictures/walls/"*.jpg -type f | shuf -n1)
+        swaybg -i "$wallpaper_path" -m fill >/dev/null 2>&1 &
+        ;;
+    swaybg-random-online)
+        download_random_wallpaper
         swaybg -i "$wallpaper_path" -m fill >/dev/null 2>&1 &
         ;;
     mpvpaper-local)
@@ -43,7 +66,7 @@ case "$WALLPAPER_MODE" in
 esac
 
 # Flavours Theme Selection (choose: auto-detect from wallpaper, fixed theme, or none)
-FLAVOURS_MODE="fixed"
+FLAVOURS_MODE="auto"
 
 case "$FLAVOURS_MODE" in
     auto)
