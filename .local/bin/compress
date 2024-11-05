@@ -1,0 +1,50 @@
+#!/bin/sh
+
+# A general-purpose compression script supporting zip and 7z formats
+# Usage: compress.sh -f FORMAT -l LEVEL DIR_TO_COMPRESS
+# Options:
+#   -f: Format (zip or 7z)
+#   -l: Compression level (0-9 for zip, 0-9 for 7z)
+#   -h: Show help
+
+# Default values
+format="zip"
+level=5
+
+while getopts "f:l:h" opt; do
+  case "$opt" in
+    f) format=$OPTARG ;;
+    l) level=$OPTARG ;;
+    h)
+      echo "Usage: $0 -f FORMAT -l LEVEL DIR_TO_COMPRESS"
+      echo "  -f FORMAT: Choose 'zip' or '7z' (default: zip)"
+      echo "  -l LEVEL: Compression level (0-9, default: 5)"
+      exit 0
+      ;;
+    *)
+      echo "Invalid option"
+      exit 1
+      ;;
+  esac
+done
+
+shift $((OPTIND - 1))
+input="$1"
+
+if [ -z "$input" ]; then
+  echo "Error: Please specify a directory or file to compress."
+  exit 1
+fi
+
+# Derive the output filename based on input name and format
+output="$(basename "$input")"
+if [ "$format" = "zip" ]; then
+  output="${output}.zip"
+  zip -r -${level} "$output" "$input"
+elif [ "$format" = "7z" ]; then
+  output="${output}.7z"
+  7z a -mx=${level} "$output" "$input"
+else
+  echo "Error: Unsupported format. Choose 'zip' or '7z'."
+  exit 1
+fi

@@ -14,36 +14,40 @@ done
 output_dir="encVids"
 mkdir -p "$output_dir"
 
-# Space-separated list of file extensions
-extensions="*.mp4 *.mkv *.ts *.mov *.avi *.MP4"
+# Array of video file extensions to search for (case-insensitive)
+extensions="mp4 mkv ts mov avi webm"
 
-# Loop over files with specified extensions
+# Build the find command with all extensions
+find_command="find . -type f \( "
 for ext in $extensions; do
-    for file in $ext; do
-        # Check if file exists, is regular, and if output already exists
-        [ -f "$file" ] || continue
-        output_file="$output_dir/${file%.*}.mp4"
-        [ -f "$output_file" ] && echo "Skipping $file: Output already exists." && continue
-        
-        echo "Encoding $file to $output_file..."
+    find_command="$find_command -iname '*.$ext' -o "
+done
+find_command="${find_command% -o } \)"  # Remove the trailing `-o` and close the condition
 
-        # Extract and calculate original FPS
-        original_fps=$(ffprobe -v error -select_streams v:0 -show_entries stream=r_frame_rate -of default=noprint_wrappers=1:nokey=1 "$file")
-        fps=$(echo "$original_fps" | awk -F'/' -v target="$target_fps" '{printf "%d", ($1/$2 > target) ? target : $1/$2}')
+# Execute the find command and process each video file
+eval "$find_command" | while read -r file; do
+    # Check if the output file already exists
+    output_file="$output_dir/${file%.*}.mp4"
+    [ -f "$output_file" ] && echo "Skipping $file: Output already exists." && continue
 
-        # Encode with ffmpeg
-        if ffmpeg -i "$file" -c:v libx265 -preset faster -profile:v main -level:v 4.0 \
-                -r "$fps" \
-                -vf "scale='if(gt(ih,iw),min(720,iw),min(1280,iw))':'if(gt(ih,iw),min(1280,ih),min(720,ih))':force_original_aspect_ratio=decrease:force_divisible_by=2" \
-                -c:a libopus -tile-columns 3 -g 240 -threads 15 \
-                -sws_flags lanczos -movflags +faststart \
-                -color_primaries bt709 -color_trc bt709 -colorspace bt709 \
-                "$output_file"; then
-            echo "Encoding successful for $file."
-        else
-            echo "Error encoding $file."
-        fi
-    done
+    echo "Encoding $file to $output_file..."
+
+    # Extract and calculate original FPS
+    original_fps=$(ffprobe -v error -select_streams v:0 -show_entries stream=r_frame_rate -of default=noprint_wrappers=1:nokey=1 "$file")
+    fps=$(echo "$original_fps" | awk -F'/' -v target="$target_fps" '{printf "%d", ($1/$2 > target) ? target : $1/$2}')
+
+    # Encode with ffmpeg using -nostdin to avoid consuming stdin
+    if ffmpeg -nostdin -i "$file" -c:v libx265 -preset faster -profile:v main -level:v 4.0 \
+            -r "$fps" \
+            -vf "scale='if(gt(ih,iw),min(720,iw),min(1280,iw))':'if(gt(ih,iw),min(1280,ih),min(720,ih))':force_original_aspect_ratio=decrease:force_divisible_by=2" \
+            -c:a libopus -tile-columns 3 -g 240 -threads 15 \
+            -sws_flags lanczos -movflags +faststart \
+            -color_primaries bt709 -color_trc bt709 -colorspace bt709 \
+            "$output_file"; then
+        echo "Encoding successful for $file."
+    else
+        echo "Error encoding $file."
+    fi
 done
 
 # Optional: Shut down the computer when the script finishes
