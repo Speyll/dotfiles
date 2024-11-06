@@ -1,0 +1,143 @@
+# vim: filetype=dosini
+
+[general]
+mode = viewer
+position = parent
+size = 800,800
+sigusr1 = reload
+sigusr2 = next_file
+app_id = swayimg
+
+# Start flavours
+[viewer]
+window = 282828
+transparency = grid
+scale = optimal
+fixed = yes
+antialiasing = no
+slideshow = no
+slideshow_time = 7
+history = 1
+preload = 1
+
+[gallery]
+size = 200
+cache = 100
+fill = yes
+antialiasing = no
+window = 282828
+background = 282828
+select = ebdbb2
+border = 8ec07c
+shadow = 665c54
+
+[list]
+order = alpha
+loop = yes
+recursive = no
+all = yes
+
+[font]
+name = monospace
+size = 14
+color = ebdbb2
+shadow = 665c54
+# End flavours
+
+[info]
+show = no
+info_timeout = 5
+status_timeout = 3
+
+[info.viewer]
+top_left = +name,+format,+filesize,+imagesize,+exif
+top_right = index
+bottom_left = scale,frame
+bottom_right = status
+
+[info.gallery]
+top_left = none
+top_right = none
+bottom_left = none
+bottom_right = name,status
+
+[keys.viewer]
+F1 = help
+Home = first_file
+End = last_file
+Prior = prev_file
+Next = next_file
+Space = next_file
+Shift+d = prev_dir
+d = next_dir
+Shift+o = prev_frame
+o = next_frame
+c = skip_file
+Shift+s = slideshow
+s = animation
+f = fullscreen
+Return = mode
+Left = prev_file
+Right = next_file
+Up = step_up 10
+Down = step_down 10
+Ctrl+Left = step_left 10
+Ctrl+Right = step_right 10
+Equal = zoom +10
+Plus = zoom +10
+Minus = zoom -10
+w = zoom width
+Shift+w = zoom height
+z = zoom fit
+Shift+z = zoom fill
+0 = zoom real
+BackSpace = zoom optimal
+Alt+s = scale
+bracketleft = rotate_left
+bracketright = rotate_right
+m = flip_vertical
+Shift+m = flip_horizontal
+a = antialiasing
+r = reload
+i = info
+Shift+Delete = exec rm "%"; skip_file
+Escape = exit
+q = exit
+
+# Mouse bindings for viewer mode
+ScrollLeft = step_right 5
+ScrollRight = step_left 5
+ScrollUp = zoom +10
+ScrollDown = zoom -10
+Ctrl+ScrollUp = step_up 5
+Ctrl+ScrollDown = step_down 5
+Shift+ScrollUp = prev_file
+Shift+ScrollDown = next_file
+Alt+ScrollUp = prev_frame
+Alt+ScrollDown = next_frame
+
+[keys.gallery]
+F1 = help
+Home = first_file
+End = last_file
+Left = step_left
+Right = step_right
+Up = step_up
+Down = step_down
+Prior = page_up
+Next = page_down
+c = skip_file
+f = fullscreen
+Return = mode
+a = antialiasing
+r = reload
+i = info
+Shift+Delete = exec rm "%"; skip_file
+Escape = exit
+q = exit
+
+# Mouse bindings for gallery mode
+ScrollLeft = step_right
+ScrollRight = step_left
+ScrollUp = step_up
+ScrollDown = step_down

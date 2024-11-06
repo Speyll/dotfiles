@@ -274,6 +274,7 @@
 
     <windowRules>
         <windowRule identifier="imv" serverDecoration="yes"/>
+        <windowRule identifier="swayimg" serverDecoration="yes"/>
     </windowRules>
 
 </labwc_config>

@@ -59,6 +59,10 @@ subtemplate = "gtk-2"
 rewrite = true
 
 [[item]]
+file = "~/.config/swayimg/config"
+template = "swayimg"
+
+[[item]]
 file = "~/.config/sway/config.d/colors"
 template = "sway"
 subtemplate = "colors"
@@ -69,3 +73,7 @@ hook = "swaymsg reload"
 [[item]]
 file = "~/.config/river/init"
 template = "river"
+
+[[item]]
+file = "~/.config/wayfire.ini"
+template = "wayfire"
