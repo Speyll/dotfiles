@@ -14,7 +14,7 @@ window = 282828
 transparency = grid
 scale = optimal
 fixed = yes
-antialiasing = no
+antialiasing = yes
 slideshow = no
 slideshow_time = 7
 history = 1
@@ -103,6 +103,7 @@ i = info
 Shift+Delete = exec rm "%"; skip_file
 Escape = exit
 q = exit
+Ctrl+w = exec ~/.config/swayimg/set-wall "%"
 
 # Mouse bindings for viewer mode
 ScrollLeft = step_right 5
@@ -135,6 +136,7 @@ i = info
 Shift+Delete = exec rm "%"; skip_file
 Escape = exit
 q = exit
+Ctrl+w = exec ~/.config/swayimg/set-wall "%"
 
 # Mouse bindings for gallery mode
 ScrollLeft = step_right

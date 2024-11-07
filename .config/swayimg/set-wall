@@ -1,0 +1,14 @@
+#!/bin/sh
+selected_image="$1"
+
+# Check if an image is provided and valid
+if [ -n "$selected_image" ] && [ -f "$selected_image" ]; then
+    # Kill any existing swaybg instances
+    pkill swaybg
+
+    # Set the selected image as the wallpaper with swaybg
+    swaybg -i "$selected_image" -m fill &
+    echo "Wallpaper set to: $selected_image"
+else
+    echo "No valid image provided."
+fi
