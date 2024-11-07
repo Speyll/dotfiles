@@ -138,9 +138,9 @@
         <keybind key="XF86_MonBrightnessDown"><action name="Execute" command="brightnessctl set 5%-" /></keybind>
 
         <!-- Screenshot -->
-        <keybind key="Print"><action name="Execute" command="grim-copy" /></keybind>
+        <keybind key="Print"><action name="Execute" command="grim-print copy" /></keybind>
         <keybind key="W-Print"><action name="Execute" command="grim" /></keybind>
-        <keybind key="W-S-s"><action name="Execute" command="grim-slurp" /></keybind>
+        <keybind key="W-S-s"><action name="Execute" command="grim-print slurp" /></keybind>
 
         <!-- Snap to regions -->
         <keybind key="W-KP_7"><action name="SnapToRegion" region="top-left" /></keybind>

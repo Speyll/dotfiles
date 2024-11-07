@@ -1,0 +1,132 @@
+#!/bin/sh
+
+# Display colors for output (adjust for your preferred colors)
+COLOR_RESET="\033[0m"
+COLOR_WIFI_CONNECTED="\033[1;32m"
+COLOR_WIFI_DISCONNECTED="\033[1;31m"
+COLOR_BLUETOOTH_CONNECTED="\033[1;32m"
+COLOR_BLUETOOTH_DISCONNECTED="\033[1;31m"
+COLOR_VPN_CONNECTED="\033[1;32m"
+COLOR_VPN_DISCONNECTED="\033[1;31m"
+COLOR_HEADER="\033[1;34m"
+
+# Display the current status of network connections
+display_status() {
+    echo "\n${COLOR_HEADER}--- Network Status ---${COLOR_RESET}"
+
+    nmcli --fields SSID,SIGNAL,BARS,SECURITY device wifi list
+    echo
+
+    # Show current Wi-Fi connection status
+    connected_wifi=$(nmcli -g SSID device wifi | sed '/^\s*$/d' | head -n 1)
+    if [ -n "$connected_wifi" ]; then
+        echo "${COLOR_WIFI_CONNECTED}Currently connected to Wi-Fi: ${connected_wifi}${COLOR_RESET}"
+    else
+        echo "${COLOR_WIFI_DISCONNECTED}No active Wi-Fi connection.${COLOR_RESET}"
+    fi
+    echo
+
+    # Show current Bluetooth status
+    bluetooth_status=$(bluetoothctl show | awk '/Powered/ {print $2}')
+    if [ "$bluetooth_status" = "yes" ]; then
+        paired_devices=$(bluetoothctl devices)
+        echo "${COLOR_BLUETOOTH_CONNECTED}Bluetooth is powered on.${COLOR_RESET}"
+        if [ -n "$paired_devices" ]; then
+            echo "Paired Bluetooth devices:"
+            echo "${COLOR_BLUETOOTH_CONNECTED}${paired_devices}${COLOR_RESET}"
+        else
+            echo "No paired Bluetooth devices found."
+        fi
+    else
+        echo "${COLOR_BLUETOOTH_DISCONNECTED}Bluetooth is powered off.${COLOR_RESET}"
+    fi
+    echo
+
+    # Show ProtonVPN status
+    vpn_status=$(nmcli connection show --active | grep -i protonvpn)
+    if [ -n "$vpn_status" ]; then
+        echo "${COLOR_VPN_CONNECTED}ProtonVPN is connected.${COLOR_RESET}"
+    else
+        echo "${COLOR_VPN_DISCONNECTED}ProtonVPN is not connected.${COLOR_RESET}"
+    fi
+}
+
+# Function to connect to a Wi-Fi network
+connect_to_wifi() {
+    show_wifi_networks
+    echo -n "Enter the number of the Wi-Fi network to connect to: "
+    read -r choice
+    ssid=$(nmcli --fields SSID device wifi | awk -v choice="$choice" 'NR == choice+1 {print $1}')
+    [ -n "$ssid" ] && {
+        echo -n "Enter password for ${ssid}: "
+        read -r password
+        nmcli device wifi connect "$ssid" password "$password" && echo "Connected to ${ssid}" || echo "Failed to connect to ${ssid}"
+    } || echo "Invalid selection. No connection was made."
+}
+
+# Function to disconnect from the current Wi-Fi network
+disconnect_from_wifi() {
+    connected_device=$(nmcli -g SSID device wifi | sed '/^\s*$/d' | head -n 1)
+    [ -n "$connected_device" ] && nmcli device disconnect "$connected_device" && echo "Disconnected from ${connected_device}" || echo "No active Wi-Fi connection."
+}
+
+# Function to connect to Bluetooth device
+connect_bluetooth() {
+    bluetoothctl power on
+    bluetoothctl scan on & sleep 5
+    if ! bluetoothctl scan off 2>/dev/null; then
+        echo "Warning: Failed to stop scanning."
+    fi
+    devices=$(bluetoothctl devices)
+    if [ -z "$devices" ]; then
+        echo "No Bluetooth devices found."
+        return
+    fi
+    temp_file=$(mktemp)
+    i=1
+    echo "$devices" | while read -r device; do
+        device_mac=$(echo "$device" | awk '{print $2}')
+        device_name=$(bluetoothctl info "$device_mac" | awk -F 'Name: ' '/Name/ {print $2}')
+        [ -z "$device_name" ] && device_name="$device_mac"
+        echo "${i}. ${device_name} (${device_mac})" >> "$temp_file"
+        i=$((i + 1))
+    done
+    echo -n "Enter the number of the Bluetooth device to connect to: "
+    read -r choice
+    device_mac=$(awk -v choice="$choice" 'NR == choice {print $1}' "$temp_file")
+    rm "$temp_file"
+    [ -n "$device_mac" ] && bluetoothctl connect "$device_mac" && echo "Connected to ${device_mac}" || echo "Invalid selection. No connection made."
+}
+
+# Function to toggle ProtonVPN connection
+toggle_vpn() {
+    CONNECTION_NAME="protonvpn"
+    vpn_status=$(nmcli connection show --active | grep -i protonvpn)
+    if [ -n "$vpn_status" ]; then
+        sudo nmcli connection down "$CONNECTION_NAME" && echo "${COLOR_VPN_DISCONNECTED}VPN disconnected.${COLOR_RESET}"
+    else
+        sudo nmcli connection up "$CONNECTION_NAME" && echo "${COLOR_VPN_CONNECTED}VPN connected.${COLOR_RESET}"
+    fi
+}
+
+# Display current network status
+display_status
+
+# Prompt for next action
+echo "${COLOR_HEADER}--- Choose an Action ---${COLOR_RESET}"
+echo "1. Connect to Wi-Fi network"
+echo "2. Disconnect from Wi-Fi network"
+echo "3. Connect to a Bluetooth device"
+echo "4. Toggle ProtonVPN"
+echo "5. Exit"
+echo -n "Choose (1-5): "
+read -r choice
+
+case $choice in
+    1) connect_to_wifi ;;
+    2) disconnect_from_wifi ;;
+    3) connect_bluetooth ;;
+    4) toggle_vpn ;;
+    5) echo "Exiting." ;;
+    *) echo "Invalid choice. Exiting." ;;
+esac

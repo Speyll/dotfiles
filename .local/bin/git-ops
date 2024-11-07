@@ -1,0 +1,51 @@
+#!/bin/sh
+
+# Function to exit with an error message
+exit_err() {
+  echo "$1" >&2
+  exit 1
+}
+
+# Prompt for commit message
+printf "Commit message: "
+read -r commit || exit_err "Failed to read input."
+
+# Check if commit message is empty
+[ -z "$commit" ] && exit_err "Commit message cannot be empty."
+
+# Function to commit and push changes
+push_changes() {
+  git add -A || exit_err "Failed to stage changes."
+  git commit -m "$commit" || exit_err "Failed to commit changes."
+  git push || exit_err "Failed to push changes."
+  echo "Changes pushed successfully."
+}
+
+# Function to clean repository by resetting to an orphan branch and pushing
+clean_repo() {
+  git checkout --orphan temp-main || exit_err "Failed to create orphan branch."
+  git add -A || exit_err "Failed to stage changes."
+  git commit -m "$commit" || exit_err "Failed to commit changes."
+
+  # Replace the current main branch with the orphaned one
+  git branch -D main 2>/dev/null
+  git branch -m main || exit_err "Failed to rename branch to 'main'."
+  git push -f origin main || exit_err "Failed to push 'main' branch to remote."
+  git gc --aggressive --prune=all || exit_err "Failed to run garbage collection."
+  git push --set-upstream origin main || exit_err "Failed to set upstream for 'main' branch."
+  echo "Repository cleaned and pushed successfully."
+}
+
+# Script usage options
+case "$1" in
+  push)    # Standard commit and push
+    push_changes
+    ;;
+  clean)   # Clean repository by resetting and pushing orphaned main
+    clean_repo
+    ;;
+  *)       # Default message if no valid argument is provided
+    echo "Usage: $0 {push|clean}"
+    exit 1
+    ;;
+esac

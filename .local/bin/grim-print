@@ -1,0 +1,45 @@
+#!/bin/sh
+
+# Check for necessary tools
+for cmd in grim swayimg slurp wl-copy; do
+    command -v "$cmd" >/dev/null 2>&1 || { echo "$cmd is required but not installed." >&2; exit 1; }
+done
+
+# Prevent multiple instances of the script
+if pidof -o %PPID -x "$0" > /dev/null; then
+    exit 0
+fi
+
+# Function to capture the whole screen, show it with swayimg, then select a region to copy
+capture_region() {
+    temp_screenshot=$(mktemp --suffix=.png)
+    grim "${temp_screenshot}"
+    swayimg -f "${temp_screenshot}" &
+    swayimg_pid=$!
+    sleep 0.1
+
+    # Select a region with slurp, then copy the selected region to the clipboard
+    grim -g "$(slurp)" - | wl-copy -t image/png
+
+    # Clean up
+    kill "$swayimg_pid" 2>/dev/null
+    rm -f "${temp_screenshot}"
+}
+
+# Function to capture the full screen and copy directly to the clipboard
+copy_full_screen() {
+    grim - | wl-copy -t image/png
+}
+
+# Handle arguments
+case "$1" in
+    slurp)   # Capture region with slurp and show with swayimg
+        capture_region
+        ;;
+    copy)    # Capture full screen and copy to clipboard
+        copy_full_screen
+        ;;
+    *)       # Default: Capture full screen and copy to clipboard
+        copy_full_screen
+        ;;
+esac

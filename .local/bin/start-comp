@@ -1,12 +1,14 @@
 #!/bin/sh
-# Startup script for sway from console
+# Generalized startup script for Wayland compositors
 # License: GNU General Public License, version 3 or later
 
 # Check for correct usage
-if [ "$#" -ne 0 ]; then
-    echo "Usage: $(basename "$0"): start a sway session from a console tty"
+if [ "$#" -ne 1 ]; then
+    echo "Usage: $(basename "$0") <compositor_name>"
     exit 1
 fi
+
+COMPOSITOR="$1"
 
 # Define the log file
 mkdir -p "$HOME/.cache"
@@ -14,12 +16,12 @@ LOGFILE="$HOME/.cache/wsession-errors"
 exec > "$LOGFILE" 2>&1
 
 # Log the script start time
-echo "Labwc session started: $(date)"
+echo "$COMPOSITOR session started: $(date)"
 
 # Enable debug mode (remove this line for production use)
 # set -x
 
-# Environment variable settings
+# Common environment variable settings
 ## QT Related
 export QT_QPA_PLATFORM=wayland-egl
 export QT_QPA_PLATFORMTHEME=qt5ct
@@ -27,7 +29,7 @@ export QT_WAYLAND_DISABLE_WINDOWDECORATION="1"
 export ELM_DISPLAY=wl
 export SDL_VIDEODRIVER=wayland
 
-## GTK RELATED
+## GTK Related
 export GTK_USE_PORTAL=0
 
 ## Firefox
@@ -39,16 +41,21 @@ export XCURSOR_SIZE=24
 #export WLR_NO_HARDWARE_CURSORS=1
 
 ## XDG
-export XDG_SESSION_DESKTOP=wlroots
-export XDG_CURRENT_DESKTOP=labwc
 export XDG_SESSION_TYPE=wayland
 export XDG_DATA_DIRS="$HOME/.local/share/flatpak/exports/share:/var/lib/flatpak/exports/share:/usr/local/share:/usr/share"
+
+# Set compositor-specific environment variables
+export XDG_SESSION_DESKTOP=wlroots
+export XDG_CURRENT_DESKTOP="$COMPOSITOR"  # Dynamically set the compositor
 
 # Remove "Couldn't register with accessibility bus: Did not receive a reply." warnings
 export NO_AT_BRIDGE=1
 
-# user-session socket has already been set up, but it's not available in a
-# current environment
+# Set keyboard layout (optional)
+export XKB_DEFAULT_LAYOUT=fr,us
+export XKB_DEFAULT_OPTIONS=grp:rctrl_rshift_toggle
+
+# user-session socket setup
 if [ -z "$DBUS_SESSION_BUS_ADDRESS" ] && \
   [ -n "$XDG_RUNTIME_DIR" ] && \
   [ "$XDG_RUNTIME_DIR" = "/run/user/`id -u`" ] && \
@@ -57,18 +64,15 @@ if [ -z "$DBUS_SESSION_BUS_ADDRESS" ] && \
   export DBUS_SESSION_BUS_ADDRESS
 fi
 
-# X11-related env variables are exported in case we switch sessions between
-# X11 and Wayland. Maybe it's unnecessary though
+# Export environment variables for dbus
 dbus-update-activation-environment --verbose DBUS_SESSION_BUS_ADDRESS
 
-
-# launch dbus if it isn't launched yet
+# Launch dbus if it isn't running yet
 if [ -z "$DBUS_SESSION_BUS_ADDRESS" ]; then
   eval $(/usr/bin/dbus-launch --exit-with-session --sh-syntax)
 fi
 
-# unset unnecessary env variables safely in a subshell and export environment
-# to dbus
+# Unset unnecessary variables and export environment to dbus
 if [ -n "$DBUS_SESSION_BUS_ADDRESS" ]; then
   (
     unset XDG_SEAT
@@ -78,17 +82,14 @@ if [ -n "$DBUS_SESSION_BUS_ADDRESS" ]; then
   )
 fi
 
-# unset variables from the old sessions which might interfere with the new one
+# Unset variables from old sessions
 unset SWAYSOCK I3SOCK WAYLAND_DISPLAY DISPLAY
 
-# dbus-update-activation-environment --systemd works only if systemd --user
-# is available on dbus, so as a kind of workaround and/or safeguard, we'll
-# export it once again
+# dbus-update-activation-environment for systemd (if necessary)
 systemctl --user import-environment
 
 # Cleanup older sessions
 rm "$HOME"/.cache/*.wob
 
-# Start sway using dbus-run-session for improved compatibility
-#exec dbus-launch --sh-syntax --exit-with-session labwc
-dbus-run-session labwc
+# Start the compositor dynamically based on the argument
+dbus-run-session "$COMPOSITOR"

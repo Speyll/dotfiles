@@ -28,7 +28,7 @@ If you are here for my old bspwm, wayfire, sway or river setups you can find it 
   - `wlsunset` For managing night mode settings.
   - `wl-clipboard` For clipboard management.
   - `cliphist` To access clipboard history.
-  - `imv` My image viewer.
+  - ~~`imv`~~ `swayimg` My image viewer.
   - `fnott` Notification system.
   - `mpv` Video player.
   - `nvim` & `nano` Text editor
@@ -53,10 +53,9 @@ Note: I use an **AZERTY** keyboard, so some keybindings may differ. For example,
 
 ## Special Scripts
 
-I've crafted special scripts to simplify environment variable setup for both Labwc and Sway. These scripts streamline the process of launching your preferred window manager with the right configurations.
+I've crafted special script to simplify environment variable setup. This script streamline the process of launching your preferred wayland compositor with the right configurations.
 
-- `start-wayfire`: Use this script to launch Wayfire with the configured environment variables.
-- `start-labwc`: Use this script to launch Labwc with the configured environment variables.
-- `start-sway`: Use this script to launch Sway with the appropriate configurations.
+- `start-comp`: Use this script to launch your compositor with configured environment variables, Example: `start-comp labwc`
+- `fuzzel-launcher`: If you want the same menu I use in my bar.
 
 Additionally, there are other handy scripts available in `.local/bin`

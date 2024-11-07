@@ -1,0 +1,109 @@
+#!/bin/sh
+
+# A combined script for extraction and compression
+# Usage:
+#   - To extract: script_name -x [-c] archive
+#   - To compress: script_name -z -f FORMAT -l LEVEL DIR_TO_COMPRESS
+
+# Defaults for compression
+format="zip"
+level=5
+
+# Error handling function
+exit_err() {
+  echo "$1" >&2
+  exit 1
+}
+
+# Show help message
+show_help() {
+  echo "Usage: $0 [options] file_or_dir"
+  echo "Options for extraction:"
+  echo "  -x: Extract an archive"
+  echo "  -c: Extract into the current directory"
+  echo "Options for compression:"
+  echo "  -z: Compress a file or directory"
+  echo "  -f FORMAT: Choose 'zip' or '7z' (default: zip)"
+  echo "  -l LEVEL: Compression level (0-9, default: 5)"
+  echo "  -h: Show this help message"
+  exit 0
+}
+
+# Parse options
+extracthere=false
+mode=""
+
+while getopts "xczf:l:h" opt; do
+  case "$opt" in
+    x) mode="extract" ;;
+    z) mode="compress" ;;
+    c) extracthere=true ;;
+    f) format=$OPTARG ;;
+    l) level=$OPTARG ;;
+    h) show_help ;;
+    *) exit_err "Invalid option" ;;
+  esac
+done
+
+shift $((OPTIND - 1))
+
+# Check if file or directory is provided
+input="$1"
+[ -z "$input" ] && exit_err "Error: Please specify a file or directory."
+
+# If neither extraction nor compression mode is specified, show help
+if [ -z "$mode" ]; then
+  exit_err "Error: You must specify either extraction (-x) or compression (-z)."
+fi
+
+# Function to extract archives
+extract() {
+  archive="$(readlink -f "$input")"
+  [ -f "$archive" ] || exit_err "Error: File \"$archive\" not found."
+
+  # If -c option is specified, extract in the current directory
+  if [ "$extracthere" = false ]; then
+    dir="${archive%.*}"
+    mkdir -p "$dir" && cd "$dir" || exit 1
+  fi
+
+  case "$archive" in
+    *.tar.bz2|*.tbz2) tar xvjf "$archive" ;;
+    *.tar.xz) tar -xf "$archive" ;;
+    *.tar.gz|*.tgz) tar xvzf "$archive" ;;
+    *.tar.zst) tar -I zstd -xf "$archive" ;;
+    *.lzma) unlzma "$archive" ;;
+    *.bz2) bunzip2 "$archive" ;;
+    *.rar) unrar x -ad "$archive" ;;
+    *.gz) gunzip "$archive" ;;
+    *.tar) tar xvf "$archive" ;;
+    *.zip) unzip "$archive" ;;
+    *.Z) uncompress "$archive" ;;
+    *.7z) 7z x "$archive" ;;
+    *.xz) unxz "$archive" ;;
+    *.exe) cabextract "$archive" ;;
+    *) exit_err "Error: Unknown archive format for '$archive'" ;;
+  esac
+}
+
+# Function to compress files/directories
+compress() {
+  output="$(basename "$input").$format"
+
+  if [ "$format" = "zip" ]; then
+    zip -r -"$level" "$output" "$input" || exit_err "Failed to create zip archive."
+  elif [ "$format" = "7z" ]; then
+    7z a -mx="$level" "$output" "$input" || exit_err "Failed to create 7z archive."
+  else
+    exit_err "Error: Unsupported format. Choose 'zip' or '7z'."
+  fi
+
+  echo "Compression complete: $output"
+}
+
+# Execute based on chosen mode
+case "$mode" in
+  extract) extract ;;
+  compress) compress ;;
+  *) show_help ;;
+esac

@@ -1,0 +1,61 @@
+#!/bin/bash
+
+# Path to the directory you want to search in
+directory="$1"
+cache_dir="$HOME/.cache/vertical_videos"
+processed_file="$cache_dir/processed_files.txt"
+non_vertical_file="$cache_dir/non_vertical_files.txt"
+
+# Check if directory is provided and exists
+if [[ -z "$directory" || ! -d "$directory" ]]; then
+    echo "Please provide a valid directory."
+    exit 1
+fi
+
+# Create a temporary directory for symlinks
+mkdir -p "$cache_dir"
+
+# Initialize the processed and non-vertical files list if they don't exist
+touch "$processed_file"
+touch "$non_vertical_file"
+
+# Load processed files into an array for faster lookups
+mapfile -t processed_files < "$processed_file"
+mapfile -t non_vertical_files < "$non_vertical_file"
+
+# Find video files that have not been processed yet and are not symlinked in the cache directory
+find "$directory" -type f \( -name "*.mp4" -o -name "*.mkv" -o -name "*.avi" \) | while read -r file; do
+    # Check if the file has already been processed using the absolute path
+    absolute_path=$(realpath "$file")
+    
+    # Ensure proper quoting for comparison
+    if [[ ! " ${processed_files[@]} " =~ " ${absolute_path} " && ! " ${non_vertical_files[@]} " =~ " ${absolute_path} " ]]; then
+        # Skip files that have already been symlinked in the cache directory
+        if ! [[ -e "$cache_dir/$(basename "$file")" ]]; then
+            echo "Processing: $file"
+            width=$(ffprobe -v error -select_streams v:0 -show_entries stream=width -of default=noprint_wrappers=1:nokey=1 "$file")
+            height=$(ffprobe -v error -select_streams v:0 -show_entries stream=height -of default=noprint_wrappers=1:nokey=1 "$file")
+            
+            if (( height > width )); then
+                ln -s "$file" "$cache_dir/$(basename "$file")"
+                echo "Linked vertical video: $(basename "$file")"
+                echo "$absolute_path" >> "$processed_file"
+            else
+                echo "Not vertical, adding to non-vertical list: $file"
+                echo "$absolute_path" >> "$non_vertical_file"
+            fi
+        else
+            echo "Already linked (skipping): $file"
+        fi
+    else
+        if [[ " ${non_vertical_files[@]} " =~ " ${absolute_path} " ]]; then
+            echo "Already checked and found non-vertical (skipping): $file"
+        else
+            echo "Already processed (skipping): $file"
+        fi
+    fi
+done
+
+# Open lf in the temporary directory containing symlinks to vertical videos
+lf "$cache_dir"
+

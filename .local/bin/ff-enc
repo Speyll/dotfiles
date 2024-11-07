@@ -1,0 +1,178 @@
+#!/bin/sh
+
+# Create output directories
+video_output_dir="encVids"
+audio_output_dir="extAudios"
+
+# Default values
+target_fps=30
+shutdown=false
+
+# Check dependencies
+for cmd in ffprobe ffmpeg awk bc; do
+    command -v "$cmd" >/dev/null 2>&1 || {
+        echo >&2 "Error: $cmd is not installed."
+        exit 1
+    }
+done
+
+# Function to encode videos with specified settings
+encode_videos() {
+    mkdir -p "$video_output_dir"
+
+    extensions="mp4 mkv ts mov avi webm"
+    find_command="find . -type f \\( "
+    for ext in $extensions; do
+        find_command="$find_command -iname '*.$ext' -o "
+    done
+    find_command="${find_command% -o } \\)"
+
+    eval "$find_command" | while read -r file; do
+        output_file="$video_output_dir/${file%.*}.mp4"
+        [ -f "$output_file" ] && echo "Skipping $file: Output already exists." && continue
+
+        echo "Encoding $file to $output_file..."
+
+        # If 'fps=copy' is specified, extract the original frame rate
+        if [ "$target_fps" = "copy" ]; then
+            original_fps=$(ffprobe -v error -select_streams v:0 -show_entries stream=r_frame_rate -of default=noprint_wrappers=1:nokey=1 "$file")
+            fps=$(echo "$original_fps" | awk -F'/' '{print $1/$2}')
+            echo "Using original framerate: $fps"
+        else
+            fps=$target_fps
+            echo "Using specified framerate: $fps"
+        fi
+
+        # Use the calculated or specified fps
+        ffmpeg -nostdin -i "$file" -c:v libx265 -preset faster -profile:v main -level:v 4.0 \
+            -r "$fps" \
+            -vf "scale='if(gt(ih,iw),min(720,iw),min(1280,iw))':'if(gt(ih,iw),min(1280,ih),min(720,ih))':force_original_aspect_ratio=decrease:force_divisible_by=2" \
+            -c:a libopus -tile-columns 3 -g 240 -threads 15 \
+            -sws_flags lanczos -movflags +faststart \
+            -color_primaries bt709 -color_trc bt709 -colorspace bt709 \
+            "$output_file" && echo "Encoding successful for $file."
+    done
+}
+
+# Function to extract audio with cover art from videos
+extract_audio() {
+    mkdir -p "$audio_output_dir"
+    extensions="mp4 mkv avi mov webm flv wmv mpg mpeg"
+    find_command="find . -type f \\( "
+    for ext in $extensions; do
+        find_command="$find_command -iname '*.$ext' -o "
+    done
+    find_command="${find_command% -o } \\)"
+
+    cover_timestamp="00:05:00"  # Default timestamp for cover art extraction
+    eval "$find_command" | while read -r video; do
+        # Check if the file exists
+        if [ -f "$video" ]; then
+            cover_art="${video%.*}_cover.jpg"
+            ffmpeg -nostdin -y -i "$video" -ss "$cover_timestamp" -vframes 1 "$cover_art"
+            echo "Extracted cover art from $video"
+
+            # Extract the audio without re-encoding into m4a
+            output_audio="${video%.*}.m4a"
+            ffmpeg -nostdin -y -i "$video" -vn -c:a copy "$output_audio"
+            echo "Extracted audio from $video without re-encoding"
+
+            # Embed the cover art into the m4a file
+            output_with_cover="extAudios/${video%.*}.m4a"
+            ffmpeg -nostdin -y -i "$output_audio" -i "$cover_art" -map 0:a -map 1 -c copy \
+                -metadata:s:v title="album cover" -metadata:s:v comment="cover (front)" \
+                -disposition:v:0 attached_pic "$output_with_cover"
+            echo "Embedded cover art into $output_with_cover"
+
+            # Clean up: remove the original audio file and cover art
+            rm "$output_audio" "$cover_art"
+        fi
+    done
+}
+
+# Function to crop video to specified aspect ratio
+crop_video() {
+    printf "Enter the aspect ratio (e.g., 0.56:1): "
+    read -r aspect_ratio
+    printf "Enter the input file name (with extension): "
+    read -r input_file
+    if [ ! -f "$input_file" ]; then
+        printf "Error: Input file '%s' does not exist.\n" "$input_file" >&2
+        exit 1
+    fi
+    output_file="${input_file%.*}_cropped.mp4"
+    ffmpeg -i "$input_file" -vf "crop=min(iw,ih*$aspect_ratio):ih" "$output_file" &&
+        echo "Video cropped successfully. Output saved as: $output_file."
+}
+
+# Parse arguments
+while [ $# -gt 0 ]; do
+    case "$1" in
+        -h|--help)
+            cat << EOF
+Usage: ff-enc [option] [args]
+
+Options:
+    -h, --help              Show this help message and exit.
+    -v, --video             Encode videos to mp4 format with optimized settings.
+    -a, --audio [time]      Extract audio from videos, embed cover art (default: 00:05:00).
+    -c, --crop              Crop a video to a specified aspect ratio.
+    --fps                   Specify target framerate (default: 30). Use 'copy' to preserve original framerate.
+    --shutdown              Shutdown the computer after processing.
+
+Examples:
+
+    ff-enc -v --fps copy
+    ff-enc -a 00:03:00
+    ff-enc -v --shutdown
+EOF
+            exit 0
+            ;;
+        -v|--video)
+            action="video"
+            ;;
+        -a|--audio)
+            action="audio"
+            timestamp="$2"
+            shift
+            ;;
+        -c|--crop)
+            action="crop"
+            ;;
+        --fps)
+            target_fps="$2"
+            shift
+            ;;
+        --shutdown)
+            shutdown=true
+            ;;
+        *)
+            echo "Invalid option: $1"
+            exit 1
+            ;;
+    esac
+    shift
+done
+
+# Perform the specified action
+case "$action" in
+    video)
+        encode_videos "$target_fps"
+        ;;
+    audio)
+        extract_audio "$timestamp"
+        ;;
+    crop)
+        crop_video
+        ;;
+    *)
+        echo "Usage: $0 {-v|-a|-c}"
+        exit 1
+        ;;
+esac
+
+# Shutdown if requested
+if [ "$shutdown" = true ]; then
+    echo "Processing complete. Shutting down..."
+    shutdown now
+fi
