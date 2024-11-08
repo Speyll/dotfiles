@@ -9,6 +9,8 @@ COLOR_BLUETOOTH_DISCONNECTED="\033[1;31m"
 COLOR_VPN_CONNECTED="\033[1;32m"
 COLOR_VPN_DISCONNECTED="\033[1;31m"
 COLOR_HEADER="\033[1;34m"
+COLOR_BLUETOOTH_CONNECTED_NB="\033[32m"
+COLOR_BLUETOOTH_DISCONNECTED_NB="\033[31m"
 
 # Display the current status of network connections
 display_status() {
@@ -31,11 +33,17 @@ display_status() {
     if [ "$bluetooth_status" = "yes" ]; then
         paired_devices=$(bluetoothctl devices)
         echo "${COLOR_BLUETOOTH_CONNECTED}Bluetooth is powered on.${COLOR_RESET}"
+
+        # Add a space between status and devices list
+        echo
+
         if [ -n "$paired_devices" ]; then
             echo "Paired Bluetooth devices:"
-            echo "${COLOR_BLUETOOTH_CONNECTED}${paired_devices}${COLOR_RESET}"
-        else
-            echo "No paired Bluetooth devices found."
+
+        # Display paired devices with color but not bold
+        echo "${COLOR_BLUETOOTH_CONNECTED_NB}${paired_devices}${COLOR_RESET}"
+    else
+        echo "No paired Bluetooth devices found."
         fi
     else
         echo "${COLOR_BLUETOOTH_DISCONNECTED}Bluetooth is powered off.${COLOR_RESET}"
@@ -51,23 +59,24 @@ display_status() {
     fi
 }
 
+# Function to show available Wi-Fi networks with numbers (simple list)
+show_simple_wifi_list() {
+    echo "\n${COLOR_HEADER}--- Select Wi-Fi Network ---${COLOR_RESET}"
+    nmcli --fields SSID device wifi | grep -v "^SSID" | sed '/^\s*$/d' | nl
+}
+
 # Function to connect to a Wi-Fi network
 connect_to_wifi() {
-    show_wifi_networks
+    show_simple_wifi_list
     echo -n "Enter the number of the Wi-Fi network to connect to: "
     read -r choice
-    ssid=$(nmcli --fields SSID device wifi | awk -v choice="$choice" 'NR == choice+1 {print $1}')
+    # Trim spaces around the selected SSID
+    ssid=$(nmcli --fields SSID device wifi | grep -v "^SSID" | sed '/^\s*$/d' | awk -v choice="$choice" 'NR == choice {print}' | sed 's/^[[:space:]]*//;s/[[:space:]]*$//')
     [ -n "$ssid" ] && {
         echo -n "Enter password for ${ssid}: "
         read -r password
         nmcli device wifi connect "$ssid" password "$password" && echo "Connected to ${ssid}" || echo "Failed to connect to ${ssid}"
     } || echo "Invalid selection. No connection was made."
-}
-
-# Function to disconnect from the current Wi-Fi network
-disconnect_from_wifi() {
-    connected_device=$(nmcli -g SSID device wifi | sed '/^\s*$/d' | head -n 1)
-    [ -n "$connected_device" ] && nmcli device disconnect "$connected_device" && echo "Disconnected from ${connected_device}" || echo "No active Wi-Fi connection."
 }
 
 # Function to connect to Bluetooth device
