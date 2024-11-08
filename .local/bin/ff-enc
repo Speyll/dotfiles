@@ -64,7 +64,8 @@ extract_audio() {
     done
     find_command="${find_command% -o } \\)"
 
-    cover_timestamp="00:05:00"  # Default timestamp for cover art extraction
+    cover_timestamp="${timestamp:-00:05:00}"  # Default to 5-minute mark if not specified
+
     eval "$find_command" | while read -r video; do
         # Check if the file exists
         if [ -f "$video" ]; then
@@ -78,7 +79,7 @@ extract_audio() {
             echo "Extracted audio from $video without re-encoding"
 
             # Embed the cover art into the m4a file
-            output_with_cover="extAudios/${video%.*}.m4a"
+            output_with_cover="$audio_output_dir/${video%.*}.m4a"
             ffmpeg -nostdin -y -i "$output_audio" -i "$cover_art" -map 0:a -map 1 -c copy \
                 -metadata:s:v title="album cover" -metadata:s:v comment="cover (front)" \
                 -disposition:v:0 attached_pic "$output_with_cover"
@@ -133,7 +134,7 @@ EOF
             ;;
         -a|--audio)
             action="audio"
-            timestamp="$2"
+            timestamp="${2:-00:05:00}"
             shift
             ;;
         -c|--crop)
@@ -174,5 +175,5 @@ esac
 # Shutdown if requested
 if [ "$shutdown" = true ]; then
     echo "Processing complete. Shutting down..."
-    shutdown now
+    sudo poweroff now
 fi

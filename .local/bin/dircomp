@@ -1,0 +1,30 @@
+#!/bin/sh
+
+# Check if directories are provided
+if [ -z "$1" ] || [ -z "$2" ]; then
+    echo "Usage: $0 <dir1> <dir2>"
+    exit 1
+fi
+
+dir1="$1"
+dir2="$2"
+
+# Ensure both directories exist
+if [ ! -d "$dir1" ] || [ ! -d "$dir2" ]; then
+    echo "Error: One or both directories do not exist."
+    exit 1
+fi
+
+# Create temporary files for the sorted file lists
+tmp1=$(mktemp)
+tmp2=$(mktemp)
+
+# List files in both directories and sort them
+find "$dir1" -type f -exec realpath --relative-to="$dir1" {} \; | sort > "$tmp1"
+find "$dir2" -type f -exec realpath --relative-to="$dir2" {} \; | sort > "$tmp2"
+
+# Compare file lists using comm
+comm -23 "$tmp1" "$tmp2"
+
+# Clean up temporary files
+rm "$tmp1" "$tmp2"

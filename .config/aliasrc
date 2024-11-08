@@ -47,9 +47,6 @@ alias \
     rsync-ssh="rsync -avzh --progress -e ssh" \
     rsync-net="rsync -avzh --progress"
 
-# Use neovim for vim if present.
-command -v nvim >/dev/null && alias vim="nvim" vimdiff="nvim -d"
-
 # Verbosity and settings that you pretty much just always are going to want.
 alias \
     cp="cp -iv" \
@@ -59,17 +56,18 @@ alias \
     clear="tput clear" \
     reset="tput reset"
 
-# Git alias
-alias gcl='git clone --depth 1'
+# Network aliases
+alias \
+    gcl='git clone --depth 1' \
+    nfs-mount="sudo mount -t nfs -o soft,timeo=50,retrans=2,intr,noac" \
+    ssh-mount="sshfs -o reconnect,ServerAliveInterval=15,ServerAliveCountMax=3,sshfs_sync"
 
-# Tmux
+# Utilities aliases
+alias \
+    pyserv="python3 -m http.server" \
+    cleanup-history="tac \$HOME/.bash_history | awk '!seen[\$0]++' | tac | sed 's/[[:space:]]\+$//' > /tmp/.bash_history_tmp && mv -f /tmp/.bash_history_tmp \$HOME/.bash_history > /dev/null 2>&1" \
+    cleanup-gamescope='pkill -9 -f "wine|wineserver|winedevice.exe|explorer.exe|gamescope-wl"' \
+
+# Config aliases
+command -v nvim >/dev/null && alias vim="nvim" vimdiff="nvim -d"
 alias tmux="tmux -f ${XDG_CONFIG_HOME:-$HOME/.config}/tmux/tmux.conf"
-
-# Python local server
-alias pyserv="python3 -m http.server"
-
-# Clear dups from bash history
-alias cleanup-history="tac \$HOME/.bash_history | awk '!seen[\$0]++' | tac | sed 's/[[:space:]]\+$//' > /tmp/.bash_history_tmp && mv -f /tmp/.bash_history_tmp \$HOME/.bash_history > /dev/null 2>&1"
-
-# Cleanup gamescope leftovers
-alias cleanup-gamescope='pkill -9 -f "wine|wineserver|winedevice.exe|explorer.exe|gamescope-wl"'

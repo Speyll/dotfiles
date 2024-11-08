@@ -100,6 +100,14 @@ __ehc()
     fi
 }
 
+# Function to not log a command in history.
+nhist() {
+    HISTFILE=/dev/null
+    bash -ic "$*"
+    history -d $(history 1)
+}
+
+
 # `tm` will allow you to select your tmux session via fzf.
 tm() {
   [[ -n "$TMUX" ]] && change="switch-client" || change="attach-session"
