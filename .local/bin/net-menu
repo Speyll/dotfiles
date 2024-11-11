@@ -1,30 +1,24 @@
 #!/bin/sh
 
-# Display colors for output (adjust for your preferred colors)
-COLOR_RESET="\033[0m"
-COLOR_WIFI_CONNECTED="\033[1;32m"
-COLOR_WIFI_DISCONNECTED="\033[1;31m"
-COLOR_BLUETOOTH_CONNECTED="\033[1;32m"
-COLOR_BLUETOOTH_DISCONNECTED="\033[1;31m"
-COLOR_VPN_CONNECTED="\033[1;32m"
-COLOR_VPN_DISCONNECTED="\033[1;31m"
-COLOR_HEADER="\033[1;34m"
-COLOR_BLUETOOTH_CONNECTED_NB="\033[32m"
-COLOR_BLUETOOTH_DISCONNECTED_NB="\033[31m"
+# Function for color escape sequences
+esc() {
+    printf '\033%s' "$1"
+}
 
 # Display the current status of network connections
 display_status() {
-    echo "\n${COLOR_HEADER}--- Network Status ---${COLOR_RESET}"
+    printf "\n%s--- Network Status --- %s\n" "$(esc "[1;34m")" "$(esc "[0m")"
 
+    # List available Wi-Fi networks
     nmcli --fields SSID,SIGNAL,BARS,SECURITY device wifi list
     echo
 
     # Show current Wi-Fi connection status
-    connected_wifi=$(nmcli -g SSID device wifi | sed '/^\s*$/d' | head -n 1)
+    connected_wifi=$(nmcli -t -f active,ssid dev wifi | grep '^yes' | cut -d':' -f2)
     if [ -n "$connected_wifi" ]; then
-        echo "${COLOR_WIFI_CONNECTED}Currently connected to Wi-Fi: ${connected_wifi}${COLOR_RESET}"
+        printf "%sCurrently connected to Wi-Fi: %s%s\n" "$(esc "[1;32m")" "$connected_wifi" "$(esc "[0m")"
     else
-        echo "${COLOR_WIFI_DISCONNECTED}No active Wi-Fi connection.${COLOR_RESET}"
+        printf "%sNo active Wi-Fi connection.%s\n" "$(esc "[1;31m")" "$(esc "[0m")"
     fi
     echo
 
@@ -32,79 +26,99 @@ display_status() {
     bluetooth_status=$(bluetoothctl show | awk '/Powered/ {print $2}')
     if [ "$bluetooth_status" = "yes" ]; then
         paired_devices=$(bluetoothctl devices)
-        echo "${COLOR_BLUETOOTH_CONNECTED}Bluetooth is powered on.${COLOR_RESET}"
-
-        # Add a space between status and devices list
-        echo
-
+        printf "%sBluetooth is powered on.%s\n" "$(esc "[1;32m")" "$(esc "[0m")"
         if [ -n "$paired_devices" ]; then
-            echo "Paired Bluetooth devices:"
-
-        # Display paired devices with color but not bold
-        echo "${COLOR_BLUETOOTH_CONNECTED_NB}${paired_devices}${COLOR_RESET}"
-    else
-        echo "No paired Bluetooth devices found."
+            printf "\nPaired Bluetooth devices:\n%s%s\n" "$(esc "[32m")" "$paired_devices"
+        else
+            printf "No paired Bluetooth devices found.\n"
         fi
     else
-        echo "${COLOR_BLUETOOTH_DISCONNECTED}Bluetooth is powered off.${COLOR_RESET}"
+        printf "%sBluetooth is powered off.%s\n" "$(esc "[1;31m")" "$(esc "[0m")"
     fi
     echo
 
     # Show ProtonVPN status
     vpn_status=$(nmcli connection show --active | grep -i protonvpn)
     if [ -n "$vpn_status" ]; then
-        echo "${COLOR_VPN_CONNECTED}ProtonVPN is connected.${COLOR_RESET}"
+        printf "%sProtonVPN is connected.%s\n" "$(esc "[1;32m")" "$(esc "[0m")"
     else
-        echo "${COLOR_VPN_DISCONNECTED}ProtonVPN is not connected.${COLOR_RESET}"
+        printf "%sProtonVPN is not connected.%s\n" "$(esc "[1;31m")" "$(esc "[0m")"
     fi
 }
 
-# Function to show available Wi-Fi networks with numbers (simple list)
+# Function to show available Wi-Fi networks
 show_simple_wifi_list() {
-    echo "\n${COLOR_HEADER}--- Select Wi-Fi Network ---${COLOR_RESET}"
+    printf "\n%s--- Select Wi-Fi Network --- %s\n" "$(esc "[1;34m")" "$(esc "[0m")"
     nmcli --fields SSID device wifi | grep -v "^SSID" | sed '/^\s*$/d' | nl
 }
 
 # Function to connect to a Wi-Fi network
 connect_to_wifi() {
     show_simple_wifi_list
-    echo -n "Enter the number of the Wi-Fi network to connect to: "
+    printf "Enter the number of the Wi-Fi network to connect to: "
     read -r choice
-    # Trim spaces around the selected SSID
-    ssid=$(nmcli --fields SSID device wifi | grep -v "^SSID" | sed '/^\s*$/d' | awk -v choice="$choice" 'NR == choice {print}' | sed 's/^[[:space:]]*//;s/[[:space:]]*$//')
-    [ -n "$ssid" ] && {
-        echo -n "Enter password for ${ssid}: "
-        read -r password
-        nmcli device wifi connect "$ssid" password "$password" && echo "Connected to ${ssid}" || echo "Failed to connect to ${ssid}"
-    } || echo "Invalid selection. No connection was made."
+
+    # Get the SSID of the selected choice, preserving spaces
+    ssid=$(nmcli --fields SSID device wifi | grep -v "^SSID" | sed '/^\s*$/d' | awk -v choice="$choice" 'NR == choice {print $0}')
+
+    # Trim leading and trailing whitespace from SSID
+    ssid=$(echo "$ssid" | xargs)
+
+    if [ -n "$ssid" ]; then
+        # Check if the Wi-Fi network is already saved
+        stored_network=$(nmcli connection show | grep -i "$ssid" || true)
+
+        if [ -z "$stored_network" ]; then
+            # If network isn't saved, ask for password and save it
+            printf "Enter password for %s: " "$ssid"
+            stty -echo
+            read -r password
+            stty echo
+            printf "\n"
+
+            # Connect and save the credentials for future use
+            nmcli device wifi connect "$ssid" password "$password" && \
+            printf "%sConnected to %s (Password Saved)%s\n" "$(esc "[1;32m")" "$ssid" "$(esc "[0m")"
+        else
+            # If network is saved, just connect automatically
+            nmcli device wifi connect "$ssid" && \
+            printf "%sConnected to %s (Using saved password)%s\n" "$(esc "[1;32m")" "$ssid" "$(esc "[0m")"
+        fi
+    else
+        printf "%sInvalid selection. No connection made.%s\n" "$(esc "[1;31m")" "$(esc "[0m")"
+    fi
 }
 
-# Function to connect to Bluetooth device
+# Function to connect to a Bluetooth device
 connect_bluetooth() {
     bluetoothctl power on
     bluetoothctl scan on & sleep 5
-    if ! bluetoothctl scan off 2>/dev/null; then
-        echo "Warning: Failed to stop scanning."
-    fi
+    bluetoothctl scan off
+
     devices=$(bluetoothctl devices)
     if [ -z "$devices" ]; then
-        echo "No Bluetooth devices found."
+        printf "%sNo Bluetooth devices found.%s\n" "$(esc "[1;31m")" "$(esc "[0m")"
         return
     fi
-    temp_file=$(mktemp)
+
     i=1
     echo "$devices" | while read -r device; do
         device_mac=$(echo "$device" | awk '{print $2}')
         device_name=$(bluetoothctl info "$device_mac" | awk -F 'Name: ' '/Name/ {print $2}')
         [ -z "$device_name" ] && device_name="$device_mac"
-        echo "${i}. ${device_name} (${device_mac})" >> "$temp_file"
+        printf "%d. %s (%s)\n" "$i" "$device_name" "$device_mac"
         i=$((i + 1))
     done
-    echo -n "Enter the number of the Bluetooth device to connect to: "
+
+    printf "Enter the number of the Bluetooth device to connect to: "
     read -r choice
-    device_mac=$(awk -v choice="$choice" 'NR == choice {print $1}' "$temp_file")
-    rm "$temp_file"
-    [ -n "$device_mac" ] && bluetoothctl connect "$device_mac" && echo "Connected to ${device_mac}" || echo "Invalid selection. No connection made."
+    device_mac=$(echo "$devices" | awk -v choice="$choice" 'NR == choice {print $2}')
+    if [ -n "$device_mac" ]; then
+        bluetoothctl connect "$device_mac" && \
+        printf "%sConnected to %s%s\n" "$(esc "[1;32m")" "$device_mac" "$(esc "[0m")"
+    else
+        printf "%sInvalid selection. No connection made.%s\n" "$(esc "[1;31m")" "$(esc "[0m")"
+    fi
 }
 
 # Function to toggle ProtonVPN connection
@@ -112,30 +126,32 @@ toggle_vpn() {
     CONNECTION_NAME="protonvpn"
     vpn_status=$(nmcli connection show --active | grep -i protonvpn)
     if [ -n "$vpn_status" ]; then
-        sudo nmcli connection down "$CONNECTION_NAME" && echo "${COLOR_VPN_DISCONNECTED}VPN disconnected.${COLOR_RESET}"
+        sudo nmcli connection down "$CONNECTION_NAME" && \
+        printf "%sVPN disconnected.%s\n" "$(esc "[1;31m")" "$(esc "[0m")"
     else
-        sudo nmcli connection up "$CONNECTION_NAME" && echo "${COLOR_VPN_CONNECTED}VPN connected.${COLOR_RESET}"
+        sudo nmcli connection up "$CONNECTION_NAME" && \
+        printf "%sVPN connected.%s\n" "$(esc "[1;32m")" "$(esc "[0m")"
     fi
 }
 
-# Display current network status
+# Display network status
 display_status
 
-# Prompt for next action
-echo "${COLOR_HEADER}--- Choose an Action ---${COLOR_RESET}"
-echo "1. Connect to Wi-Fi network"
-echo "2. Disconnect from Wi-Fi network"
-echo "3. Connect to a Bluetooth device"
-echo "4. Toggle ProtonVPN"
-echo "5. Exit"
-echo -n "Choose (1-5): "
-read -r choice
+# Interactive menu
+while true; do
+    printf "\n%s--- Choose an Action --- %s\n" "$(esc "[1;34m")" "$(esc "[0m")"
+    printf "1. Connect to Wi-Fi network\n"
+    printf "2. Connect to Bluetooth device\n"
+    printf "3. Toggle ProtonVPN\n"
+    printf "4. Exit\n"
+    printf "Choose (1-4): "
+    read -r choice
 
-case $choice in
-    1) connect_to_wifi ;;
-    2) disconnect_from_wifi ;;
-    3) connect_bluetooth ;;
-    4) toggle_vpn ;;
-    5) echo "Exiting." ;;
-    *) echo "Invalid choice. Exiting." ;;
-esac
+    case $choice in
+        1) connect_to_wifi ;;
+        2) connect_bluetooth ;;
+        3) toggle_vpn ;;
+        4) echo "Exiting." ; break ;;
+        *) printf "%sInvalid choice. Try again.%s\n" "$(esc "[1;31m")" "$(esc "[0m")" ;;
+    esac
+done
