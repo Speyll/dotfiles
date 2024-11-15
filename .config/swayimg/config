@@ -104,6 +104,7 @@ Shift+Delete = exec rm "%"; skip_file
 Escape = exit
 q = exit
 Ctrl+w = exec ~/.config/swayimg/set-wall "%"
+Ctrl+c = exec wl-copy < "%"
 
 # Mouse bindings for viewer mode
 ScrollLeft = step_right 5
@@ -137,6 +138,7 @@ Shift+Delete = exec rm "%"; skip_file
 Escape = exit
 q = exit
 Ctrl+w = exec ~/.config/swayimg/set-wall "%"
+Ctrl+c = exec wl-copy < "%"
 
 # Mouse bindings for gallery mode
 ScrollLeft = step_right
