@@ -144,6 +144,7 @@
         "tooltip": true,
         "tooltip-format": "{ipaddr}",
         "tooltip-format-disconnected": "Disconnected",
+        "on-click": "foot -e net-menu",
     },
 
     "bluetooth": {
