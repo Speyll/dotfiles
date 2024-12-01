@@ -165,7 +165,6 @@
         "on-click": "foot -e net-menu",
     },
 
-
     "bluetooth": {
         "format": "",
         "format-disabled": "",
