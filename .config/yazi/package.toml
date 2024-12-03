@@ -1,0 +1,5 @@
+[plugin]
+deps = [{ use = "yazi-rs/plugins:full-border", rev = "40eafa3" }, { use = "yazi-rs/plugins:smart-enter", rev = "40eafa3" }]
+
+[flavor]
+deps = []
