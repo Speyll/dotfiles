@@ -12,8 +12,7 @@ If you are here for my old bspwm, wayfire, sway or river setups you can find it 
 
 ## Screenshot
 
-(outdated needs an update)
-![Screenshot](https://i.ibb.co/TvdZp1D/grimoptimized.webp)
+![Screenshot](https://i.ibb.co/NnkDQ0K/grim.webp)
 
 ## Software Used
 
