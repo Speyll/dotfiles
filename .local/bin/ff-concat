@@ -1,0 +1,27 @@
+#!/bin/bash
+
+# Check if there are video files in the directory
+tmpfile=$(mktemp)
+
+# Loop through video files (mp4, mov, avi, mkv, flv, webm)
+for f in *.{mp4,mov,avi,mkv,flv,webm}; do
+    if [ -f "$f" ]; then
+        echo "file '$PWD/$f'" >> "$tmpfile"
+    fi
+done
+
+# Check if we have any files listed
+if [ -s "$tmpfile" ]; then
+    echo "Found video files. Concatenating..."
+    sleep 1  # Ensure temporary file is written
+
+    # Concatenate videos using ffmpeg
+    ffmpeg -f concat -safe 0 -i "$tmpfile" -c copy output.mp4
+
+    # Clean up the temporary file
+    rm "$tmpfile"
+    echo "Concatenation completed, output saved as output.mp4."
+else
+    echo "No video files found in the current directory."
+    rm "$tmpfile"
+fi

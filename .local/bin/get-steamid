@@ -1,6 +1,6 @@
 #!/bin/sh
 
-steamapps="$HOME/.steam/steam/steamapps"
+steamapps="$HOME/.var/app/com.valvesoftware.Steam/data/Steam/steamapps"
 
 # Print header
 printf "Looking through %s/compatdata/ ...\n" "$steamapps"
@@ -13,7 +13,7 @@ for x in "$steamapps"/compatdata/*; do
     name=$(sed -n '/^\s*"name"\s*/ s/.*"\(.*\)"/\1/p' "$steamapps/appmanifest_$id.acf" 2>/dev/null)
 
     # Get version or default to "N/A"
-    version=$(cat "$x/version" 2>/dev/null || echo "N/A")  
+    version=$(cat "$x/version" 2>/dev/null || echo "N/A")
 
     # Print the information, using a default message if name is empty
     printf "%-8s  %-10s  %s\n" "$version" "$id" "${name:-this is not a Steam app?}"
