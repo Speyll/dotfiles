@@ -27,6 +27,7 @@ fi
 export CLICOLOR=1
 export TERM=xterm-256color
 export GREP_OPTIONS="--color=always"
+export FZF_DEFAULT_OPTS="--color=fg:7,bg:0,hl:1 --color=fg+:15,bg+:8,hl+:9 --color=info:14,prompt:13,pointer:12,marker:10,spinner:11"
 
 # Default programs variables
 export EDITOR="nvim"

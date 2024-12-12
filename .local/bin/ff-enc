@@ -67,25 +67,31 @@ extract_audio() {
     cover_timestamp="${timestamp:-00:05:00}"  # Default to 5-minute mark if not specified
 
     eval "$find_command" | while read -r video; do
-        # Check if the file exists
         if [ -f "$video" ]; then
             cover_art="${video%.*}_cover.jpg"
             ffmpeg -nostdin -y -i "$video" -ss "$cover_timestamp" -vframes 1 "$cover_art"
             echo "Extracted cover art from $video"
 
-            # Extract the audio without re-encoding into m4a
             output_audio="${video%.*}.m4a"
-            ffmpeg -nostdin -y -i "$video" -vn -c:a copy "$output_audio"
-            echo "Extracted audio from $video without re-encoding"
-
-            # Embed the cover art into the m4a file
             output_with_cover="$audio_output_dir/${video%.*}.m4a"
+
+            # Attempt to copy the audio stream without re-encoding
+            echo "Attempting direct audio copy..."
+            if ffmpeg -nostdin -y -i "$video" -vn -c:a copy "$output_audio"; then
+                echo "Direct audio copy successful: $output_audio"
+            else
+                echo "Direct copy failed. Re-encoding audio to AAC..."
+                ffmpeg -nostdin -y -i "$video" -vn -c:a aac -b:a 192k "$output_audio"
+                echo "Audio re-encoded to AAC: $output_audio"
+            fi
+
+            # Embed cover art into the m4a file
             ffmpeg -nostdin -y -i "$output_audio" -i "$cover_art" -map 0:a -map 1 -c copy \
                 -metadata:s:v title="album cover" -metadata:s:v comment="cover (front)" \
                 -disposition:v:0 attached_pic "$output_with_cover"
             echo "Embedded cover art into $output_with_cover"
 
-            # Clean up: remove the original audio file and cover art
+            # Clean up intermediate files
             rm "$output_audio" "$cover_art"
         fi
     done
