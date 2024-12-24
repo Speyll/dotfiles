@@ -104,22 +104,9 @@ exec_fuzzel_todo() {
 
 # Function for application runner
 exec_fuzzel_run() {
-    FUZZEL_IGNORED_BINDIRS="/usr/bin:/usr/bin/core_perl:/usr/bin/site_perl:/usr/bin/vendor_perl"
-    _ignored_bindirs=$(echo "$FUZZEL_IGNORED_BINDIRS" | tr ':' ' ')
-    _bindirs=$(echo "$PATH" | tr ':' ' ')
-    _lsdirs=""
-    for _bindir in ${_bindirs}; do
-        if [ -d "$_bindir" ] && ! echo "$_ignored_bindirs" | grep -qw "$_bindir"; then
-            _lsdirs="$_lsdirs $_bindir"
-        fi
-    done
-    if [ -n "$_lsdirs" ]; then
-        _execfile=$(printf '%s\n' "$_lsdirs" | xargs -I{} find "{}" -maxdepth 1 -type f -executable | fuzzel --dmenu)
-        [ -n "$_execfile" ] && exec "$_execfile"
-    else
-        echo "No executable found!" >&2
-        exit 1
-    fi
+    exec_list=$(printf "%s\n" $(echo "$PATH" | tr ':' '\n' | xargs -I{} find {} -maxdepth 1 -executable -type f -printf "%f\n" 2>/dev/null) | sort -u)
+    selected=$(echo "$exec_list" | fuzzel --dmenu)
+    [ -n "$selected" ] && exec "$selected"
 }
 
 # Menu definitions

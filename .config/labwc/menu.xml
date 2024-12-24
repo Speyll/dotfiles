@@ -24,7 +24,7 @@
         <menu id="tasks" label="Tasks">
             <item label="Reconfigure"><action name="Reconfigure" /></item>
             <item label="Exit"><action name="Exit" /></item>
-            <item label="Power Menu"><action name="Execute" command="fuzz-power" /></item>
+            <item label="Fuzz Menu"><action name="Execute" command="fuzz-launcher" /></item>
         </menu>
     </menu>
 </openbox_menu>
