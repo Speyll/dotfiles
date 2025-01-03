@@ -1,0 +1,26 @@
+#!/bin/sh
+
+# Function to check for updates and send a notification
+check_updates() {
+    # Synchronize the repository to ensure accurate results
+    sudo xbps-install -S >/dev/null 2>&1
+
+    # Count the number of available updates
+    xbps_updates=$(sudo xbps-install -Sun | wc -l)
+    flatpak_updates=$(flatpak remote-ls --updates | wc -l)
+
+    # Notify the user if there are any updates
+    if [ "$xbps_updates" -gt 0 ] || [ "$flatpak_updates" -gt 0 ]; then
+        notify-send -t 0 "System Updates" \
+            "<b>Xbps:</b> $xbps_updates updates\n<b>Flatpak:</b> $flatpak_updates updates"
+    fi
+}
+
+# Perform an initial check
+check_updates
+
+# Enter the periodic loop
+while true; do
+    sleep 14400  # Wait for 4 hours
+    check_updates
+done

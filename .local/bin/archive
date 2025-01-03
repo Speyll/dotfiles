@@ -5,17 +5,14 @@
 #   - To extract: script_name -x [-c] archive
 #   - To compress: script_name -z -f FORMAT -l LEVEL DIR_TO_COMPRESS
 
-# Defaults for compression
 format="zip"
 level=5
 
-# Error handling function
 exit_err() {
   echo "$1" >&2
   exit 1
 }
 
-# Show help message
 show_help() {
   echo "Usage: $0 [options] file_or_dir"
   echo "Options for extraction:"
@@ -29,7 +26,15 @@ show_help() {
   exit 0
 }
 
-# Parse options
+sanitize_name() {
+  echo "$1" | sed -e 's/[^[:alnum:]._-]/_/g'
+}
+
+sanitize_dir_contents() {
+  find . -depth -name '*[[:space:]]*' -exec rename ' ' '_' '{}' +
+  find . -depth -name '*[^[:alnum:]._-]*' -exec rename '.*' '_' '{}' +
+}
+
 extracthere=false
 mode=""
 
@@ -46,22 +51,25 @@ while getopts "xczf:l:h" opt; do
 done
 
 shift $((OPTIND - 1))
-
-# Check if file or directory is provided
 input="$1"
 [ -z "$input" ] && exit_err "Error: Please specify a file or directory."
 
-# If neither extraction nor compression mode is specified, show help
 if [ -z "$mode" ]; then
   exit_err "Error: You must specify either extraction (-x) or compression (-z)."
 fi
 
-# Function to extract archives
 extract() {
   archive="$(readlink -f "$input")"
   [ -f "$archive" ] || exit_err "Error: File \"$archive\" not found."
 
-  # If -c option is specified, extract in the current directory
+  original_name="$(basename "$archive")"
+  safe_name="$(sanitize_name "$original_name")"
+
+  if [ "$original_name" != "$safe_name" ]; then
+    mv "$archive" "$(dirname "$archive")/$safe_name"
+    archive="$(dirname "$archive")/$safe_name"
+  fi
+
   if [ "$extracthere" = false ]; then
     dir="${archive%.*}"
     mkdir -p "$dir" && cd "$dir" || exit 1
@@ -84,9 +92,13 @@ extract() {
     *.exe) cabextract "$archive" ;;
     *) exit_err "Error: Unknown archive format for '$archive'" ;;
   esac
+
+  sanitize_dir_contents
+  if [ "$original_name" != "$safe_name" ]; then
+    mv "$archive" "$(dirname "$archive")/$original_name"
+  fi
 }
 
-# Function to compress files/directories
 compress() {
   output="$(basename "$input").$format"
 
@@ -101,9 +113,9 @@ compress() {
   echo "Compression complete: $output"
 }
 
-# Execute based on chosen mode
 case "$mode" in
   extract) extract ;;
   compress) compress ;;
   *) show_help ;;
 esac
+

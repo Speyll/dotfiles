@@ -7,7 +7,7 @@ dbus-update-activation-environment --all >/dev/null 2>&1 &
 /usr/libexec/polkit-gnome-authentication-agent-1 >/dev/null 2>&1 &
 
 # Output and Display Configuration
-wlr-randr --output HDMI-A-1 --mode 1920x1080@60.000000 --adaptive-sync enabled >/dev/null 2>&1 &
+wlr-randr --output HDMI-A-1 --mode 1920x1080@60.000000 --adaptive-sync disabled >/dev/null 2>&1 &
 
 # Kill Existing Processes
 for process in flavours pipewire wireplumber pipewire-pulse mpvpaper swaybg fnott wlsunset cliphist; do
@@ -21,7 +21,7 @@ wireplumber >/dev/null 2>&1 &
 pipewire-pulse >/dev/null 2>&1 &
 
 # Wallpaper Mode Selection
-WALLPAPER_MODE="swaybg-random-online" # Options: "swaybg", "swaybg-random", "mpvpaper-local", "mpvpaper-online" "swaybg-random-online" 
+WALLPAPER_MODE="swaybg-random-online" # Options: "swaybg", "swaybg-random", "mpvpaper-local", "mpvpaper-online" "swaybg-random-online"
 LINK="https://youtu.be/GIky-GXIBVY" # Online video link for mpvpaper-online mode
 URL_FILE="$HOME/.config/autostart/wallpaper_urls.txt" # File containing wallpaper URLs
 
@@ -29,7 +29,7 @@ URL_FILE="$HOME/.config/autostart/wallpaper_urls.txt" # File containing wallpape
 download_random_wallpaper() {
     # Choose a random URL from the URL file
     wallpaper_url=$(shuf -n1 "$URL_FILE")
-    
+
     # Download to a temporary location
     curl -sL "$wallpaper_url" -o /tmp/wallpaper.jpg
 
@@ -109,3 +109,9 @@ wl-paste --watch cliphist store -max-items 100 >/dev/null 2>&1 & # Clipboard man
 for portal in xdg-desktop-portal xdg-desktop-portal-gtk xdg-desktop-portal-wlr; do
     /usr/libexec/$portal >/dev/null 2>&1 &
 done
+
+# Check if the system is Void Linux and run void-updtscan
+if grep -q "Void" /etc/os-release; then
+    sleep 2
+    "$HOME/.local/bin/void-updtscan" >/dev/null 2>&1 &
+fi

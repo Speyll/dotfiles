@@ -90,11 +90,11 @@
     <keyboard>
         <default />
         <!-- Workspace navigation -->
-        <keybind key="W-ampersand"><action name="GoToDesktop" to="1" /></keybind>
-        <keybind key="W-eacute"><action name="GoToDesktop" to="2" /></keybind>
-        <keybind key="W-quotedbl"><action name="GoToDesktop" to="3" /></keybind>
-        <keybind key="W-apostrophe"><action name="GoToDesktop" to="4" /></keybind>
-        <keybind key="W-parenleft"><action name="GoToDesktop" to="5" /></keybind>
+        <keybind key="W-1"><action name="GoToDesktop" to="1" /></keybind>
+        <keybind key="W-2"><action name="GoToDesktop" to="2" /></keybind>
+        <keybind key="W-3"><action name="GoToDesktop" to="3" /></keybind>
+        <keybind key="W-4"><action name="GoToDesktop" to="4" /></keybind>
+        <keybind key="W-5"><action name="GoToDesktop" to="5" /></keybind>
         <keybind key="W-C-Right"><action name="GoToDesktop" to="right" wrap="yes" /></keybind>
         <keybind key="W-C-Left"><action name="GoToDesktop" to="left" wrap="yes" /></keybind>
 
@@ -124,7 +124,7 @@
         <!-- Execute commands -->
         <keybind key="W-Return"><action name="Execute" command="foot" /></keybind>
         <keybind key="W-S-n"><action name="Execute" command="foot -T lf lf" /></keybind>
-        <keybind key="W-semicolon"><action name="Execute" command="bemoji" /></keybind>
+        <keybind key="W-period"><action name="Execute" command="bemoji" /></keybind>
         <keybind key="W-comma"><action name="Execute" command="clip-manager" /></keybind>
         <keybind key="W-d"><action name="Execute" command="fuzzel" /></keybind>
         <keybind key="F10"><action name="Execute" command="/home/lyes/videos/rec/pipobs/bin/python3 /home/lyes/videos/rec/pipobs/replay.py" /></keybind>
