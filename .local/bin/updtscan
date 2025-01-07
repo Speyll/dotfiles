@@ -1,0 +1,70 @@
+#!/bin/sh
+
+# Function to check for updates and send a notification
+check_updates() {
+    # Initialize update counts
+    updates=0
+    flatpak_updates=0
+
+    # Function to execute commands with elevated privileges
+    run_with_privileges() {
+        if command -v sudo >/dev/null 2>&1; then
+            sudo "$@"
+        elif command -v pkexec >/dev/null 2>&1; then
+            pkexec "$@"
+        else
+            notify-send -t 0 "Permission Denied" "This script requires elevated privileges to check for system updates."
+            exit 1
+        fi
+    }
+
+    # Void Linux (xbps)
+    if command -v xbps-install >/dev/null 2>&1; then
+        run_with_privileges xbps-install -S >/dev/null 2>&1
+        updates=$(run_with_privileges xbps-install -Sun | wc -l)
+    fi
+
+    # Arch Linux (pacman)
+    if command -v pacman >/dev/null 2>&1; then
+        run_with_privileges pacman -Sy >/dev/null 2>&1
+        updates=$(pacman -Qu | wc -l)
+    fi
+
+    # Debian/Ubuntu (apt)
+    if command -v apt >/dev/null 2>&1; then
+        run_with_privileges apt update -qq >/dev/null 2>&1
+        updates=$(apt list --upgradable 2>/dev/null | grep -c "upgradable")
+    fi
+
+    # Fedora (dnf)
+    if command -v dnf >/dev/null 2>&1; then
+        run_with_privileges dnf check-update -q >/dev/null 2>&1
+        updates=$(dnf list updates -q | grep -c '^[a-zA-Z]')
+    fi
+
+    # openSUSE (zypper)
+    if command -v zypper >/dev/null 2>&1; then
+        run_with_privileges zypper refresh -q >/dev/null 2>&1
+        updates=$(zypper list-updates | grep -c '|')
+    fi
+
+    # Flatpak
+    if command -v flatpak >/dev/null 2>&1; then
+        flatpak_updates=$(flatpak remote-ls --updates | wc -l)
+    fi
+
+    # Send notification if updates are available
+    if [ "$updates" -gt 0 ] || [ "$flatpak_updates" -gt 0 ]; then
+        notify-send -t 0 "System Updates" \
+            "<b>Packages:</b> $updates updates\n<b>Flatpak:</b> $flatpak_updates updates"
+    fi
+}
+
+# Perform an initial check
+check_updates
+
+# Enter the periodic loop
+while true; do
+    sleep 14400  # Wait for 4 hours
+    check_updates
+done

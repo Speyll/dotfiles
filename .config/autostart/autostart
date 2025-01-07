@@ -110,8 +110,9 @@ for portal in xdg-desktop-portal xdg-desktop-portal-gtk xdg-desktop-portal-wlr; 
     /usr/libexec/$portal >/dev/null 2>&1 &
 done
 
-# Check if the system is Void Linux and run void-updtscan
-if grep -q "Void" /etc/os-release; then
-    sleep 2
-    "$HOME/.local/bin/void-updtscan" >/dev/null 2>&1 &
+# Set to `true` to launch the update scan, or `false` to skip
+launch_updates=true
+
+if [ "$launch_updates" = true ]; then
+    "$HOME/.local/bin/updtscan.sh" >/dev/null 2>&1 &
 fi
