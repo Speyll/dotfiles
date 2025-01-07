@@ -114,5 +114,6 @@ done
 launch_updates=true
 
 if [ "$launch_updates" = true ]; then
+    sleep 2
     "$HOME/.local/bin/updtscan.sh" >/dev/null 2>&1 &
 fi
