@@ -20,18 +20,18 @@ done
 encode_videos() {
     mkdir -p "$video_output_dir"
 
-    extensions="mp4 mkv ts mov avi webm"
-    find_command="find . -type f \\( "
+    extensions="mp4 mkv ts mov avi webm gif"
+    find_command="find . -maxdepth 1 -type f \\( "
     for ext in $extensions; do
         find_command="$find_command -iname '*.$ext' -o "
     done
     find_command="${find_command% -o } \\)"
 
     eval "$find_command" | while read -r file; do
-        output_file="$video_output_dir/${file%.*}.mp4"
-        [ -f "$output_file" ] && echo "Skipping $file: Output already exists." && continue
+    output_file="$video_output_dir/${file%.*}.mp4"
+    [ -f "$output_file" ] && echo "Skipping $file: Output already exists." && continue
 
-        echo "Encoding $file to $output_file..."
+    echo "Encoding $file to $output_file..."
 
         # If 'fps=copy' is specified, extract the original frame rate
         if [ "$target_fps" = "copy" ]; then
@@ -43,22 +43,22 @@ encode_videos() {
             echo "Using specified framerate: $fps"
         fi
 
-        # Use the calculated or specified fps
-        ffmpeg -nostdin -i "$file" -c:v libx265 -preset faster -profile:v main -level:v 4.0 \
+        ffmpeg -nostdin -i "$file" -c:v libx265 -preset 4 -tile-columns 3 -g 240 -threads 15 \
             -r "$fps" \
             -vf "scale='if(gt(ih,iw),min(720,iw),min(1280,iw))':'if(gt(ih,iw),min(1280,ih),min(720,ih))':force_original_aspect_ratio=decrease:force_divisible_by=2" \
-            -c:a libopus -tile-columns 3 -g 240 -threads 15 \
+            -c:a libopus -b:a 128k \
             -sws_flags lanczos -movflags +faststart \
             -color_primaries bt709 -color_trc bt709 -colorspace bt709 \
             "$output_file" && echo "Encoding successful for $file."
-    done
+
+        done
 }
 
 # Function to extract audio with cover art from videos
 extract_audio() {
     mkdir -p "$audio_output_dir"
     extensions="mp4 mkv avi mov webm flv wmv mpg mpeg"
-    find_command="find . -type f \\( "
+    find_command="find . -maxdepth 1 -type f \\( "
     for ext in $extensions; do
         find_command="$find_command -iname '*.$ext' -o "
     done
