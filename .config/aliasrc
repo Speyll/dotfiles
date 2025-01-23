@@ -2,17 +2,22 @@
 # Colorized commands
 alias \
     ls="ls -shA --color=auto" \
+    dir="dir --color=auto" \
+    vdir="vdir --color=auto" \
     grep="grep --color=auto" \
     fgrep="fgrep --color=auto" \
     egrep="egrep --color=auto" \
     diff="diff --color=auto" \
-    ip="ip --color=auto" \
-    ccat="highlight --out-format=ansi"
+    ccat="highlight --out-format=ansi" \
+    dfg="df -BG" \
+    dfm="df -BM" \
+    ip="ip --color=auto"
 
-# Enhanced ls variants
+# LS aliases with preserved color flags
 alias \
-    ll="ls -l" \
-    llt="ls -latrG"
+    ll="ls -l --color=auto" \
+    la="ls -A --color=auto" \
+    llt="ls -latrG --color=auto"
 
 # Package management
 alias \
