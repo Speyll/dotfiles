@@ -1,73 +1,48 @@
 #!/bin/sh
-# Colorize commands when possible.
+# Colorized commands
 alias \
     ls="ls -shA --color=auto" \
-    dir="dir --color=auto" \
-    vdir="vdir --color=auto" \
     grep="grep --color=auto" \
     fgrep="fgrep --color=auto" \
     egrep="egrep --color=auto" \
     diff="diff --color=auto" \
-    ccat="highlight --out-format=ansi" \
-    dfg="df -BG" \
-    dfm="df -BM" \
     ip="ip --color=auto" \
+    ccat="highlight --out-format=ansi"
 
-# Some more ls aliases.
+# Enhanced ls variants
 alias \
-    ll="ls -l --color=auto" \
-    la="ls -A --color=auto" \
+    ll="ls -l" \
     llt="ls -latrG"
 
-# xbps and pkg aliases.
+# Package management
 alias \
     xbs="sudo xbps-install" \
     xbr="sudo xbps-remove -Rv" \
-    xbq="xbps-query -Rs"
-
-# apt aliases.
-alias \
+    xbq="xbps-query -Rs" \
     apti="sudo apt-get install --no-install-recommends" \
-    aptr="sudo apt-get --purge autoremove"
-
-# zypper aliases.
-alias \
-    zyi="sudo zypper install --no-recommends" \
-    zyr="sudo zypper remove --clean-deps --no-confirm"
-
-# flatpak aliases.
-alias \
+    aptr="sudo apt-get --purge autoremove" \
     flinst="flatpak install" \
-    flrem="flatpak uninstall --delete-data" \
     flclean="flatpak uninstall --unused --delete-data -y && flatpak repair"
 
-# rsync aliases
-alias \
-    rsync="rsync -avh --progress" \
-    rsync-ssh="rsync -avzh --progress -e ssh" \
-    rsync-net="rsync -avzh --progress"
-
-# Verbosity and settings that you pretty much just always are going to want.
+# Safe file operations
 alias \
     cp="cp -iv" \
     mv="mv -iv" \
     rm="rm -vI" \
-    mkd="mkdir -pv" \
-    clear="tput clear" \
-    reset="tput reset"
+    mkd="mkdir -pv"
 
-# Network aliases
-alias \
-    gcl='git clone --depth 1' \
-    nfs-mount="sudo mount -t nfs -o soft,timeo=50,retrans=2,intr,noac" \
-    ssh-mount="sshfs -o reconnect,ServerAliveInterval=15,ServerAliveCountMax=3,sshfs_sync"
-
-# Utilities aliases
+# System utilities
 alias \
     pyserv="python3 -m http.server" \
-    cleanup-history="tac \$HOME/.bash_history | awk '!seen[\$0]++' | tac | sed 's/[[:space:]]\+$//' > /tmp/.bash_history_tmp && mv -f /tmp/.bash_history_tmp \$HOME/.bash_history > /dev/null 2>&1" \
+    pyenv="python -m venv" \
     cleanup-gamescope='pkill -9 -f "wine|wineserver|winedevice.exe|explorer.exe|gamescope-wl"' \
+    reset="tput reset"
 
-# Config aliases
+# Version control
+alias gcl='git clone --depth 1'
+
+# Use neovim if available
 command -v nvim >/dev/null && alias vim="nvim" vimdiff="nvim -d"
+
+# XDG-compliant tmux configuration
 alias tmux="tmux -f ${XDG_CONFIG_HOME:-$HOME/.config}/tmux/tmux.conf"

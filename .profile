@@ -1,79 +1,75 @@
-# ~/.profile: executed by the command interpreter for login shells.
-# This file is not read by bash(1), if ~/.bash_profile or ~/.bash_login
-# exists.
-# see /usr/share/doc/bash/examples/startup-files for examples.
-# the files are located in the bash-doc package.
+# ~/.profile: executed by login shells
 
-# the default umask is set in /etc/profile; for setting the umask
-# for ssh logins, install and configure the libpam-umask package.
-#umask 022
+# Source .bashrc if available
+[ -n "$BASH_VERSION" ] && [ -f "$HOME/.bashrc" ] && . "$HOME/.bashrc"
 
-# Enable bashrc if running bash
-if [ -n "$BASH_VERSION" ] && [ -f "$HOME/.bashrc" ]; then
-    . "$HOME/.bashrc"
-fi
+# Add directories to PATH without duplicates
+path_prepend() {
+    [ -d "$1" ] && [[ ":$PATH:" != *":$1:"* ]] && PATH="$1:$PATH"
+}
 
-# Set PATH so it includes user's private bin if it exists
-if [ -d "$HOME/bin" ] ; then
-    PATH="$HOME/bin:$PATH"
-fi
+# User binaries and Nix paths (priority order)
+path_prepend "$HOME/.nix-profile/bin"      # Nix user packages
+path_prepend "$HOME/.nix-profile/sbin"     # Nix user system utilities
+path_prepend "/nix/var/nix/profiles/default/bin"  # Default Nix profile
+path_prepend "$HOME/bin"                   # Personal scripts
+path_prepend "$HOME/.local/bin"            # Local user binaries
+export PATH
 
-# Add $HOME/.local/bin to the $PATH
-if [ -d "$HOME/.local/bin" ]; then
-    PATH="$HOME/.local/bin:$PATH"
-fi
-
-# Enable colors in your shell
+# Core terminal environment
+export TERM="xterm-256color"
 export CLICOLOR=1
-export TERM=xterm-256color
-export GREP_OPTIONS="--color=always"
-export FZF_DEFAULT_OPTS="--color=fg:7,bg:-1,hl:1 --color=fg+:15,bg+:8,hl+:9 --color=info:14,prompt:13,pointer:12,marker:10,spinner:11"
-
-# Default programs variables
 export EDITOR="nvim"
-export FILE="nnn"
 export PAGER="less"
+export FILE="nnn"
 
-# Setting default XDG dirs
+# XDG Base Directory Specification
 export XDG_CONFIG_HOME="$HOME/.config"
 export XDG_DATA_HOME="$HOME/.local/share"
 export XDG_CACHE_HOME="$HOME/.cache"
 export XDG_RUNTIME_DIR="/run/user/$(id -u)"
 
-# Cleaning up $HOME dir
-export NOTMUCH_CONFIG="${XDG_CONFIG_HOME:-$HOME/.config}/notmuch-config"
-export GTK2_RC_FILES="${XDG_CONFIG_HOME:-$HOME/.config}/gtk-2.0/gtkrc-2.0"
+# Application cleanup and special settings
 export LESSHISTFILE="-"
-export WGETRC="${XDG_CONFIG_HOME:-$HOME/.config}/wget/wgetrc"
+export GTK_OVERLAY_SCROLLING=0             # Disable smooth scrolling
+export _JAVA_AWT_WM_NONREPARENTING=1       # Fix Java GUI apps
 export TMUX_TMPDIR="$XDG_RUNTIME_DIR"
-export WINEPREFIX="$1;2C{XDG_DATA_HOME:-$HOME/.local/share}/wineprefixes/default"
-export KODI_DATA="${XDG_DATA_HOME:-$HOME/.local/share}/kodi"
-export PASSWORD_STORE_DIR="${XDG_DATA_HOME:-$HOME/.local/share}/password-store"
-export ANDROID_SDK_HOME="${XDG_CONFIG_HOME:-$HOME/.config}/android"
-export CARGO_HOME="${XDG_DATA_HOME:-$HOME/.local/share}/cargo"
-export GOPATH="${XDG_DATA_HOME:-$HOME/.local/share}/go"
-export ANSIBLE_CONFIG="${XDG_CONFIG_HOME:-$HOME/.config}/ansible/ansible.cfg"
-export WEECHAT_HOME="${XDG_CONFIG_HOME:-$HOME/.config}/weechat"
-export MBSYNCRC="${XDG_CONFIG_HOME:-$HOME/.config}/mbsync/config"
-export ELECTRUMDIR="${XDG_DATA_HOME:-$HOME/.local/share}/electrum"
 
-# Disable GTK smooth scrolling
-export GTK_OVERLAY_SCROLLING=0
+# Development tool paths
+export CARGO_HOME="$XDG_DATA_HOME/cargo"
+export GOPATH="$XDG_DATA_HOME/go"
+export NPM_CONFIG_USERCONFIG="$XDG_CONFIG_HOME/npm/npmrc"
 
-# Password management
-export PASSWORD_STORE_DIR="${XDG_DATA_HOME}/password-store"
-export SUDO_ASKPASS="$HOME/.local/bin/dmenupass"
+# Security and privacy
+export PASSWORD_STORE_DIR="$XDG_DATA_HOME/password-store"
 
-# Fix for Java applications in dwm & wayland
-export _JAVA_AWT_WM_NONREPARENTING=1
+# Nix environment configuration
+export NIX_PATH="nixpkgs=$HOME/.nix-defexpr/channels/nixpkgs"
+export NIX_SSL_CERT_FILE="/etc/ssl/certs/ca-certificates.crt"
 
-# Configuration for nnn, remove if you don't use it.
-export NNN_OPTS="dH"
+# Application cleanup via XDG Base Directory Specification
+export NOTMUCH_CONFIG="$XDG_CONFIG_HOME/notmuch-config"
+export GTK2_RC_FILES="$XDG_CONFIG_HOME/gtk-2.0/gtkrc-2.0"
+export LESSHISTFILE="-"
+export WGETRC="$XDG_CONFIG_HOME/wget/wgetrc"
+export TMUX_TMPDIR="$XDG_RUNTIME_DIR"
+export WINEPREFIX="$XDG_DATA_HOME/wineprefixes/default"
+export KODI_DATA="$XDG_DATA_HOME/kodi"
+export PASSWORD_STORE_DIR="$XDG_DATA_HOME/password-store"
+export ANDROID_SDK_HOME="$XDG_CONFIG_HOME/android"
+export CARGO_HOME="$XDG_DATA_HOME/cargo"
+export GOPATH="$XDG_DATA_HOME/go"
+export ANSIBLE_CONFIG="$XDG_CONFIG_HOME/ansible/ansible.cfg"
+export WEECHAT_HOME="$XDG_CONFIG_HOME/weechat"
+export MBSYNCRC="$XDG_CONFIG_HOME/mbsync/config"
+export ELECTRUMDIR="$XDG_DATA_HOME/electrum"
 
-# Enable if your gpu lack support for Alacritty
-#export LIBGL_ALWAYS_SOFTWARE=1 alacritty
+# Optional FZF theming (if installed)
+[ -f "$HOME/.fzf.bash" ] && source "$HOME/.fzf.bash"
+export FZF_DEFAULT_OPTS="--color=fg:7,bg:-1,hl:1 --color=fg+:15,bg+:8,hl+:9 --color=info:14,prompt:13,pointer:12,marker:10,spinner:11"
 
-# Autologin on tty1
-#if [ -z "$DISPLAY" ] && [ "$(fgconsole)" -eq 1 ]; then
-    #start-labwc
-#fi
+# NNN configuration (if installed)
+command -v nnn >/dev/null && export NNN_OPTS="dH"
+
+# Uncomment for tty1 autologin
+# [ -z "$DISPLAY" ] && [ "$(fgconsole)" -eq 1 ] && start-comp labwc

@@ -1,6 +1,4 @@
 # ~/.bashrc: executed by bash(1) for non-login shells.
-# see /usr/share/doc/bash/examples/startup-files (in the package bash-doc)
-# for examples
 
 # If not running interactively, don't do anything
 case $- in
@@ -8,14 +6,26 @@ case $- in
       *) return;;
 esac
 
-# History settings
+# Improved history settings
 export HISTCONTROL=ignorespace:ignoredups:erasedups
-export PROMPT_COMMAND='cleanup-history; history -a; history -n'
 export HISTSIZE=1000
 export HISTFILESIZE=2000
 shopt -s histappend
 
-# Enable programmable completion features
+# Enhanced history cleanup function
+cleanup-history() {
+    local histfile="$HOME/.bash_history"
+    [[ -r "$histfile" ]] || return
+    tac "$histfile" | awk '!seen[$0]++' | tac | \
+        sed -e 's/[[:space:]]*$//' -e '/^$/d' > "${histfile}.tmp"
+    [[ -s "${histfile}.tmp" ]] && mv -f "${histfile}.tmp" "$histfile"
+    history -c
+    history -r
+}
+
+export PROMPT_COMMAND='history -a; cleanup-history; history -n'
+
+# Enable programmable completion
 if ! shopt -oq posix; then
   if [ -f /usr/share/bash-completion/bash_completion ]; then
     . /usr/share/bash-completion/bash_completion
@@ -24,95 +34,54 @@ if ! shopt -oq posix; then
   fi
 fi
 
-# Check window size after each command
 shopt -s checkwinsize
 
-# Make less more friendly for non-text input files, see lesspipe
-[ -x /usr/bin/lesspipe ] && eval "$(SHELL=/bin/sh lesspipe)"
-
-# Set variable identifying the chroot you work in (used in the prompt below)
-if [ -z "${debian_chroot:-}" ] && [ -r /etc/debian_chroot ]; then
-    debian_chroot=$(cat /etc/debian_chroot)
-fi
-
-# Color settings
-## Determine if the terminal supports color
+# Color prompt setup
 if [ -x /usr/bin/tput ] && tput setaf 1 >&/dev/null; then
-    color_prompt=yes
-else
-    color_prompt=no
-fi
-
-## Set the prompt based on color support
-if [ "$color_prompt" = yes ]; then
     PS1='[\[\e[32m\]\A\[\e[0m\]][\[\e[34m\]\h\[\e[0m\]][\[\e[33m\]\w\[\e[0m\]]\$ '
 else
-    PS1='[\A][\h\][\w]\$ '
+    PS1='[\A][\h][\w]\$ '
 fi
 
-## If this is an xterm set the title to user@host:dir
 case "$TERM" in
-xterm*|rxvt*|foot*)
-    PS1='[\[\e[32m\]\A\[\e[0m\]][\[\e[34m\]\h\[\e[0m\]][\[\e[33m\]\w\[\e[0m\]]\$ '
-    ;;
-*)
-    ;;
+    xterm*|rxvt*|foot*|alacritty*)
+        PS1="\[\e]0;\u@\h: \w\a\]$PS1"
+        ;;
 esac
 
-# Alias definition
-if [ -f ~/.config/aliasrc ]; then
-    . ~/.config/aliasrc
+# Load aliases
+[[ -f ~/.config/aliasrc ]] && . ~/.config/aliasrc
+
+# Proper FZF integration
+if [[ -f /usr/share/doc/fzf/examples/key-bindings.bash ]]; then
+    source /usr/share/doc/fzf/examples/key-bindings.bash
+elif [[ -f ~/.fzf.bash ]]; then
+    source ~/.fzf.bash
+elif [[ -f /usr/share/fzf/key-bindings.bash ]]; then
+    source /usr/share/fzf/key-bindings.bash
 fi
 
-# Enable bash completion
-if ! shopt -oq posix; then
-  if [ -f /usr/share/bash-completion/bash_completion ]; then
-    . /usr/share/bash-completion/bash_completion
-  elif [ -f /etc/bash_completion ]; then
-    . /etc/bash_completion
-  fi
+# Enhanced history search (CTRL-R)
+__fzf_history__() {
+    local output
+    output=$(
+        HISTTIMEFORMAT= history |
+        fzf --height 100% --tac --tiebreak=index --no-sort --exact \
+            --bind 'ctrl-d:page-down,ctrl-u:page-up'
+    )
+    [[ -n "$output" ]] && printf "%s" "$output" | sed 's/^ *[0-9]* *//'
+}
+
+# Improved key binding for history search
+if [[ $- == *i* ]]; then
+    bind '"\C-r": " \C-e\C-u\C-y\ey\C-u$(__fzf_history__)\e\C-e\er\e^"'
 fi
 
-# fzf history
-bind '"\C-r": "\C-x1\e^\er"'
-bind -x '"\C-x1": __fzf_history';
-
-__fzf_history ()
-{
-    # Capture the selected command from history using fzf
-    local selected_cmd
-    selected_cmd=$(history | fzf --tac --tiebreak=index | perl -ne 'm/^\s*([0-9]+)\s*(.*)/ and print "$2"')
-
-    # Check if the selected command is different from the last history entry and the last executed command
-    if [[ -n $selected_cmd && $selected_cmd != "$(history 1 | sed 's/^[ ]*[0-9]*[ ]*//')" ]]; then
-        __ehc "$selected_cmd"
-    fi
-}
-
-__ehc()
-{
-    if [[ -n $1 ]]; then
-        bind '"\er": redraw-current-line'
-        READLINE_LINE=${READLINE_LINE:+${READLINE_LINE:0:READLINE_POINT}}${1}${READLINE_LINE:+${READLINE_LINE:READLINE_POINT}}
-        READLINE_POINT=$(( READLINE_POINT + ${#1} ))
-    else
-        bind '"\er":'
-    fi
-}
-
-# Function to not log a command in history.
-nhist() {
-    HISTFILE=/dev/null
-    bash -ic "$*"
-    history -d $(history 1)
-}
-
-
-# `tm` will allow you to select your tmux session via fzf.
-tm() {
-  [[ -n "$TMUX" ]] && change="switch-client" || change="attach-session"
-  if [ $1 ]; then
-    tmux $change -t "$1" 2>/dev/null || (tmux new-session -d -s $1 && tmux $change -t "$1"); return
-  fi
-  session=$(tmux list-sessions -F "#{session_name}" 2>/dev/null | fzf --exit-0) &&  tmux $change -t "$session" || echo "No sessions found."
-}
+# Ensure CTRL-T works with proper preview
+if command -v bat &>/dev/null; then
+    export FZF_CTRL_T_OPTS="--preview 'bat --color=always --line-range :500 {}'"
+elif command -v highlight &>/dev/null; then
+    export FZF_CTRL_T_OPTS="--preview 'highlight -O ansi --line-numbers {}'"
+else
+    export FZF_CTRL_T_OPTS="--preview 'cat {}'"
+fi
