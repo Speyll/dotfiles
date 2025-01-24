@@ -85,3 +85,10 @@ elif command -v highlight &>/dev/null; then
 else
     export FZF_CTRL_T_OPTS="--preview 'cat {}'"
 fi
+
+# Don't log a command in history
+nhist() {
+    HISTFILE=/dev/null
+    bash -ic "$*"
+    history -d $(history 1)
+}

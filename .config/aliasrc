@@ -26,15 +26,29 @@ alias \
     xbq="xbps-query -Rs" \
     apti="sudo apt-get install --no-install-recommends" \
     aptr="sudo apt-get --purge autoremove" \
+    zyi="sudo zypper install --no-recommends" \
+    zyr="sudo zypper remove --clean-deps --no-confirm" \
     flinst="flatpak install" \
+    flrem="flatpak uninstall --delete-data" \
     flclean="flatpak uninstall --unused --delete-data -y && flatpak repair"
+
+# Network aliases
+alias \
+    rsync="rsync -avh --progress" \
+    rsync-ssh="rsync -avzh --progress -e ssh" \
+    rsync-net="rsync -avzh --progress" \
+    gcl='git clone --depth 1' \
+    nfs-mount="sudo mount -t nfs -o soft,timeo=50,retrans=2,intr,noac" \
+    ssh-mount="sshfs -o reconnect,ServerAliveInterval=15,ServerAliveCountMax=3,sshfs_sync"
 
 # Safe file operations
 alias \
     cp="cp -iv" \
     mv="mv -iv" \
     rm="rm -vI" \
-    mkd="mkdir -pv"
+    mkd="mkdir -pv" \
+    clear="tput clear" \
+    reset="tput reset"
 
 # System utilities
 alias \
