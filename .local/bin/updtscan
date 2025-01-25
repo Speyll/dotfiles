@@ -1,70 +1,107 @@
 #!/bin/sh
 
-# Function to check for updates and send a notification
-check_updates() {
-    # Initialize update counts
-    updates=0
-    flatpak_updates=0
+# Configuration
+CHECK_INTERVAL=14400  # 4 hours in seconds
+NOTIFY_TIMEOUT=0  # Notification timeout in milliseconds
+LOCKFILE="/tmp/update-checker.lock"
 
-    # Function to execute commands with elevated privileges
-    run_with_privileges() {
-        if command -v sudo >/dev/null 2>&1; then
-            sudo "$@"
-        elif command -v pkexec >/dev/null 2>&1; then
-            pkexec "$@"
-        else
-            notify-send -t 0 "Permission Denied" "This script requires elevated privileges to check for system updates."
-            exit 1
-        fi
-    }
+# Create lock file and cleanup on exit
+if [ -e "$LOCKFILE" ]; then
+    echo "Error: Another instance is already running!" >&2
+    exit 1
+fi
+touch "$LOCKFILE"
+trap 'rm -f "$LOCKFILE"; exit' INT TERM EXIT
 
-    # Void Linux (xbps)
-    if command -v xbps-install >/dev/null 2>&1; then
-        run_with_privileges xbps-install -S >/dev/null 2>&1
-        updates=$(run_with_privileges xbps-install -Sun | wc -l)
-    fi
+# Function to check for command availability
+command_exists() {
+    command -v "$1" >/dev/null 2>&1
+}
 
-    # Arch Linux (pacman)
-    if command -v pacman >/dev/null 2>&1; then
-        run_with_privileges pacman -Sy >/dev/null 2>&1
-        updates=$(pacman -Qu | wc -l)
-    fi
-
-    # Debian/Ubuntu (apt)
-    if command -v apt >/dev/null 2>&1; then
-        run_with_privileges apt update -qq >/dev/null 2>&1
-        updates=$(apt list --upgradable 2>/dev/null | grep -c "upgradable")
-    fi
-
-    # Fedora (dnf)
-    if command -v dnf >/dev/null 2>&1; then
-        run_with_privileges dnf check-update -q >/dev/null 2>&1
-        updates=$(dnf list updates -q | grep -c '^[a-zA-Z]')
-    fi
-
-    # openSUSE (zypper)
-    if command -v zypper >/dev/null 2>&1; then
-        run_with_privileges zypper refresh -q >/dev/null 2>&1
-        updates=$(zypper list-updates | grep -c '|')
-    fi
-
-    # Flatpak
-    if command -v flatpak >/dev/null 2>&1; then
-        flatpak_updates=$(flatpak remote-ls --updates | wc -l)
-    fi
-
-    # Send notification if updates are available
-    if [ "$updates" -gt 0 ] || [ "$flatpak_updates" -gt 0 ]; then
-        notify-send -t 0 "System Updates" \
-            "<b>Packages:</b> $updates updates\n<b>Flatpak:</b> $flatpak_updates updates"
+# Function to execute commands with elevated privileges
+run_with_privileges() {
+    if command_exists sudo; then
+        sudo "$@"
+    elif command_exists pkexec; then
+        pkexec "$@"
+    else
+        echo "Error: No privilege escalation tool found!" >&2
+        return 1
     fi
 }
 
-# Perform an initial check
+# Package manager checks
+check_xbps() {
+    if run_with_privileges xbps-install -Sy >/dev/null 2>&1; then
+        run_with_privileges xbps-install -un 2>/dev/null | wc -l
+    else
+        echo 0
+    fi
+}
+
+check_pacman() {
+    if run_with_privileges pacman -Sy >/dev/null 2>&1; then
+        pacman -Quq 2>/dev/null | wc -l
+    else
+        echo 0
+    fi
+}
+
+check_apt() {
+    if run_with_privileges apt update -qq >/dev/null 2>&1; then
+        apt list --upgradable 2>/dev/null | grep -c "upgradable"
+    else
+        echo 0
+    fi
+}
+
+check_dnf() {
+    run_with_privileges dnf check-update -q >/dev/null
+    case $? in
+        0|100) dnf list updates -q 2>/dev/null | grep -c '^[a-zA-Z]' ;;
+        *) echo 0 ;;
+    esac
+}
+
+check_zypper() {
+    if run_with_privileges zypper refresh -q >/dev/null 2>&1; then
+        zypper -q list-updates -t package 2>/dev/null | wc -l
+    else
+        echo 0
+    fi
+}
+
+check_flatpak() {
+    flatpak remote-ls --updates 2>/dev/null | wc -l
+}
+
+# Main update check function
+check_updates() {
+    total_updates=0
+    flatpak_updates=0
+
+    # System package managers
+    command_exists xbps-install && total_updates=$((total_updates + $(check_xbps)))
+    command_exists pacman && total_updates=$((total_updates + $(check_pacman)))
+    command_exists apt && total_updates=$((total_updates + $(check_apt)))
+    command_exists dnf && total_updates=$((total_updates + $(check_dnf)))
+    command_exists zypper && total_updates=$((total_updates + $(check_zypper)))
+
+    # Flatpak
+    command_exists flatpak && flatpak_updates=$(check_flatpak)
+
+    # Send notification if updates are available
+    if [ "$total_updates" -gt 0 ] || [ "$flatpak_updates" -gt 0 ]; then
+        notify-send -t "$NOTIFY_TIMEOUT" "System Updates Available" \
+            "Packages: $total_updates\nFlatpaks: $flatpak_updates"
+    fi
+}
+
+# Initial check
 check_updates
 
-# Enter the periodic loop
+# Periodic checks
 while true; do
-    sleep 14400  # Wait for 4 hours
+    sleep "$CHECK_INTERVAL"
     check_updates
 done

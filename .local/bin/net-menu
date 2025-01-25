@@ -1,121 +1,129 @@
 #!/bin/sh
 
-# Function for color escape sequences
-esc() {
-    printf '\033%s' "$1"
+# Configuration
+VPN_CONNECTION="protonvpn"
+LOCKFILE="/tmp/network-manager.lock"
+
+# Color definitions
+BLUE=$(tput setaf 4)
+GREEN=$(tput setaf 2)
+RED=$(tput setaf 1)
+BOLD=$(tput bold)
+RESET=$(tput sgr0)
+
+# Cleanup function
+cleanup() {
+    rm -f "$LOCKFILE"
+    stty echo
+    exit 0
 }
 
-# Display the current status of network connections
-display_status() {
-    printf "\n%s--- Network Status --- %s\n" "$(esc "[1;34m")" "$(esc "[0m")"
+trap cleanup INT TERM EXIT
 
-    # List available Wi-Fi networks
-    nmcli --fields SSID,SIGNAL,BARS,SECURITY device wifi list
-    echo
+# Check for existing instance
+[ -e "$LOCKFILE" ] && { echo "${RED}Error: Another instance is running!${RESET}" >&2; exit 1; }
+touch "$LOCKFILE"
 
-    # Show current Wi-Fi connection status
-    connected_wifi=$(nmcli -t -f active,ssid dev wifi | grep '^yes' | cut -d':' -f2)
-    if [ -n "$connected_wifi" ]; then
-        printf "%sCurrently connected to Wi-Fi: %s%s\n" "$(esc "[1;32m")" "$connected_wifi" "$(esc "[0m")"
-    else
-        printf "%sNo active Wi-Fi connection.%s\n" "$(esc "[1;31m")" "$(esc "[0m")"
-    fi
-    echo
-
-    # Show ProtonVPN status
-    vpn_status=$(nmcli connection show --active | grep -i protonvpn)
-    if [ -n "$vpn_status" ]; then
-        printf "%sProtonVPN is connected.%s\n" "$(esc "[1;32m")" "$(esc "[0m")"
-    else
-        printf "%sProtonVPN is not connected.%s\n" "$(esc "[1;31m")" "$(esc "[0m")"
-    fi
+# Privilege escalation
+run_privileged() {
+    command -v sudo >/dev/null && sudo "$@" ||
+    command -v pkexec >/dev/null && pkexec "$@" || {
+        echo "${RED}Error: No privilege tool found${RESET}" >&2
+        return 1
+    }
 }
 
-# Function to show available Wi-Fi networks
-show_simple_wifi_list() {
-    printf "\n%s--- Select Wi-Fi Network --- %s\n" "$(esc "[1;34m")" "$(esc "[0m")"
-    nmcli --fields SSID device wifi | grep -v "^SSID" | sed '/^\s*$/d' | nl
+# Deduplicated network list
+get_wifi_list() {
+    nmcli --fields SSID,SIGNAL,BARS,SECURITY device wifi list | awk '
+        BEGIN { FS="  +"; max = 0 }
+        NR == 1 { print; next }
+        {
+            ssid = $1
+            gsub(/^[ \t]+|[ \t]+$/, "", ssid)
+            if (!seen[ssid] || $2 > seen[ssid]) {
+                seen[ssid] = $2
+                lines[ssid] = $0
+            }
+        }
+        END { for (s in lines) print lines[s] | "sort -k2 -nr" }'
 }
 
-# Function to connect to a Wi-Fi network
-connect_to_wifi() {
-    show_simple_wifi_list
-    printf "Enter the number of the Wi-Fi network to connect to: "
+# Network status display
+show_network_status() {
+    echo "\n${BLUE}${BOLD}--- Network Status ---${RESET}"
+    connected_wifi=$(nmcli -t -f active,ssid dev wifi | awk -F: '$1 == "yes" {print $2}')
+    [ -n "$connected_wifi" ] && echo "${GREEN}Connected: $connected_wifi${RESET}" || echo "${RED}No Wi-Fi${RESET}"
+    nmcli connection show --active | grep -qi "$VPN_CONNECTION" && echo "${GREEN}VPN: Connected${RESET}" || echo "${RED}VPN: Disconnected${RESET}"
+}
+
+# Connect to Wi-Fi
+connect_wifi() {
+    echo "\n${BLUE}${BOLD}--- Available Networks ---${RESET}"
+    wifi_list=$(get_wifi_list)
+    echo "$wifi_list" | awk 'NR>1' | nl
+    printf "\n${BOLD}Enter number (0 to cancel): ${RESET}"
     read -r choice
+    [ "$choice" -eq 0 ] 2>/dev/null && return
 
-    # Get the SSID of the selected choice, preserving spaces
-    ssid=$(nmcli --fields SSID device wifi | grep -v "^SSID" | sed '/^\s*$/d' | awk -v choice="$choice" 'NR == choice {print $0}')
+    ssid=$(echo "$wifi_list" | awk 'NR>1' | sed -n "${choice}p" | awk '{sub(/^[ \t]+/, ""); print $1}')
+    [ -z "$ssid" ] && { echo "${RED}Invalid choice${RESET}"; return; }
 
-    # Trim leading and trailing whitespace from SSID
-    ssid=$(echo "$ssid" | xargs)
-
-    if [ -n "$ssid" ]; then
-        # Check if the Wi-Fi network is already saved
-        stored_network=$(nmcli connection show | grep -i "$ssid" || true)
-
-        if [ -z "$stored_network" ]; then
-            # If network isn't saved, ask for password and save it
-            printf "Enter password for %s: " "$ssid"
-            stty -echo
-            read -r password
-            stty echo
-            printf "\n"
-
-            # Connect and save the credentials for future use
-            nmcli device wifi connect "$ssid" password "$password" && \
-            printf "%sConnected to %s (Password Saved)%s\n" "$(esc "[1;32m")" "$ssid" "$(esc "[0m")"
-        else
-            # If network is saved, just connect automatically
-            nmcli device wifi connect "$ssid" && \
-            printf "%sConnected to %s (Using saved password)%s\n" "$(esc "[1;32m")" "$ssid" "$(esc "[0m")"
-        fi
+    if nmcli connection show | grep -q "$ssid"; then
+        nmcli device wifi connect "$ssid" && echo "${GREEN}Connected!${RESET}" || echo "${RED}Connection failed${RESET}"
     else
-        printf "%sInvalid selection. No connection made.%s\n" "$(esc "[1;31m")" "$(esc "[0m")"
+        printf "Password: "
+        stty -echo
+        read -r password
+        stty echo
+        printf "\n"
+        nmcli device wifi connect "$ssid" password "$password" && echo "${GREEN}Connected!${RESET}" || echo "${RED}Failed${RESET}"
     fi
 }
 
-# Function to disconnect from the current Wi-Fi network
-disconnect_from_wifi() {
-    connected_wifi=$(nmcli -t -f active,ssid dev wifi | grep '^yes' | cut -d':' -f2)
-    if [ -n "$connected_wifi" ]; then
-        nmcli connection down "$connected_wifi" && \
-        printf "%sDisconnected from Wi-Fi: %s%s\n" "$(esc "[1;31m")" "$connected_wifi" "$(esc "[0m")"
-    else
-        printf "%sNo active Wi-Fi connection to disconnect.%s\n" "$(esc "[1;31m")" "$(esc "[0m")"
-    fi
+# Disconnect Wi-Fi
+disconnect_wifi() {
+    connected=$(nmcli -t -f active,ssid dev wifi | awk -F: '$1 == "yes" {print $2}')
+    [ -z "$connected" ] && { echo "${RED}Not connected${RESET}"; return; }
+    nmcli connection down "$connected" && echo "${GREEN}Disconnected: $connected${RESET}" || echo "${RED}Disconnect failed${RESET}"
 }
 
-# Function to toggle ProtonVPN connection
+# VPN management
 toggle_vpn() {
-    CONNECTION_NAME="protonvpn"
-    vpn_status=$(nmcli connection show --active | grep -i protonvpn)
-    if [ -n "$vpn_status" ]; then
-        sudo nmcli connection down "$CONNECTION_NAME" && \
-        printf "%sVPN disconnected.%s\n" "$(esc "[1;31m")" "$(esc "[0m")"
+    if nmcli connection show --active | grep -qi "$VPN_CONNECTION"; then
+        run_privileged nmcli connection down "$VPN_CONNECTION" && echo "${GREEN}VPN disconnected${RESET}" || echo "${RED}VPN disconnect failed${RESET}"
     else
-        sudo nmcli connection up "$CONNECTION_NAME" && \
-        printf "%sVPN connected.%s\n" "$(esc "[1;32m")" "$(esc "[0m")"
+        run_privileged nmcli connection up "$VPN_CONNECTION" && echo "${GREEN}VPN connected${RESET}" || echo "${RED}VPN connect failed${RESET}"
     fi
 }
 
-# Display network status
-display_status
+# Main menu
+main_menu() {
+    while true; do
+        show_network_status
+        echo "\n${BLUE}${BOLD}--- Main Menu ---${RESET}"
+        echo "1) Connect to Wi-Fi"
+        echo "2) Disconnect Wi-Fi"
+        echo "3) Toggle VPN"
+        echo "4) Refresh"
+        echo "5) Exit"
+        printf "\n${BOLD}Choice (1-5): ${RESET}"
+        read -r choice
 
-# Interactive menu
-while true; do
-    printf "\n%s--- Choose an Action --- %s\n" "$(esc "[1;34m")" "$(esc "[0m")"
-    printf "1. Connect to Wi-Fi network\n"
-    printf "2. Disconnect from Wi-Fi network\n"
-    printf "3. Toggle ProtonVPN\n"
-    printf "4. Exit\n"
-    printf "Choose (1-4): "
-    read -r choice
+        case $choice in
+            1) connect_wifi ;;
+            2) disconnect_wifi ;;
+            3) toggle_vpn ;;
+            4) continue ;;
+            5) break ;;
+            *) echo "${RED}Invalid option${RESET}" ;;
+        esac
+        sleep 1
+    done
+}
 
-    case $choice in
-        1) connect_to_wifi ;;
-        2) disconnect_from_wifi ;;
-        3) toggle_vpn ;;
-        4) echo "Exiting." ; break ;;
-        *) printf "%sInvalid choice. Try again.%s\n" "$(esc "[1;31m")" "$(esc "[0m")" ;;
-    esac
-done
+# Initial checks
+command -v nmcli >/dev/null || { echo "${RED}NetworkManager required${RESET}" >&2; exit 1; }
+
+main_menu
+cleanup

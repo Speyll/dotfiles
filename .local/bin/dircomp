@@ -15,16 +15,15 @@ if [ ! -d "$dir1" ] || [ ! -d "$dir2" ]; then
     exit 1
 fi
 
-# Create temporary files for the sorted file lists
-tmp1=$(mktemp)
-tmp2=$(mktemp)
+# Create named pipes
+mkfifo fifo1 fifo2
 
-# List files in both directories and sort them
-find "$dir1" -type f -exec realpath --relative-to="$dir1" {} \; | sort > "$tmp1"
-find "$dir2" -type f -exec realpath --relative-to="$dir2" {} \; | sort > "$tmp2"
+# List files in the top-level of both directories, sort, and write to named pipes
+(find "$dir1" -maxdepth 1 -type f -exec basename {} \; | sort > fifo1) &
+(find "$dir2" -maxdepth 1 -type f -exec basename {} \; | sort > fifo2) &
 
 # Compare file lists using comm
-comm -23 "$tmp1" "$tmp2"
+comm -23 fifo1 fifo2
 
-# Clean up temporary files
-rm "$tmp1" "$tmp2"
+# Clean up named pipes
+rm fifo1 fifo2

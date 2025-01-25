@@ -35,4 +35,3 @@ if [ -n "$selected_video" ]; then
 else
   echo "No video selected."
 fi
-
