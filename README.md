@@ -46,9 +46,9 @@ For those on a Systemd distro, I also have a script tailored for Debian. While i
 - `Mod + Shift + S`: Take screenshot of selected area (slurp + grim)
 - `Impr Screen`: Capture entire screen
 - `Mod + Comma`: Access clipboard selector
-- `Mod + Semicolon`: Open emoji selector
+- `Mod + Period`: Open emoji selector
 
-Note: I use an **AZERTY** keyboard, so some keybindings may differ. For example, workspace switching may not use numbers, and window closing may require `Mod + Shift + A` instead of `Q`. Similarly, the **emoji selector** may be triggered by `Mod + M` instead of semicolon, if you use a QWERTY Keyboard you might want to modify that before.
+Note: ~~I use an **AZERTY** keyboard, so some keybindings may differ. For example, workspace switching may not use numbers, and window closing may require `Mod + Shift + A` instead of `Q`. Similarly, the **emoji selector** may be triggered by `Mod + M` instead of semicolon, if you use a QWERTY Keyboard you might want to modify that before.~~ I forced myself to learn QWERTY so this no longer applies for the moment.
 
 ## Special Scripts
 
