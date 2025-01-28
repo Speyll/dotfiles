@@ -57,5 +57,5 @@ find "$directory" -type f \( -name "*.mp4" -o -name "*.mkv" -o -name "*.avi" \) 
 done
 
 # Open lf in the temporary directory containing symlinks to vertical videos
-lf "$cache_dir"
+yazi "$cache_dir"
 

@@ -2,50 +2,78 @@
 
 # Function to exit with an error message
 exit_err() {
-  echo "$1" >&2
+  printf '%s\n' "$1" >&2
   exit 1
 }
 
+# Check if origin remote exists
+check_origin() {
+  if ! git config --get remote.origin.url >/dev/null 2>&1; then
+    exit_err "Remote 'origin' is not configured."
+  fi
+}
+
+# Validate there are changes to commit
+check_changes() {
+  if git diff --cached --quiet; then
+    exit_err "No changes to commit."
+  fi
+}
+
 # Prompt for commit message
-printf "Commit message: "
-read -r commit || exit_err "Failed to read input."
+get_commit_message() {
+  printf "Commit message: "
+  read -r commit || exit_err "Failed to read input."
+  [ -z "$commit" ] && exit_err "Commit message cannot be empty."
+}
 
-# Check if commit message is empty
-[ -z "$commit" ] && exit_err "Commit message cannot be empty."
-
-# Function to commit and push changes
+# Standard commit and push
 push_changes() {
+  check_origin
   git add -A || exit_err "Failed to stage changes."
+  check_changes
   git commit -m "$commit" || exit_err "Failed to commit changes."
   git push || exit_err "Failed to push changes."
-  echo "Changes pushed successfully."
+  printf '%s\n' "Changes pushed successfully."
 }
 
-# Function to clean repository by resetting to an orphan branch and pushing
+# Clean repository history
 clean_repo() {
-  git checkout --orphan temp-main || exit_err "Failed to create orphan branch."
-  git add -A || exit_err "Failed to stage changes."
-  git commit -m "$commit" || exit_err "Failed to commit changes."
+  check_origin
 
-  # Replace the current main branch with the orphaned one
-  git branch -D main 2>/dev/null
-  git branch -m main || exit_err "Failed to rename branch to 'main'."
-  git push -f origin main || exit_err "Failed to push 'main' branch to remote."
-  git gc --aggressive --prune=all || exit_err "Failed to run garbage collection."
-  git push --set-upstream origin main || exit_err "Failed to set upstream for 'main' branch."
-  echo "Repository cleaned and pushed successfully."
+  # Safety checks
+  if ! git diff --quiet; then
+    exit_err "Uncommitted changes detected. Aborting clean operation."
+  fi
+
+  temp_branch="tmp-$(date +%s)"
+  git checkout --orphan "$temp_branch" || exit_err "Failed to create orphan branch."
+  git add -A || exit_err "Failed to stage changes."
+  git commit --allow-empty -m "$commit" || exit_err "Failed to initial commit."
+
+  # Force update main branch
+  if git show-ref --verify --quiet refs/heads/main; then
+    git branch -D main || exit_err "Failed to remove existing main branch."
+  fi
+
+  git branch -m main || exit_err "Failed to rename temporary branch."
+  git push -f origin main || exit_err "Failed to force push new history."
+  git gc --aggressive --prune=now --quiet || exit_err "Failed to optimize repository."
+  printf '%s\n' "Repository history cleaned successfully."
 }
 
-# Script usage options
+# Main execution
+get_commit_message
+
 case "$1" in
-  push)    # Standard commit and push
+  push)
     push_changes
     ;;
-  clean)   # Clean repository by resetting and pushing orphaned main
+  clean)
     clean_repo
     ;;
-  *)       # Default message if no valid argument is provided
-    echo "Usage: $0 {push|clean}"
+  *)
+    printf '%s\n' "Usage: $0 {push|clean}"
     exit 1
     ;;
 esac
