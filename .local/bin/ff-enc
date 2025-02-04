@@ -1,8 +1,8 @@
 #!/bin/sh
-
 # Safer execution (POSIX-compatible)
 set -e
 set -u
+#set -x  # Uncomment for verbose debugging output
 
 # Configuration
 video_output_dir="encVids"
@@ -10,7 +10,7 @@ audio_output_dir="extAudios"
 temp_work_dir=$(mktemp -d -t ffmpeg-process-XXXXXX)
 trap 'rm -rf "$temp_work_dir"' EXIT
 
-# File extensions
+# File extensions (space-separated list)
 video_extensions="mp4 mkv ts mov avi webm gif"
 audio_extensions="mp4 mkv avi mov webm flv wmv mpg mpeg"
 
@@ -35,57 +35,93 @@ validate_timestamp() {
 find_media_files() {
     type=$1
     exts=""
-    
+
     case $type in
         video) exts="$video_extensions" ;;
         audio) exts="$audio_extensions" ;;
         *) die "Invalid media type: $type" ;;
     esac
-    
-    # Build find command
-    query=""
+
+    # Build POSIX-compliant find command
+    find_cmd="find . -maxdepth 1 -type f "
     first=true
     for ext in $exts; do
         if [ "$first" = true ]; then
-            query="$query -iname \"*.$ext\""
+            find_cmd="$find_cmd \( -iname '*.$ext'"
             first=false
         else
-            query="$query -o -iname \"*.$ext\""
+            find_cmd="$find_cmd -o -iname '*.$ext'"
         fi
     done
-    
-    eval "find . -maxdepth 1 -type f \( $query \)"
+    [ "$first" = false ] && find_cmd="$find_cmd \)"
+
+    # Execute with proper filename handling
+    eval "$find_cmd" | while IFS= read -r file; do
+        printf "%s\n" "$file"
+    done
 }
 
-# Core Functions
 encode_videos() {
     mkdir -p "$video_output_dir"
-    
+
     find_media_files video | while IFS= read -r file; do
-        base_name=$(basename "$file")
-        output_file="$video_output_dir/${base_name%.*}.mp4"
-        
+        [ -z "$file" ] && continue
+
+        base_name=$(basename -- "$file")
+        clean_name=$(echo "${base_name%.*}" | tr -cd '[:alnum:]._-')
+        output_file="$video_output_dir/${clean_name}.mp4"
+
         if [ -f "$output_file" ]; then
             echo "Skipping: $base_name (exists)"
             continue
         fi
-        
-        echo "Processing: $base_name"
-        
-        # Frame rate handling
-        if [ "$target_fps" = "copy" ]; then
-            fps=$(ffprobe -v error -select_streams v:0 \
-                  -show_entries stream=r_frame_rate -of csv=p=0 "$file" | bc -l)
-            echo "Original FPS: $fps"
-        else
-            fps=$target_fps
+
+        echo "Analyzing: $base_name"
+
+        # Get video properties
+        video_codec=$(ffprobe -v error -select_streams v:0 \
+                -show_entries stream=codec_name -of csv=p=0 "$file")
+        height=$(ffprobe -v error -select_streams v:0 \
+                 -show_entries stream=height -of csv=p=0 "$file")
+        fps_input=$(ffprobe -v error -select_streams v:0 \
+                   -show_entries stream=r_frame_rate -of csv=p=0 "$file")
+        fps_original=$(echo "scale=2; $fps_input" | bc -l)
+
+        # Get audio properties
+        audio_codec=$(ffprobe -v error -select_streams a:0 \
+                -show_entries stream=codec_name -of csv=p=0 "$file" 2>/dev/null || echo "none")
+
+        # Compliance check matrix
+        video_compliant=false
+        audio_compliant=false
+
+        [ "$video_codec" = "hevc" ] && [ "$height" -le 720 ] && \
+        [ $(echo "$fps_original <= 30" | bc) -eq 1 ] && video_compliant=true
+
+        [ "$audio_codec" = "opus" ] && audio_compliant=true
+
+        # Decision logic
+        if $video_compliant && $audio_compliant; then
+            echo "Skipping: $base_name (fully compliant)"
+            continue
+        elif $video_compliant; then
+            echo "Processing audio only: $base_name"
+            ffmpeg -nostdin -y -i "$file" \
+                -c:v copy \
+                -c:a libopus -b:a 128k -vbr on \
+                -movflags +faststart -tag:v hvc1 \
+                -f mp4 \
+                "$output_file" || echo "Failed to process $base_name"
+            continue
         fi
 
-        ffmpeg -nostdin -i "$file" \
+        echo "Processing full conversion: $base_name"
+        ffmpeg -nostdin -y -i "$file" \
             -c:v libx265 -preset fast -x265-params no-sao=1:bframes=8 \
-            -vf "scale=ceil(iw/2)*2:ceil(ih/2)*2,fps=$fps" \
+            -vf "scale=-2:720,fps=$target_fps" \
             -c:a libopus -b:a 128k -vbr on \
             -movflags +faststart -tag:v hvc1 \
+            -f mp4 \
             "$output_file" || echo "Failed to process $base_name"
     done
 }
@@ -97,21 +133,22 @@ extract_audio() {
 
     find_media_files audio | while IFS= read -r video; do
         base_name=$(basename "$video")
+        [ -z "$base_name" ] && die "Base name extraction failed for file: $video"
         temp_audio="$temp_work_dir/${base_name%.*}.m4a"
         output_file="$audio_output_dir/${base_name%.*}.m4a"
         cover_art="$temp_work_dir/${base_name%.*}_cover.jpg"
 
         echo "Processing audio for: $base_name"
 
-        # Extract cover art
+        # Extract cover art at the given timestamp (suppressing errors)
         ffmpeg -nostdin -y -ss "$timestamp" -i "$video" -vframes 1 "$cover_art" 2>/dev/null || continue
 
-        # Extract and process audio
+        # Extract and process audio; try copy first, then re-encode if necessary
         if ! ffmpeg -nostdin -y -i "$video" -vn -c:a copy -strict -2 "$temp_audio" 2>/dev/null; then
             ffmpeg -nostdin -y -i "$video" -vn -c:a aac -b:a 192k "$temp_audio"
         fi
 
-        # Embed metadata
+        # Embed metadata (cover art) into the final audio file
         ffmpeg -nostdin -y -i "$temp_audio" -i "$cover_art" \
             -map 0:a -map 1 -c copy -disposition:v:0 attached_pic \
             -metadata:s:v title="Album cover" \
@@ -123,7 +160,7 @@ extract_audio() {
 crop_video() {
     printf "Enter aspect ratio (e.g., 0.56 for 9:16 vertical): "
     read -r aspect_ratio
-    
+
     case $aspect_ratio in
         *[!0-9.]*) die "Invalid aspect ratio" ;;
     esac
@@ -133,14 +170,14 @@ crop_video() {
     [ -f "$input_file" ] || die "File not found: $input_file"
 
     output_file="${input_file%.*}_cropped.mp4"
-    
+    echo "Cropping $input_file to output: $output_file"
+
     ffmpeg -i "$input_file" -vf "crop=iw:iw/$aspect_ratio" \
         -c:a copy -c:v libx265 -preset fast \
         "$output_file"
 }
 
-# Main Execution
-# Dependency checks
+# Main Execution: dependency checks
 for cmd in ffprobe ffmpeg; do
     command -v "$cmd" >/dev/null 2>&1 || die "Missing dependency: $cmd"
 done
@@ -196,7 +233,7 @@ EOF
     shift
 done
 
-# Execute action
+# Execute action based on input
 case "$action" in
     video) encode_videos ;;
     audio) extract_audio "$cover_timestamp" ;;
@@ -204,9 +241,10 @@ case "$action" in
     *) die "No action specified. Use -h for help." ;;
 esac
 
-# Final cleanup and shutdown
+# Final cleanup and optional shutdown
 if [ "$shutdown" = true ]; then
     echo "Processing complete. System will shutdown in 60 seconds..."
     sleep 60
     sudo poweroff
 fi
+
