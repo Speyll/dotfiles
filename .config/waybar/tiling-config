@@ -1,5 +1,5 @@
  {
-    "layer": "bottom",
+    "layer": "top",
     "position": "bottom",
     "height": 28,
     "spacing": 0,
@@ -90,7 +90,7 @@
     "wlr/taskbar": {
         "format": "{icon}",
         "icon-size": 20,
-        "icon-theme": "breeze",
+        "icon-theme": "breeze-dark",
         "tooltip": true,
         "tooltip-format": "{title}",
         "on-click": "minimize-raise",
@@ -164,6 +164,7 @@
         "tooltip-format-disconnected": "Disconnected",
         "on-click": "foot -e net-menu",
     },
+
 
     "bluetooth": {
         "format": "",

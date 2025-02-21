@@ -1,119 +1,138 @@
 #!/bin/sh
 
-# Environment Setup
-dbus-update-activation-environment --all >/dev/null 2>&1 &
+# Log file for errors and output
+LOGFILE="/tmp/autostart.log"
 
-# Polkit Agent
-/usr/libexec/polkit-gnome-authentication-agent-1 >/dev/null 2>&1 &
+# Options
+ENABLE_AUDIO=false # Options: true or false
+ENABLE_PORTALS=false # Options: true or false
+WALLPAPER_MODE="swaybg-random-online" # Options: "swaybg", "swaybg-random", "mpvpaper-local", "mpvpaper-online", "swaybg-random-online", "none"
+WAYBAR_STYLE="none" # Options: "stacking", "tiling", "none"
+THEME_MODE="fixed" # Options: "auto", "fixed", "none"
+ENABLE_UPDATE_SCAN=true # Options: true or false
 
-# Output and Display Configuration
-wlr-randr --output HDMI-A-1 --mode 1920x1080@60.000000 --adaptive-sync disabled >/dev/null 2>&1 &
+# --- Environment Setup ---
+dbus-update-activation-environment --all >>"$LOGFILE" 2>&1 &
+/usr/libexec/polkit-gnome-authentication-agent-1 >>"$LOGFILE" 2>&1 &
+wlr-randr --output HDMI-A-1 --mode 1920x1080@60.000000 --adaptive-sync disabled >>"$LOGFILE" 2>&1 &
 
-# Kill Existing Processes
-for process in flavours pipewire wireplumber pipewire-pulse mpvpaper swaybg fnott wlsunset cliphist; do
-    pkill -x "$process"
+# --- Process Management ---
+# Kill general processes (always)
+for process in flavours mpvpaper swaybg fnott wlsunset cliphist; do
+    pkill -x "$process" >>"$LOGFILE" 2>&1
 done
 
-# Start PipeWire and Services
-dbus-run-session pipewire >/dev/null 2>&1 &
-sleep 1
-wireplumber >/dev/null 2>&1 &
-pipewire-pulse >/dev/null 2>&1 &
+# --- Audio Services ---
+if [ "$ENABLE_AUDIO" = true ]; then
+    # Kill audio processes
+    for process in pipewire wireplumber pipewire-pulse; do
+        pkill -x "$process" >>"$LOGFILE" 2>&1
+    done
+    # Start PipeWire and related services
+    pipewire >>"$LOGFILE" 2>&1 &
+    sleep 1
+    wireplumber >>"$LOGFILE" 2>&1 &
+    pipewire-pulse >>"$LOGFILE" 2>&1 &
+fi
 
-# Wallpaper Mode Selection
-WALLPAPER_MODE="swaybg-random-online" # Options: "swaybg", "swaybg-random", "mpvpaper-local", "mpvpaper-online" "swaybg-random-online"
+# --- Wallpaper Setup ---
+DEFAULT_WALLPAPER="$HOME/pictures/walls/wall.jpg"
 LINK="https://youtu.be/GIky-GXIBVY" # Online video link for mpvpaper-online mode
 URL_FILE="$HOME/.config/autostart/wallpaper_urls.txt" # File containing wallpaper URLs
 
-# Download a random wallpaper and set it as the background
+# Function to download a random wallpaper
 download_random_wallpaper() {
-    # Choose a random URL from the URL file
     wallpaper_url=$(shuf -n1 "$URL_FILE")
-
-    # Download to a temporary location
     curl -sL "$wallpaper_url" -o /tmp/wallpaper.jpg
-
-    # Check if download was successful
     if [ $? -ne 0 ]; then
-        echo "Failed to download wallpaper."
-        exit 1
+        echo "Failed to download wallpaper. Using default." >>"$LOGFILE"
+        wallpaper_path="$DEFAULT_WALLPAPER"
+    else
+        wallpaper_path="/tmp/wallpaper.jpg"
     fi
-
-    # Set the downloaded file as wallpaper_path
-    wallpaper_path="/tmp/wallpaper.jpg"
 }
 
+# Set wallpaper based on mode
 case "$WALLPAPER_MODE" in
     swaybg)
-        wallpaper_path="$HOME/pictures/walls/wall.jpg"
-        swaybg --mode fill -i "$wallpaper_path" >/dev/null 2>&1 &
+        wallpaper_path="$DEFAULT_WALLPAPER"
+        swaybg --mode fill -i "$wallpaper_path" >>"$LOGFILE" 2>&1 &
         ;;
     swaybg-random)
         wallpaper_path=$(find "$HOME/pictures/walls/"*.jpg -type f | shuf -n1)
-        swaybg -i "$wallpaper_path" -m fill >/dev/null 2>&1 &
+        if [ -z "$wallpaper_path" ]; then
+            wallpaper_path="$DEFAULT_WALLPAPER"
+        fi
+        swaybg -i "$wallpaper_path" -m fill >>"$LOGFILE" 2>&1 &
         ;;
     swaybg-random-online)
         download_random_wallpaper
-        swaybg -i "$wallpaper_path" -m fill >/dev/null 2>&1 &
+        swaybg -i "$wallpaper_path" -m fill >>"$LOGFILE" 2>&1 &
         ;;
     mpvpaper-local)
-        mpvpaper -vsp -o "no-audio pause=no --loop --ytdl-format='bestvideo[height<=1080]+bestaudio/best'" '*' "$(find "$HOME/pictures/walls/"*.mp4 -type f | shuf -n1)" >/dev/null 2>&1 &
+        video_path=$(find "$HOME/pictures/walls/"*.mp4 -type f | shuf -n1)
+        if [ -n "$video_path" ]; then
+            mpvpaper -vsp -o "no-audio pause=no --loop --ytdl-format='bestvideo[height<=1080]+bestaudio/best'" '*' "$video_path" >>"$LOGFILE" 2>&1 &
+        else
+            echo "No local video found for mpvpaper-local." >>"$LOGFILE"
+        fi
         ;;
     mpvpaper-online)
-        mpvpaper -vsp -o "no-audio pause=no --loop --ytdl-format='bestvideo[height<=1080]+bestaudio/best'" '*' "$LINK" >/dev/null 2>&1 &
+        mpvpaper -vsp -o "no-audio pause=no --loop --ytdl-format='bestvideo[height<=1080]+bestaudio/best'" '*' "$LINK" >>"$LOGFILE" 2>&1 &
         ;;
     none) ;;
 esac
 
-# Flavours Theme Selection (choose: auto-detect from wallpaper, fixed theme, or none)
-FLAVOURS_MODE="fixed"
-
-case "$FLAVOURS_MODE" in
+# --- Theme Configuration ---
+case "$THEME_MODE" in
     auto)
-        # Generate and apply the Flavours theme based on the selected wallpaper
-        flavours generate dark "$wallpaper_path" >/dev/null 2>&1
-        flavours apply generated >/dev/null 2>&1 &
+        if [ -n "$wallpaper_path" ]; then
+            flavours generate dark "$wallpaper_path" >>"$LOGFILE" 2>&1
+            flavours apply generated >>"$LOGFILE" 2>&1 &
+        else
+            echo "No wallpaper path set for auto theme mode." >>"$LOGFILE"
+        fi
         ;;
     fixed)
-        flavours apply gruvbox-dark-medium >/dev/null 2>&1 &
+        flavours apply gruvbox-dark-medium >>"$LOGFILE" 2>&1 &
         ;;
     none) ;;
 esac
 
-# Set GNOME Color Scheme
-gsettings set org.gnome.desktop.interface color-scheme prefer-dark >/dev/null 2>&1 &
+# --- GNOME Color Scheme ---
+gsettings set org.gnome.desktop.interface color-scheme prefer-dark >>"$LOGFILE" 2>&1 &
 
-# Waybar Configuration (choose: stacking, tiling, or none)
-WAYBAR_MODE="none"
-
-case "$WAYBAR_MODE" in
+# --- Waybar Configuration ---
+case "$WAYBAR_STYLE" in
     stacking)
-        pkill -x waybar; waybar -c "$HOME/.config/waybar/stacking-config" -s "$HOME/.config/waybar/style.css" >/dev/null 2>&1 &
+        pkill -x waybar >>"$LOGFILE" 2>&1
+        waybar -c "$HOME/.config/waybar/stacking-config" -s "$HOME/.config/waybar/style.css" >>"$LOGFILE" 2>&1 &
         ;;
     tiling)
-        pkill -x waybar; waybar -c "$HOME/.config/waybar/tiling-config" -s "$HOME/.config/waybar/style.css" >/dev/null 2>&1 &
+        pkill -x waybar >>"$LOGFILE" 2>&1
+        waybar -c "$HOME/.config/waybar/tiling-config" -s "$HOME/.config/waybar/style.css" >>"$LOGFILE" 2>&1 &
         ;;
     none) ;;
 esac
 
-# Cursor Theme
-gsettings set org.gnome.desktop.interface cursor-theme Breeze_Snow >/dev/null 2>&1 &
-seat seat0 xcursor_theme Breeze_Snow >/dev/null 2>&1 &
+# --- Cursor Theme ---
+gsettings set org.gnome.desktop.interface cursor-theme Breeze_Snow >>"$LOGFILE" 2>&1 &
+seat seat0 xcursor_theme Breeze_Snow >>"$LOGFILE" 2>&1 &
 
-# Start Additional Services
-fnott >/dev/null 2>&1 & # Notifications
-wlsunset -l 36.7 -L 3.08 >/dev/null 2>&1 & # Night light
-wl-paste --watch cliphist store -max-items 100 >/dev/null 2>&1 & # Clipboard manager
+# --- Additional Services ---
+fnott >>"$LOGFILE" 2>&1 & # Notifications
+wlsunset -l 36.7 -L 3.08 >>"$LOGFILE" 2>&1 & # Night light
+wl-paste --watch cliphist store -max-items 100 >>"$LOGFILE" 2>&1 & # Clipboard manager
 
-# Start XDG Desktop Portal Services
-for portal in xdg-desktop-portal xdg-desktop-portal-gtk xdg-desktop-portal-wlr; do
-    /usr/libexec/$portal >/dev/null 2>&1 &
-done
+# --- Portals ---
+if [ "$ENABLE_PORTALS" = true ]; then
+    for portal in xdg-desktop-portal xdg-desktop-portal-wlr xdg-desktop-portal-gtk; do
+        /usr/libexec/$portal >>"$LOGFILE" 2>&1 &
+    done
+fi
 
-# Set to `true` to launch the update scan, or `false` to skip
-check_updates=true
-
-if [ "$check_updates" = true ]; then
+# --- Update Scan ---
+if [ "$ENABLE_UPDATE_SCAN" = true ]; then
     sleep 2
-    "$HOME/.local/bin/updtscan" >/dev/null 2>&1 &
+    "$HOME/.local/bin/updtscan" >>"$LOGFILE" 2>&1 &
 fi

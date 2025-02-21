@@ -3,7 +3,7 @@
 
 include "/home/lyes/.gtkrc-2.0.mine"
 gtk-theme-name="Breeze"
-gtk-icon-theme-name="breeze"
+gtk-icon-theme-name="Breeze"
 gtk-font-name="Sans 11"
 gtk-cursor-theme-name="Breeze_Snow"
 gtk-cursor-theme-size=24

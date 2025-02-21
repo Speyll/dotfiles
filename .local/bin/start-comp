@@ -2,13 +2,21 @@
 # Generalized startup script for Wayland compositors
 # License: GNU General Public License, version 3 or later
 
-# Check for correct usage
-if [ "$#" -ne 1 ]; then
-    echo "Usage: $(basename "$0") <compositor_name>"
+# Parse options
+START_PIPEWIRE=false
+while [ "$#" -gt 0 ]; do
+    case "$1" in
+        -p) START_PIPEWIRE=true ;;
+        *) COMPOSITOR="$1" ;;
+    esac
+    shift
+done
+
+if [ -z "$COMPOSITOR" ]; then
+    echo "Usage: $(basename "$0") [-p] <compositor_name>"
+    echo "   -p: Start PipeWire and related services"
     exit 1
 fi
-
-COMPOSITOR="$1"
 
 # Define the log file
 mkdir -p "$HOME/.cache"
@@ -17,9 +25,6 @@ exec > "$LOGFILE" 2>&1
 
 # Log the script start time
 echo "$COMPOSITOR session started: $(date)"
-
-# Enable debug mode (remove this line for production use)
-# set -x
 
 # Common environment variable settings
 ## QT Related
@@ -30,7 +35,7 @@ export ELM_DISPLAY=wl
 export SDL_VIDEODRIVER=wayland
 
 ## GTK Related
-export GTK_USE_PORTAL=0
+export GTK_USE_PORTAL=1
 
 ## Firefox
 export MOZ_ENABLE_WAYLAND=1
@@ -43,10 +48,11 @@ export XCURSOR_SIZE=24
 ## XDG
 export XDG_SESSION_TYPE=wayland
 export XDG_DATA_DIRS="$HOME/.local/share/flatpak/exports/share:/var/lib/flatpak/exports/share:/usr/local/share:/usr/share"
+export XDG_SESSION_DESKTOP="$COMPOSITOR"
+export XDG_CURRENT_DESKTOP="$COMPOSITOR"
 
-# Set compositor-specific environment variables
-export XDG_SESSION_DESKTOP=wlroots
-export XDG_CURRENT_DESKTOP="$COMPOSITOR"  # Dynamically set the compositor
+# Comment out XDG_DESKTOP_PORTAL unless specifically needed
+#export XDG_DESKTOP_PORTAL=wlr
 
 # Remove "Couldn't register with accessibility bus: Did not receive a reply." warnings
 export NO_AT_BRIDGE=1
@@ -55,41 +61,37 @@ export NO_AT_BRIDGE=1
 export XKB_DEFAULT_LAYOUT=fr,us
 export XKB_DEFAULT_OPTIONS=grp:rctrl_rshift_toggle
 
-# user-session socket setup
-if [ -z "$DBUS_SESSION_BUS_ADDRESS" ] && \
-  [ -n "$XDG_RUNTIME_DIR" ] && \
-  [ "$XDG_RUNTIME_DIR" = "/run/user/`id -u`" ] && \
-  [ -S "$XDG_RUNTIME_DIR/bus" ]; then
-  DBUS_SESSION_BUS_ADDRESS="unix:path=$XDG_RUNTIME_DIR/bus"
-  export DBUS_SESSION_BUS_ADDRESS
-fi
-
-# Export environment variables for dbus
-dbus-update-activation-environment --verbose DBUS_SESSION_BUS_ADDRESS
-
-# Launch dbus if it isn't running yet
+# D-Bus session setup
 if [ -z "$DBUS_SESSION_BUS_ADDRESS" ]; then
-  eval $(/usr/bin/dbus-launch --exit-with-session --sh-syntax)
+    eval $(/usr/bin/dbus-launch --exit-with-session --sh-syntax)
 fi
-
-# Unset unnecessary variables and export environment to dbus
-if [ -n "$DBUS_SESSION_BUS_ADDRESS" ]; then
-  (
-    unset XDG_SEAT
-    unset XDG_SESSION_ID
-    unset XDG_VTNR
-    dbus-update-activation-environment --verbose --all
-  )
-fi
+dbus-update-activation-environment --verbose --all
 
 # Unset variables from old sessions
 unset SWAYSOCK I3SOCK WAYLAND_DISPLAY DISPLAY
 
-# dbus-update-activation-environment for systemd (if necessary)
-systemctl --user import-environment
-
 # Cleanup older sessions
-rm "$HOME"/.cache/*.wob
+rm -f "$HOME"/.cache/*.wob
 
-# Start the compositor dynamically based on the argument
+# Start PipeWire and Services if -p option is given
+if [ "$START_PIPEWIRE" = true ]; then
+    echo "Starting PipeWire services..."
+    pgrep -x pipewire > /dev/null || pipewire &
+    sleep 1
+    pgrep -x wireplumber > /dev/null || wireplumber &
+    pgrep -x pipewire-pulse > /dev/null || pipewire-pulse &
+fi
+
+# Launch XDG Desktop Portal Services
+echo "Starting desktop portals..."
+for portal in xdg-desktop-portal xdg-desktop-portal-wlr xdg-desktop-portal-gtk xdg-desktop-portal-gnome; do
+    pkill -x "/usr/libexec/$portal"
+done
+sleep 1
+for portal in xdg-desktop-portal xdg-desktop-portal-wlr xdg-desktop-portal-gtk xdg-desktop-portal-gnome; do
+    /usr/libexec/$portal &
+done
+
+# Start the compositor
+echo "Starting compositor: $COMPOSITOR"
 dbus-run-session "$COMPOSITOR"
