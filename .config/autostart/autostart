@@ -5,7 +5,6 @@ LOGFILE="/tmp/autostart.log"
 
 # Options
 ENABLE_AUDIO=false # Options: true or false
-ENABLE_PORTALS=false # Options: true or false
 WALLPAPER_MODE="swaybg-random-online" # Options: "swaybg", "swaybg-random", "mpvpaper-local", "mpvpaper-online", "swaybg-random-online", "none"
 WAYBAR_STYLE="none" # Options: "stacking", "tiling", "none"
 THEME_MODE="fixed" # Options: "auto", "fixed", "none"
@@ -123,13 +122,6 @@ seat seat0 xcursor_theme Breeze_Snow >>"$LOGFILE" 2>&1 &
 fnott >>"$LOGFILE" 2>&1 & # Notifications
 wlsunset -l 36.7 -L 3.08 >>"$LOGFILE" 2>&1 & # Night light
 wl-paste --watch cliphist store -max-items 100 >>"$LOGFILE" 2>&1 & # Clipboard manager
-
-# --- Portals ---
-if [ "$ENABLE_PORTALS" = true ]; then
-    for portal in xdg-desktop-portal xdg-desktop-portal-wlr xdg-desktop-portal-gtk; do
-        /usr/libexec/$portal >>"$LOGFILE" 2>&1 &
-    done
-fi
 
 # --- Update Scan ---
 if [ "$ENABLE_UPDATE_SCAN" = true ]; then

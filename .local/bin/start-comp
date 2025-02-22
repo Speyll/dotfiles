@@ -82,16 +82,6 @@ if [ "$START_PIPEWIRE" = true ]; then
     pgrep -x pipewire-pulse > /dev/null || pipewire-pulse &
 fi
 
-# Launch XDG Desktop Portal Services
-echo "Starting desktop portals..."
-for portal in xdg-desktop-portal xdg-desktop-portal-wlr xdg-desktop-portal-gtk xdg-desktop-portal-gnome; do
-    pkill -x "/usr/libexec/$portal"
-done
-sleep 1
-for portal in xdg-desktop-portal xdg-desktop-portal-wlr xdg-desktop-portal-gtk xdg-desktop-portal-gnome; do
-    /usr/libexec/$portal &
-done
-
 # Start the compositor
 echo "Starting compositor: $COMPOSITOR"
 dbus-run-session "$COMPOSITOR"
