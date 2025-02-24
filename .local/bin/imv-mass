@@ -1,0 +1,22 @@
+#!/bin/bash
+
+# Set the target directory to the first argument, or use the current directory if no argument is provided
+TARGET_DIR="${1:-.}"
+
+# Use mapfile to read the output of find into an array, handling null terminators
+mapfile -d '' files < <(find "$TARGET_DIR" -type f \( -iname '*.jpg' -o -iname '*.jpeg' -o -iname '*.png' -o -iname '*.gif' -o -iname '*.webp' \) -print0)
+
+# Check if any files were found
+if [ "${#files[@]}" -eq 0 ]; then
+    echo "No image files found in $TARGET_DIR"
+    exit 1
+fi
+
+# Shuffle the array using Bash's built-in randomization
+shuffled_files=()
+while IFS= read -r -d '' file; do
+    shuffled_files+=("$file")
+done < <(printf '%s\0' "${files[@]}" | sort -z -R)
+
+# Open the shuffled files with imv
+imv "${shuffled_files[@]}"

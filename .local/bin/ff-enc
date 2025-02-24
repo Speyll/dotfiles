@@ -7,12 +7,14 @@ set -u
 # Configuration
 video_output_dir="encVids"
 audio_output_dir="extAudios"
+optimized_audio_dir="optAudios"
 temp_work_dir=$(mktemp -d -t ffmpeg-process-XXXXXX)
 trap 'rm -rf "$temp_work_dir"' EXIT
 
 # File extensions (space-separated list)
 video_extensions="mp4 mkv ts mov avi webm gif"
 audio_extensions="mp4 mkv avi mov webm flv wmv mpg mpeg"
+audio_file_extensions="mp3 wav flac aac m4a opus"
 
 # Processing parameters
 target_fps=30
@@ -39,6 +41,7 @@ find_media_files() {
     case $type in
         video) exts="$video_extensions" ;;
         audio) exts="$audio_extensions" ;;
+        audio_files) exts="$audio_file_extensions" ;;
         *) die "Invalid media type: $type" ;;
     esac
 
@@ -62,7 +65,7 @@ find_media_files() {
 }
 
 encode_videos() {
-    mkdir -p "$video_output_dir"
+    mkdir -p "$video_output_dir" || die "Cannot create $video_output_dir"
 
     find_media_files video | while IFS= read -r file; do
         [ -z "$file" ] && continue
@@ -96,7 +99,7 @@ encode_videos() {
         audio_compliant=false
 
         [ "$video_codec" = "hevc" ] && [ "$height" -le 720 ] && \
-        [ $(echo "$fps_original <= 30" | bc) -eq 1 ] && video_compliant=true
+        [ "$(echo "$fps_original <= 30" | bc)" -eq 1 ] && video_compliant=true
 
         [ "$audio_codec" = "opus" ] && audio_compliant=true
 
@@ -126,14 +129,15 @@ encode_videos() {
     done
 }
 
-extract_audio() {
-    mkdir -p "$audio_output_dir"
+extract_audio_from_video() {
+    mkdir -p "$audio_output_dir" || die "Cannot create $audio_output_dir"
     timestamp=${1:-$cover_timestamp}
     validate_timestamp "$timestamp"
 
     find_media_files audio | while IFS= read -r video; do
+        [ -z "$video" ] && continue
+
         base_name=$(basename "$video")
-        [ -z "$base_name" ] && die "Base name extraction failed for file: $video"
         temp_audio="$temp_work_dir/${base_name%.*}.m4a"
         output_file="$audio_output_dir/${base_name%.*}.m4a"
         cover_art="$temp_work_dir/${base_name%.*}_cover.jpg"
@@ -145,7 +149,7 @@ extract_audio() {
 
         # Extract and process audio; try copy first, then re-encode if necessary
         if ! ffmpeg -nostdin -y -i "$video" -vn -c:a copy -strict -2 "$temp_audio" 2>/dev/null; then
-            ffmpeg -nostdin -y -i "$video" -vn -c:a aac -b:a 192k "$temp_audio"
+            ffmpeg -nostdin -y -i "$video" -vn -c:a aac -b:a 192k "$temp_audio" || continue
         fi
 
         # Embed metadata (cover art) into the final audio file
@@ -153,7 +157,29 @@ extract_audio() {
             -map 0:a -map 1 -c copy -disposition:v:0 attached_pic \
             -metadata:s:v title="Album cover" \
             -metadata:s:v comment="Cover (front)" \
-            "$output_file"
+            "$output_file" || echo "Failed to embed metadata for $base_name"
+    done
+}
+
+optimize_audio() {
+    mkdir -p "$optimized_audio_dir" || die "Cannot create $optimized_audio_dir"
+
+    find_media_files audio_files | while IFS= read -r file; do
+        [ -z "$file" ] && continue
+
+        base_name=$(basename -- "$file")
+        clean_name=$(echo "${base_name%.*}" | tr -cd '[:alnum:]._-')
+        output_file="$optimized_audio_dir/${clean_name}.opus"
+
+        if [ -f "$output_file" ]; then
+            echo "Skipping: $base_name (exists)"
+            continue
+        fi
+
+        echo "Optimizing audio: $base_name"
+        ffmpeg -nostdin -y -i "$file" \
+            -c:a libopus -b:a 128k -vbr on \
+            "$output_file" || echo "Failed to optimize $base_name"
     done
 }
 
@@ -174,7 +200,7 @@ crop_video() {
 
     ffmpeg -i "$input_file" -vf "crop=iw:iw/$aspect_ratio" \
         -c:a copy -c:v libx265 -preset fast \
-        "$output_file"
+        "$output_file" || die "Failed to crop $input_file"
 }
 
 # Main Execution: dependency checks
@@ -194,22 +220,25 @@ Usage: $0 [options]
 
 Options:
   -v, --video        Encode videos to HEVC/H.265
-  -a, --audio [TIME] Extract audio with cover art (default: 00:10:00)
+  -x, --extract [TIME] Extract audio from video with cover art (default: 00:10:00)
+  -a, --audio        Optimize audio files to Opus format
   -c, --crop         Crop video to custom aspect ratio
   --fps RATE         Target framerate (number or 'copy')
   --shutdown         Power off after completion
   -h, --help         Show this help
 
 Examples:
-  $0 -v --fps copy
-  $0 -a 00:03:00
-  $0 -v --shutdown
+  $0 -v --fps copy       # Encode videos, preserving original framerate
+  $0 -x 00:03:00         # Extract audio from videos at 3 minutes
+  $0 -a                  # Optimize audio files to Opus
+  $0 -c                  # Crop a video interactively
+  $0 -v --shutdown       # Encode videos and shut down
 EOF
             exit 0
             ;;
         -v|--video) action="video" ;;
-        -a|--audio)
-            action="audio"
+        -x|--extract)
+            action="extract"
             if [ $# -ge 2 ]; then
                 case "$2" in
                     [0-9][0-9]:[0-9][0-9]:[0-9][0-9])
@@ -219,6 +248,7 @@ EOF
                 esac
             fi
             ;;
+        -a|--audio) action="audio" ;;
         -c|--crop) action="crop" ;;
         --fps)
             target_fps=$2
@@ -236,7 +266,8 @@ done
 # Execute action based on input
 case "$action" in
     video) encode_videos ;;
-    audio) extract_audio "$cover_timestamp" ;;
+    extract) extract_audio_from_video "$cover_timestamp" ;;
+    audio) optimize_audio ;;
     crop) crop_video ;;
     *) die "No action specified. Use -h for help." ;;
 esac
@@ -247,4 +278,3 @@ if [ "$shutdown" = true ]; then
     sleep 60
     sudo poweroff
 fi
-
