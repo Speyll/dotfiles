@@ -21,16 +21,19 @@ cleanup() {
 trap cleanup INT TERM EXIT
 
 # Check for existing instance
-[ -e "$LOCKFILE" ] && { echo "${RED}Error: Another instance is running!${RESET}" >&2; exit 1; }
+[ -e "$LOCKFILE" ] && { printf "%s\n" "${RED}Error: Another instance is running!${RESET}" >&2; exit 1; }
 touch "$LOCKFILE"
 
 # Privilege escalation
 run_privileged() {
-    command -v sudo >/dev/null && sudo "$@" ||
-    command -v pkexec >/dev/null && pkexec "$@" || {
-        echo "${RED}Error: No privilege tool found${RESET}" >&2
+    if command -v sudo >/dev/null; then
+        sudo "$@"
+    elif command -v pkexec >/dev/null; then
+        pkexec "$@"
+    else
+        printf "%s\n" "${RED}Error: No privilege tool found${RESET}" >&2
         return 1
-    }
+    fi
 }
 
 # Deduplicated network list
@@ -51,49 +54,49 @@ get_wifi_list() {
 
 # Network status display
 show_network_status() {
-    echo "\n${BLUE}${BOLD}--- Network Status ---${RESET}"
+    printf "\n%b%b%s%b\n" "${BLUE}" "${BOLD}" "--- Network Status ---" "${RESET}"
     connected_wifi=$(nmcli -t -f active,ssid dev wifi | awk -F: '$1 == "yes" {print $2}')
-    [ -n "$connected_wifi" ] && echo "${GREEN}Connected: $connected_wifi${RESET}" || echo "${RED}No Wi-Fi${RESET}"
-    nmcli connection show --active | grep -qi "$VPN_CONNECTION" && echo "${GREEN}VPN: Connected${RESET}" || echo "${RED}VPN: Disconnected${RESET}"
+    [ -n "$connected_wifi" ] && printf "%s\n" "${GREEN}Connected: $connected_wifi${RESET}" || printf "%s\n" "${RED}No Wi-Fi${RESET}"
+    nmcli connection show --active | grep -qi "$VPN_CONNECTION" && printf "%s\n" "${GREEN}VPN: Connected${RESET}" || printf "%s\n" "${RED}VPN: Disconnected${RESET}"
 }
 
 # Connect to Wi-Fi
 connect_wifi() {
-    echo "\n${BLUE}${BOLD}--- Available Networks ---${RESET}"
+    printf "\n%b%b%s%b\n" "${BLUE}" "${BOLD}" "--- Available Networks ---" "${RESET}"
     wifi_list=$(get_wifi_list)
     echo "$wifi_list" | awk 'NR>1' | nl
-    printf "\n${BOLD}Enter number (0 to cancel): ${RESET}"
+    printf "\n%bEnter number (0 to cancel): %b" "${BOLD}" "${RESET}"
     read -r choice
     [ "$choice" -eq 0 ] 2>/dev/null && return
 
     ssid=$(echo "$wifi_list" | awk 'NR>1' | sed -n "${choice}p" | awk '{sub(/^[ \t]+/, ""); print $1}')
-    [ -z "$ssid" ] && { echo "${RED}Invalid choice${RESET}"; return; }
+    [ -z "$ssid" ] && { printf "%s\n" "${RED}Invalid choice${RESET}"; return; }
 
     if nmcli connection show | grep -q "$ssid"; then
-        nmcli device wifi connect "$ssid" && echo "${GREEN}Connected!${RESET}" || echo "${RED}Connection failed${RESET}"
+        nmcli device wifi connect "$ssid" && printf "%s\n" "${GREEN}Connected!${RESET}" || printf "%s\n" "${RED}Connection failed${RESET}"
     else
         printf "Password: "
         stty -echo
         read -r password
         stty echo
         printf "\n"
-        nmcli device wifi connect "$ssid" password "$password" && echo "${GREEN}Connected!${RESET}" || echo "${RED}Failed${RESET}"
+        nmcli device wifi connect "$ssid" password "$password" && printf "%s\n" "${GREEN}Connected!${RESET}" || printf "%s\n" "${RED}Failed${RESET}"
     fi
 }
 
 # Disconnect Wi-Fi
 disconnect_wifi() {
     connected=$(nmcli -t -f active,ssid dev wifi | awk -F: '$1 == "yes" {print $2}')
-    [ -z "$connected" ] && { echo "${RED}Not connected${RESET}"; return; }
-    nmcli connection down "$connected" && echo "${GREEN}Disconnected: $connected${RESET}" || echo "${RED}Disconnect failed${RESET}"
+    [ -z "$connected" ] && { printf "%s\n" "${RED}Not connected${RESET}"; return; }
+    nmcli connection down "$connected" && printf "%s\n" "${GREEN}Disconnected: $connected${RESET}" || printf "%s\n" "${RED}Disconnect failed${RESET}"
 }
 
 # VPN management
 toggle_vpn() {
     if nmcli connection show --active | grep -qi "$VPN_CONNECTION"; then
-        run_privileged nmcli connection down "$VPN_CONNECTION" && echo "${GREEN}VPN disconnected${RESET}" || echo "${RED}VPN disconnect failed${RESET}"
+        run_privileged nmcli connection down "$VPN_CONNECTION" && printf "%s\n" "${GREEN}VPN disconnected${RESET}" || printf "%s\n" "${RED}VPN disconnect failed${RESET}"
     else
-        run_privileged nmcli connection up "$VPN_CONNECTION" && echo "${GREEN}VPN connected${RESET}" || echo "${RED}VPN connect failed${RESET}"
+        run_privileged nmcli connection up "$VPN_CONNECTION" && printf "%s\n" "${GREEN}VPN connected${RESET}" || printf "%s\n" "${RED}VPN connect failed${RESET}"
     fi
 }
 
@@ -101,13 +104,13 @@ toggle_vpn() {
 main_menu() {
     while true; do
         show_network_status
-        echo "\n${BLUE}${BOLD}--- Main Menu ---${RESET}"
-        echo "1) Connect to Wi-Fi"
-        echo "2) Disconnect Wi-Fi"
-        echo "3) Toggle VPN"
-        echo "4) Refresh"
-        echo "5) Exit"
-        printf "\n${BOLD}Choice (1-5): ${RESET}"
+        printf "\n%b%b%s%b\n" "${BLUE}" "${BOLD}" "--- Main Menu ---" "${RESET}"
+        printf "1) Connect to Wi-Fi\n"
+        printf "2) Disconnect Wi-Fi\n"
+        printf "3) Toggle VPN\n"
+        printf "4) Refresh\n"
+        printf "5) Exit\n"
+        printf "\n%bChoice (1-5): %b" "${BOLD}" "${RESET}"
         read -r choice
 
         case $choice in
@@ -116,14 +119,14 @@ main_menu() {
             3) toggle_vpn ;;
             4) continue ;;
             5) break ;;
-            *) echo "${RED}Invalid option${RESET}" ;;
+            *) printf "%s\n" "${RED}Invalid option${RESET}" ;;
         esac
         sleep 1
     done
 }
 
 # Initial checks
-command -v nmcli >/dev/null || { echo "${RED}NetworkManager required${RESET}" >&2; exit 1; }
+command -v nmcli >/dev/null || { printf "%s\n" "${RED}NetworkManager required${RESET}" >&2; exit 1; }
 
 main_menu
 cleanup
