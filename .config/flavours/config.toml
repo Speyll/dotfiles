@@ -57,6 +57,13 @@ rewrite = true
 light = false
 hook = "swaymsg reload"
 
+[[items]]
+file = "~/.config/hypr/colors.conf"
+template = "hyprland"
+subtemplate = "colors"
+rewrite = true
+hook = "hyprctl reload"
+
 [[item]]
 file = "~/.config/river/init"
 template = "river"
