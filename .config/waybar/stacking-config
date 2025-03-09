@@ -1,5 +1,5 @@
 {
-    "layer": "bottom",
+    "layer": "top",
     "position": "bottom",
     "height": 28,
     "spacing": 0,
@@ -72,7 +72,7 @@
     "wlr/taskbar": {
         "format": "{icon}",
         "icon-size": 20,
-        "icon-theme": "breeze",
+        "icon-theme": "breeze-dark",
         "tooltip": true,
         "tooltip-format": "{title}",
         "on-click": "minimize-raise",
@@ -106,8 +106,8 @@
     },
 
     "clock": {
-        "format": "{:%H:%M}",
-        "timezone": "Africa/Algiers",
+        "format": "{:L%H:%M}",
+        "timezone": "",
         "tooltip": true,
         "tooltip-format": "{:%a %d %b}",
     },
