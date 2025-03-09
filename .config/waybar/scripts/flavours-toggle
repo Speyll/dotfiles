@@ -14,12 +14,10 @@ last_theme=$(cat "$THEME_FILE")
 # Toggle between themes based on the last applied theme
 if [ "$last_theme" = "dark" ]; then
     flavours apply gruvbox-light-medium
-    #flavours apply catppuccin-light 
     gsettings set org.gnome.desktop.interface color-scheme prefer-light
     echo "light" > "$THEME_FILE"
 else
     flavours apply gruvbox-dark-medium
-    #flavours apply catppuccin-dark
     gsettings set org.gnome.desktop.interface color-scheme prefer-dark
     echo "dark" > "$THEME_FILE"
 fi

@@ -67,11 +67,13 @@ tooltip label {
 /* If workspaces is the leftmost module, omit left margin */
 .modules-left > widget:first-child > #workspaces {
     margin-left: 0;
+    padding-left: 0;
 }
 
 /* If workspaces is the rightmost module, omit right margin */
 .modules-right > widget:last-child > #workspaces {
     margin-right: 0;
+    padding-right: 0;
 }
 
 #workspaces, #tags {
@@ -90,7 +92,7 @@ tooltip label {
     background-color: @base01;
 }
 
-#workspaces button.focused, #tags button.focused {
+#workspaces button.focused, #tags button.focused, #workspaces button.active, #tags button.active {
     color: @base00;
     background-color: @base0C;
 }
@@ -105,7 +107,7 @@ tooltip label {
     color: @base07;
 }
 
-#window.empty {
+#window.empty, #window.solo {
     padding: 0;
     background-color: transparent;
 }

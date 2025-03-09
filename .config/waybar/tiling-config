@@ -1,5 +1,5 @@
  {
-    "layer": "top",
+    "layer": "bottom",
     "position": "bottom",
     "height": 28,
     "spacing": 0,
@@ -18,6 +18,7 @@
         "modules": [
             "custom/launcher",
             "group/sway",
+            "group/hyprland",
             "group/river",
         ],
     },
@@ -52,6 +53,7 @@
         "modules": [
             "custom/wlsunset",
             "sway/language",
+            "hyprland/language",
         ],
     },
 
@@ -87,10 +89,18 @@
         ],
     },
 
+    "group/hyprland": {
+        "orientation": "inherit",
+        "modules": [
+            "hyprland/workspaces",
+            "hyprland/window",
+        ],
+    },
+
     "wlr/taskbar": {
         "format": "{icon}",
         "icon-size": 20,
-        "icon-theme": "breeze-dark",
+        "icon-theme": "breeze",
         "tooltip": true,
         "tooltip-format": "{title}",
         "on-click": "minimize-raise",
@@ -164,7 +174,6 @@
         "tooltip-format-disconnected": "Disconnected",
         "on-click": "foot -e net-menu",
     },
-
 
     "bluetooth": {
         "format": "",
@@ -251,5 +260,34 @@
     "river/window": {
         "tooltip": false,
         "format": " {}",
+    },
+
+    "hyprland/workspaces": {
+        "disable-scroll": false,
+        "all-outputs": true,
+        "warp-on-scroll": false,
+        "format": "{name}",
+        "persistent-workspaces": {
+            "1": [], "2": [], "3": [], "4": [], "5": [],},
+    },
+
+    "hyprland/window": {
+        "format": "{title}",
+        "icon": true,
+        "icon-size": 14,
+        "max-length": 50,
+        "tooltip": false,
+        "rewrite": {
+            "Firefox Web Browser": "Firefox",
+            "mpv Media Player": "mpv",
+            "": "Desktop",
+        },
+    },
+
+    "hyprland/language": {
+        "format": "",
+        "on-click": "dash ~/.config/waybar/scripts/sway-keyboard-toggle.sh",
+        "tooltip": true,
+        "tooltip-format": "fr/us"
     },
 },
