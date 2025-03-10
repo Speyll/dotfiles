@@ -69,7 +69,7 @@ toggle_keyboard() {
     if pgrep -x "wvkbd-mobintl" > /dev/null; then
         pkill wvkbd-mobintl
     else
-        wvkbd-mobintl &
+        wvkbd-mobintl -H 50 -R 5 --bg "#282828" --fg "#ffffff" --fn "monospace 12" --alpha 200 &
     fi
 }
 

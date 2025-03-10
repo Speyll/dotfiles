@@ -154,6 +154,7 @@
         <keybind key="W-KP_3"><action name="SnapToRegion" region="bottom-right" /></keybind>
 
         <!-- Misc -->
+        <numlock>on</numlock>
         <keybind key="W-x"><action name="ToggleAlwaysOnTop" /></keybind>
         <keybind key="W-S-x"><action name="ToggleDecorations" /></keybind>
         <keybind key="W-C-Backspace"><action name="Exit" /></keybind>
@@ -245,13 +246,13 @@
 
     <touch deviceName="" mapToOutput="" />
 
-    <tablet mapToOutput="" rotate="0" mouseEmulation="no">
+    <tablet mapToOutput="" rotate="0" mouseEmulation="no" >
         <!-- Active area dimensions are in mm -->
         <area top="0.0" left="0.0" width="0.0" height="0.0" />
         <map button="Tip" to="Left" />
         <map button="Stylus" to="Right" />
         <map button="Stylus2" to="Middle" />
-        <map button="Pad" to="C-z" />
+        <map button="Pad1" to="C-z" />
         <map button="Pad2" to="C-S-z" />
     </tablet>
     <tabletTool motion="absolute" relativeMotionSensitivity="1.0" />
