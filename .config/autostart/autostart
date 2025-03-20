@@ -8,6 +8,8 @@ ENABLE_AUDIO=false # Options: true or false
 WALLPAPER_MODE="swaybg-random-online" # Options: "swaybg", "swaybg-random", "mpvpaper-local", "mpvpaper-online", "swaybg-random-online", "none"
 WAYBAR_STYLE="none" # Options: "stacking", "tiling", "none"
 THEME_MODE="fixed" # Options: "auto", "fixed", "none"
+FLAVOURS_THEME="gruvbox-dark-medium"
+CURSOR_THEME="Kaela-Kovalskia-v2" # Exemple: "Breeze_Snow"
 ENABLE_UPDATE_SCAN=true # Options: true or false
 
 # --- Environment Setup ---
@@ -93,7 +95,7 @@ case "$THEME_MODE" in
         fi
         ;;
     fixed)
-        flavours apply gruvbox-dark-medium >>"$LOGFILE" 2>&1 &
+        flavours apply $FLAVOURS_THEME >>"$LOGFILE" 2>&1 &
         ;;
     none) ;;
 esac
@@ -115,8 +117,8 @@ case "$WAYBAR_STYLE" in
 esac
 
 # --- Cursor Theme ---
-gsettings set org.gnome.desktop.interface cursor-theme Breeze_Snow >>"$LOGFILE" 2>&1 &
-seat seat0 xcursor_theme Breeze_Snow >>"$LOGFILE" 2>&1 &
+gsettings set org.gnome.desktop.interface cursor-theme $CURSOR_THEME >>"$LOGFILE" 2>&1 &
+seat seat0 xcursor_theme $CURSOR_THEME >>"$LOGFILE" 2>&1 &
 
 # --- Additional Services ---
 fnott >>"$LOGFILE" 2>&1 & # Notifications

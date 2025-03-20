@@ -41,7 +41,7 @@ export GTK_USE_PORTAL=1
 export MOZ_ENABLE_WAYLAND=1
 
 ## Cursor
-export XCURSOR_THEME=Breeze_Snow
+export XCURSOR_THEME=Kaela-Kovalskia-v2
 export XCURSOR_SIZE=24
 #export WLR_NO_HARDWARE_CURSORS=1
 
