@@ -1,7 +1,7 @@
 [Desktop Entry]
 Name=Web Browser
 Icon=internet-web-browser
-Exec=flatpak run io.gitlab.librewolf-community
+Exec=flatpak run io.gitlab.librewolf-community -new-tab %U
 Terminal=false
 Type=Application
 StartupWMClass=librewolf

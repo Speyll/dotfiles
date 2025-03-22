@@ -1,8 +1,12 @@
 [Added Associations]
-image/jpeg=qimgv.desktop;
-image/png=qimgv.desktop;
-image/webp=qimgv.desktop;
-image/gif=img.desktop;
+image/gif=video.desktop;
+application/zip=lxqt-archiver.desktop;
+application/x-zerosize=text.desktop;
+application/x-trash=text.desktop;
+inode/symlink=text.desktop;
+application/xml=nvim.desktop;
+application/x-executable=nvim.desktop;
+image/webp=video.desktop;
 
 [Default Applications]
 text/*=text.desktop;
@@ -20,4 +24,9 @@ application/pdf=pdf.desktop;
 application/rss+xml=rss.desktop;
 x-scheme-handler/lbry=lbry.desktop;
 inode/directory=file.desktop;
-
+application/xml=nvim.desktop;
+x-scheme-handler/http=browser.desktop
+x-scheme-handler/https=browser.desktop
+x-scheme-handler/about=browser.desktop;
+x-scheme-handler/unknown=browser.desktop;
+text/html=browser.desktop
