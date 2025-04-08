@@ -109,7 +109,7 @@ check_updates() {
 check_updates
 
 # Periodic checks
-while true; do
-    sleep "$CHECK_INTERVAL"
-    check_updates
-done
+#while true; do
+#    sleep "$CHECK_INTERVAL"
+#    check_updates
+#done
