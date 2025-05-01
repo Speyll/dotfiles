@@ -73,7 +73,6 @@ connect_wifi() {
         printf "%s\n" "${RED}No networks found.${RESET}"
         return
     fi
-    # Display networks with indices
     for i in "${!networks[@]}"; do
         IFS=: read -r ssid signal security <<< "${networks[$i]}"
         [ -z "$ssid" ] && ssid="<Hidden>"
@@ -92,16 +91,24 @@ connect_wifi() {
     IFS=: read -r ssid signal security <<< "${networks[$index]}"
     ssid=$(echo "$ssid" | xargs)
     [ -z "$ssid" ] && ssid="<Hidden>"
-    if [ "$security" = "--" ] || [ -z "$security" ]; then
-        nmcli device wifi connect "$ssid" && \
-          printf "%s\n" "${GREEN}Connected!${RESET}" || \
-          printf "%s\n" "${RED}Connection failed.${RESET}"
+
+    # Check for existing connection profile
+    if nmcli -t -f NAME connection show | grep -Fxq "$ssid"; then
+        nmcli connection up "$ssid" && \
+            printf "%s\n" "${GREEN}Connected to saved network: $ssid${RESET}" || \
+            printf "%s\n" "${RED}Failed to connect to $ssid.${RESET}"
     else
-        read -rsp "Password: " password
-        echo
-        nmcli device wifi connect "$ssid" password "$password" && \
-          printf "%s\n" "${GREEN}Connected!${RESET}" || \
-          printf "%s\n" "${RED}Connection failed.${RESET}"
+        if [ "$security" = "--" ] || [ -z "$security" ]; then
+            nmcli device wifi connect "$ssid" && \
+                printf "%s\n" "${GREEN}Connected to open network: $ssid${RESET}" || \
+                printf "%s\n" "${RED}Connection to $ssid failed.${RESET}"
+        else
+            read -rsp "Password: " password
+            echo
+            nmcli device wifi connect "$ssid" password "$password" && \
+                printf "%s\n" "${GREEN}Connected to $ssid${RESET}" || \
+                printf "%s\n" "${RED}Connection to $ssid failed.${RESET}"
+        fi
     fi
 }
 

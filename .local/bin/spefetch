@@ -18,10 +18,10 @@ white=$(printf '\033[37m')
 # Symbol configuration with automatic fallback
 if [ "$USE_NERD_FONTS" -eq 1 ]; then
     os_icon="󰍹" ker_icon="󰌢" up_icon="󰔟" pkg_icon="󰏖"
-    sh_icon="󰆍" de_icon="󰖲"
+    sh_icon="󰆍" de_icon="󰖲" inst_icon="󰄾"
 else
     os_icon="🏠" ker_icon="💫" up_icon="⏳" pkg_icon="📦"
-    sh_icon="🐚" de_icon="🎨"
+    sh_icon="🐚" de_icon="🎨" inst_icon="📅"
 fi
 
 # System info detection (with lowercase OS)
@@ -35,6 +35,15 @@ os=$( ( . /etc/os-release && echo "${PRETTY_NAME:-$NAME}" || uname -o || uname -
 kernel=$(uname -sr | tr '[:upper:]' '[:lower:]')
 uptime=$(uptime -p 2>/dev/null | sed 's/up //;s/ days\?/d/;s/ hours\?/h/;s/ minutes\?/m/' | tr -d ',')
 shell=$(basename "${SHELL:-unknown}" | tr '[:upper:]' '[:lower:]')
+
+# Estimate installation age using /lost+found directory
+install_days="unknown"
+if [ -d /lost+found ]; then
+    install_date=$(stat -c %W /lost+found 2>/dev/null)
+    if [ "$install_date" -gt 0 ] 2>/dev/null; then
+        install_days=$(( ( $(date +%s) - install_date ) / 86400 ))
+    fi
+fi
 
 # Enhanced package detection
 detect_pkgs() {
@@ -100,7 +109,7 @@ ${reset}
 ${cyan}     /\_/\     ${green}${user}${yellow}@${magenta}${host}
 ${cyan}    / ${white}o${blue} ${white}o${cyan} \    ${red}${os_icon}  ${white}${os}
 ${cyan}    \   ^ /    ${yellow}${ker_icon}  ${white}${kernel}
-${cyan}     './ \     ${green}${up_icon}  ${white}${uptime}
+${cyan}     './ \     ${green}${up_icon} ${white} ${uptime} ${magenta}${inst_icon} ${white}${install_days}d
 ${cyan}      |||      $(build_pkg_string)
 ${cyan}     /   \     ${blue}${sh_icon}  ${white}${shell}
 ${cyan}               ${yellow}${de_icon}  ${white}${ui:-unknown}
