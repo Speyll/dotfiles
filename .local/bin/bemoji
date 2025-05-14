@@ -66,7 +66,7 @@ prepare_db() {
 
 download_emoji() {
     curl -sSL "https://unicode.org/Public/emoji/latest/emoji-test.txt" |
-    sed -nE 's/^.*; fully-qualified.*# (.[^ ]*) .*$/\1 \2/p' > "$DB_DIR/emojis.txt"
+    sed -nE 's/^.*; fully-qualified.*# (.[^ ]*) E[0-9.]+ (.*)$/\1 \2/p' > "$DB_DIR/emojis.txt"
 }
 
 download_math() {
