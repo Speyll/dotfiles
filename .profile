@@ -29,30 +29,10 @@ export XDG_DATA_HOME="$HOME/.local/share"
 export XDG_CACHE_HOME="$HOME/.cache"
 export XDG_RUNTIME_DIR="/run/user/$(id -u)"
 
-# Application cleanup and special settings
-export LESSHISTFILE="-"
-export GTK_OVERLAY_SCROLLING=0             # Disable smooth scrolling
-export _JAVA_AWT_WM_NONREPARENTING=1       # Fix Java GUI apps
-export TMUX_TMPDIR="$XDG_RUNTIME_DIR"
-
-# Development tool paths
-export CARGO_HOME="$XDG_DATA_HOME/cargo"
-export GOPATH="$XDG_DATA_HOME/go"
-export NPM_CONFIG_USERCONFIG="$XDG_CONFIG_HOME/npm/npmrc"
-
-# Security and privacy
-export PASSWORD_STORE_DIR="$XDG_DATA_HOME/password-store"
-
-# Nix environment configuration
-export NIX_PATH="nixpkgs=$HOME/.nix-defexpr/channels/nixpkgs"
-export NIX_SSL_CERT_FILE="/etc/ssl/certs/ca-certificates.crt"
-
-# Application cleanup via XDG Base Directory Specification
+# XDG-compliant application settings
 export NOTMUCH_CONFIG="$XDG_CONFIG_HOME/notmuch-config"
 export GTK2_RC_FILES="$XDG_CONFIG_HOME/gtk-2.0/gtkrc-2.0"
-export LESSHISTFILE="-"
 export WGETRC="$XDG_CONFIG_HOME/wget/wgetrc"
-export TMUX_TMPDIR="$XDG_RUNTIME_DIR"
 export WINEPREFIX="$XDG_DATA_HOME/wineprefixes/default"
 export KODI_DATA="$XDG_DATA_HOME/kodi"
 export PASSWORD_STORE_DIR="$XDG_DATA_HOME/password-store"
@@ -63,13 +43,20 @@ export ANSIBLE_CONFIG="$XDG_CONFIG_HOME/ansible/ansible.cfg"
 export WEECHAT_HOME="$XDG_CONFIG_HOME/weechat"
 export MBSYNCRC="$XDG_CONFIG_HOME/mbsync/config"
 export ELECTRUMDIR="$XDG_DATA_HOME/electrum"
+export NPM_CONFIG_USERCONFIG="$XDG_CONFIG_HOME/npm/npmrc"
 
-# Optional FZF theming (if installed)
-[ -f "$HOME/.fzf.bash" ] && source "$HOME/.fzf.bash"
+# Application-specific settings
+export LESSHISTFILE="-"                     # Disable Less history
+export GTK_OVERLAY_SCROLLING=0             # Disable smooth scrolling
+export _JAVA_AWT_WM_NONREPARENTING=1       # Fix Java GUI apps
+export TMUX_TMPDIR="$XDG_RUNTIME_DIR"
+
+# Nix environment configuration
+export NIX_PATH="nixpkgs=$HOME/.nix-defexpr/channels/nixpkgs"
+export NIX_SSL_CERT_FILE="/etc/ssl/certs/ca-certificates.crt"
+
+# FZF theming (handled in .bashrc for key bindings)
 export FZF_DEFAULT_OPTS="--color=fg:7,bg:-1,hl:1 --color=fg+:15,bg+:8,hl+:9 --color=info:14,prompt:13,pointer:12,marker:10,spinner:11"
 
 # NNN configuration (if installed)
 command -v nnn >/dev/null && export NNN_OPTS="dH"
-
-# Uncomment for tty1 autologin
-# [ -z "$DISPLAY" ] && [ "$(fgconsole)" -eq 1 ] && start-comp labwc

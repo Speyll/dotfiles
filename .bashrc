@@ -6,24 +6,14 @@ case $- in
       *) return;;
 esac
 
-# Improved history settings
-export HISTCONTROL=ignorespace:ignoredups:erasedups
+# History settings
+export HISTCONTROL=ignoredups:erasedups
 export HISTSIZE=1000
 export HISTFILESIZE=2000
 shopt -s histappend
 
-# Enhanced history cleanup function
-cleanup-history() {
-    local histfile="$HOME/.bash_history"
-    [[ -r "$histfile" ]] || return
-    tac "$histfile" | awk '!seen[$0]++' | tac | \
-        sed -e 's/[[:space:]]*$//' -e '/^$/d' > "${histfile}.tmp"
-    [[ -s "${histfile}.tmp" ]] && mv -f "${histfile}.tmp" "$histfile"
-    history -c
-    history -r
-}
-
-export PROMPT_COMMAND='history -a; cleanup-history; history -n'
+# Write and reload history after each command to ensure deduplication
+export PROMPT_COMMAND='history -a; history -n'
 
 # Enable programmable completion
 if ! shopt -oq posix; then
@@ -34,6 +24,7 @@ if ! shopt -oq posix; then
   fi
 fi
 
+# Check window size after each command
 shopt -s checkwinsize
 
 # Color prompt setup
@@ -43,6 +34,7 @@ else
     PS1='[\A][\h][\w]\$ '
 fi
 
+# Set terminal title for supported terminals
 case "$TERM" in
     xterm*|rxvt*|foot*|alacritty*)
         PS1="\[\e]0;\u@\h: \w\a\]$PS1"
@@ -63,30 +55,30 @@ fi
 
 # Enhanced history search (CTRL-R)
 __fzf_history__() {
-    local output
-    output=$(
-        HISTTIMEFORMAT= history |
-        fzf --height 100% --tac --tiebreak=index --no-sort --exact \
-            --bind 'ctrl-d:page-down,ctrl-u:page-up'
-    )
-    [[ -n "$output" ]] && printf "%s" "$output" | sed 's/^ *[0-9]* *//'
+    history -a  # Append current session history to the history file
+    history -r  # Reload the history from the file to ensure it’s up-to-date
+    local line
+    line=$(history | fzf --height 100% --tac --tiebreak=index --no-sort --exact \
+            --bind 'ctrl-d:page-down,ctrl-u:page-up' | sed 's/^ *[0-9]* *//')
+    if [[ -n "$line" ]]; then
+        READLINE_LINE=$line
+        READLINE_POINT=${#line}
+    fi
 }
 
-# Improved key binding for history search
+# Bind CTRL-R to the history search function in interactive shells
 if [[ $- == *i* ]]; then
-    bind '"\C-r": " \C-e\C-u\C-y\ey\C-u$(__fzf_history__)\e\C-e\er\e^"'
+    bind -x '"\C-r": __fzf_history__'
 fi
 
-# Ensure CTRL-T works with proper preview
-if command -v bat &>/dev/null; then
+# FZF preview with bat if available, otherwise cat
+if command -v bat >/dev/null 2>&1; then
     export FZF_CTRL_T_OPTS="--preview 'bat --color=always --line-range :500 {}'"
-elif command -v highlight &>/dev/null; then
-    export FZF_CTRL_T_OPTS="--preview 'highlight -O ansi --line-numbers {}'"
 else
     export FZF_CTRL_T_OPTS="--preview 'cat {}'"
 fi
 
-# Don't log a command in history
+# Run command without logging to history
 nhist() {
     HISTFILE=/dev/null
     bash -ic "$*"
