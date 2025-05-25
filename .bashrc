@@ -53,10 +53,37 @@ elif [[ -f /usr/share/fzf/key-bindings.bash ]]; then
     source /usr/share/fzf/key-bindings.bash
 fi
 
+# Keep bash history clean
+cleanup-history() {
+    local histfile="$HOME/.bash_history"
+    [[ -r "$histfile" ]] || return
+    awk '
+    {
+        cleaned = $0
+        gsub(/[[:space:]]*$/, "", cleaned)
+        if (cleaned != "") {
+            last[cleaned] = NR
+            line[NR] = cleaned
+        }
+    }
+    END {
+        for (i = 1; i <= NR; i++) {
+            if (i in line && last[line[i]] == i) {
+                print line[i]
+            }
+        }
+    }
+    ' "$histfile" > "${histfile}.tmp"
+    [[ -s "${histfile}.tmp" ]] && mv -f "${histfile}.tmp" "$histfile"
+    history -c
+    history -r
+}
+
 # Enhanced history search (CTRL-R)
 __fzf_history__() {
-    history -a  # Append current session history to the history file
-    history -r  # Reload the history from the file to ensure it’s up-to-date
+    history -a
+    history -c
+    history -r
     local line
     line=$(history | fzf --height 100% --tac --tiebreak=index --no-sort --exact \
             --bind 'ctrl-d:page-down,ctrl-u:page-up' | sed 's/^ *[0-9]* *//')
