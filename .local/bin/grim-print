@@ -12,18 +12,51 @@ fi
 
 # Function to capture the whole screen, show it with swayimg, then select a region to copy
 capture_region() {
-    temp_screenshot=$(mktemp --suffix=.png)
-    grim "${temp_screenshot}"
-    swayimg -f "${temp_screenshot}" &
-    swayimg_pid=$!
-    sleep 0.1
+  # Create temporary files
+  local tmp_dp2 tmp_hdmi tmp_all
+  tmp_dp2=$(mktemp --suffix=.png)
+  tmp_hdmi=$(mktemp --suffix=.png)
+  tmp_all=$(mktemp --suffix=.png)
 
-    # Select a region with slurp, then copy the selected region to the clipboard
-    grim -g "$(slurp)" - | wl-copy -t image/png
+  # Capture all monitors immediately (parallel execution)
+  grim -o DP-2 "$tmp_dp2" &
+  grim -o HDMI-A-1 "$tmp_hdmi" &
+  grim "$tmp_all" &
+  wait  # Wait for all captures to complete
 
-    # Clean up
-    kill "$swayimg_pid" 2>/dev/null
-    rm -f "${temp_screenshot}"
+  # Let user choose which overlay to work on
+  local choice selected
+  choice=$(printf "Main\nSecondary\nCombined" \
+           | fuzzel -d -f "monospace:size=14" -a "center" -w 11 -l 3 --prompt="")
+
+  case "$choice" in
+    Main)      selected="$tmp_dp2" ;;
+    Secondary) selected="$tmp_hdmi" ;;
+    Combined)  selected="$tmp_all" ;;
+    *)         # Cleanup and exit if cancelled
+      rm -f "$tmp_dp2" "$tmp_hdmi" "$tmp_all"
+      return 1
+      ;;
+  esac
+
+  # Show overlay fullscreen
+  swayimg -f "$selected" &
+  local swayimg_pid=$!
+  sleep 0.1
+
+  # Region selection and copy to clipboard
+  local region
+  if region=$(slurp); then
+    grim -g "$region" - | wl-copy -t image/png
+  fi
+
+  # Cleanup
+  kill "$swayimg_pid" 2>/dev/null
+  wait "$swayimg_pid" 2>/dev/null
+  rm -f "$tmp_dp2" "$tmp_hdmi" "$tmp_all"
+
+  # Return success only if region was selected
+  [[ -n "$region" ]]
 }
 
 # Function to capture the full screen and copy directly to the clipboard
