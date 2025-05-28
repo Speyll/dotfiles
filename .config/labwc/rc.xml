@@ -65,8 +65,15 @@
 
     <!-- Set range to 0 to disable window snapping completely -->
     <snapping>
-        <range>1</range>
+        <range>5</range>
         <topMaximize>yes</topMaximize>
+        <overlay>
+            <enabled>yes</enabled>
+            <delay>
+                <inner>200</inner>
+                <outer>200</outer>
+                </delay>
+        </overlay>
     </snapping>
 
     <desktops>
@@ -117,13 +124,14 @@
         <keybind key="A-Right"><action name="MoveToEdge" direction="right" /></keybind>
         <keybind key="A-Down"><action name="MoveToEdge" direction="down" /></keybind>
         <keybind key="W-Up"><action name="ToggleMaximize" /></keybind>
+        <keybind key="W-Up"><action name="ToggleMaximize" /></keybind>
         <keybind key="W-Left"><action name="ToggleSnapToEdge" direction="left" /></keybind>
         <keybind key="W-Right"><action name="ToggleSnapToEdge" direction="right" /></keybind>
         <keybind key="W-Down"><action name="ToggleSnapToEdge" direction="down" /></keybind>
 
         <!-- Execute commands -->
-        <keybind key="W-Return"><action name="Execute" command="foot" /></keybind>
-        <keybind key="W-S-n"><action name="Execute" command="foot -T lf lf" /></keybind>
+        <keybind key="W-Return"><action name="Execute" command="sh -c '$TERMINAL'" /></keybind>
+        <keybind key="W-S-n"><action name="Execute" command="sh -c '$TERMINAL -T nnn -e nnn'" /></keybind>
         <keybind key="W-period"><action name="Execute" command="bemoji" /></keybind>
         <keybind key="W-comma"><action name="Execute" command="clip-manager" /></keybind>
         <keybind key="W-d"><action name="Execute" command="fuzzel" /></keybind>

@@ -17,7 +17,7 @@ path_prepend "$HOME/.local/bin"            # Local user binaries
 export PATH
 
 # Core terminal environment
-export TERM="xterm-256color"
+export TERMINAL="alacritty"
 export CLICOLOR=1
 export EDITOR="nvim"
 export PAGER="less"
