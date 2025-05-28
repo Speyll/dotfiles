@@ -16,8 +16,8 @@ If you are here for my old bspwm, wayfire, sway or river setups you can find it 
 
 ## Software Used
 
-  - mainly `labwc` & `wayfire` and somtimes `sway` as window managers (compositors).
-  - `foot` Terminal emulator.
+  - mainly `labwc` and somtimes `sway` as window managers (compositors).
+  - `foot` & `alacritty` Terminal emulator.
   - ~~`yambar`~~ `waybar` Status bar.
   - `fuzzel` The application launcher menu.
   - `pipewire` Audio server.
