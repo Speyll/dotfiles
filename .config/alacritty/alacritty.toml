@@ -1,0 +1,14 @@
+[general]
+import = [ "~/.config/alacritty/colors.toml" ]
+
+[window]
+opacity = 0.96
+padding.x = 24
+padding.y = 24
+
+[font]
+normal = { family = "monospace", style = "Regular" }
+size = 12.0
+
+[cursor]
+style = { shape = "Block", blinking = "On" }

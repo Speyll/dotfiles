@@ -12,6 +12,11 @@ template = "foot"
 hook = "footclient -e 'source ~/.config/foot/colors.ini'"
 rewrite = true
 
+[[item]]
+file = "~/.config/alacritty/colors.toml"
+template = "alacritty"
+rewrite = true
+
 [[items]]
 file = "~/.config/fuzzel/colors.ini"
 template = "fuzzel"
