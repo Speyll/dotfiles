@@ -13,7 +13,7 @@ export HISTFILESIZE=2000
 shopt -s histappend
 
 # Write and reload history after each command to ensure deduplication
-export PROMPT_COMMAND='history -a; history -n'
+export PROMPT_COMMAND='history -a; history -n cleanup-history'
 
 # Enable programmable completion
 if ! shopt -oq posix; then
@@ -29,7 +29,7 @@ shopt -s checkwinsize
 
 # Color prompt setup
 if [ -x /usr/bin/tput ] && tput setaf 1 >&/dev/null; then
-    PS1='[\[\e[32m\]\A\[\e[0m\]][\[\e[34m\]\h\[\e[0m\]][\[\e[33m\]\w\[\e[0m\]]\$ '
+    PROMPT_COMMAND='PS1="\[\e]0;\u@\h: \w\a\][\[\e[32m\]\A\[\e[0m\]][\[\e[34m\]\h\[\e[0m\]][\$(branch=\$(git branch --show-current 2>/dev/null); if [ -n \"\$branch\" ]; then echo -e \"\[\e[35m\]\$branch\[\e[0m\] \"; fi)\]\[\e[33m\]\w\[\e[0m\]]\$ "'
 else
     PS1='[\A][\h][\w]\$ '
 fi
@@ -74,7 +74,11 @@ cleanup-history() {
         }
     }
     ' "$histfile" > "${histfile}.tmp"
-    [[ -s "${histfile}.tmp" ]] && mv -f "${histfile}.tmp" "$histfile"
+    if [[ -s "${histfile}.tmp" ]]; then
+        command mv -f "${histfile}.tmp" "$histfile" >/dev/null 2>&1
+    else
+        rm -f "${histfile}.tmp" >/dev/null 2>&1
+    fi
     history -c
     history -r
 }
