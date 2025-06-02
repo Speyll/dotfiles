@@ -12,8 +12,36 @@ export HISTSIZE=1000
 export HISTFILESIZE=2000
 shopt -s histappend
 
-# Write and reload history after each command to ensure deduplication
-export PROMPT_COMMAND='history -a; history -n cleanup-history'
+# Check window size after each command
+shopt -s checkwinsize
+
+# Git branch function
+git_branch() {
+    local branch
+    branch=$(git branch --show-current 2>/dev/null)
+    if [[ -n "$branch" ]]; then
+        # Purple color for git branch
+        echo -e "\[\e[35m\]$branch\[\e[0m\] "
+    fi
+}
+
+# Color prompt setup
+if [ -x /usr/bin/tput ] && tput setaf 1 >&/dev/null; then
+    set_prompt() {
+        local branch=$(git_branch)
+        local title="\[\e]0;\u@\h: \w\a\]"
+        PS1="${title}[\[\e[32m\]\A\[\e[0m\]][\[\e[34m\]\h\[\e[0m\]][${branch}\[\e[33m\]\w\[\e[0m\]]\$ "
+    }
+    prompt_command() {
+        history -a          # Append current session history to file
+        history -n          # Read new history entries from file
+        cleanup-history     # Clean up the history file
+        set_prompt          # Set the prompt dynamically
+    }
+    PROMPT_COMMAND=prompt_command
+else
+    PS1='[\A][\h][\w]\$ '
+fi
 
 # Enable programmable completion
 if ! shopt -oq posix; then
@@ -23,23 +51,6 @@ if ! shopt -oq posix; then
     . /etc/bash_completion
   fi
 fi
-
-# Check window size after each command
-shopt -s checkwinsize
-
-# Color prompt setup
-if [ -x /usr/bin/tput ] && tput setaf 1 >&/dev/null; then
-    PROMPT_COMMAND='PS1="\[\e]0;\u@\h: \w\a\][\[\e[32m\]\A\[\e[0m\]][\[\e[34m\]\h\[\e[0m\]][\$(branch=\$(git branch --show-current 2>/dev/null); if [ -n \"\$branch\" ]; then echo -e \"\[\e[35m\]\$branch\[\e[0m\] \"; fi)\]\[\e[33m\]\w\[\e[0m\]]\$ "'
-else
-    PS1='[\A][\h][\w]\$ '
-fi
-
-# Set terminal title for supported terminals
-case "$TERM" in
-    xterm*|rxvt*|foot*|alacritty*)
-        PS1="\[\e]0;\u@\h: \w\a\]$PS1"
-        ;;
-esac
 
 # Load aliases
 [[ -f ~/.config/aliasrc ]] && . ~/.config/aliasrc
