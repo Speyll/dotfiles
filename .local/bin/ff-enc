@@ -1,280 +1,232 @@
 #!/bin/sh
-# Safer execution (POSIX-compatible)
 set -e
 set -u
-#set -x  # Uncomment for verbose debugging output
 
-# Configuration
+### CONFIGURATION ###
 video_output_dir="encVids"
 audio_output_dir="extAudios"
 optimized_audio_dir="optAudios"
-temp_work_dir=$(mktemp -d -t ffmpeg-process-XXXXXX)
-trap 'rm -rf "$temp_work_dir"' EXIT
+max_jobs=6  # Adjust to your CPU core count for best results
 
-# File extensions (space-separated list)
+target_height=900
+target_fps=30
+crf=26
+preset="medium"
+audio_bitrate="128k"
+cover_timestamp="00:10:00"
+
 video_extensions="mp4 mkv ts mov avi webm gif"
 audio_extensions="mp4 mkv avi mov webm flv wmv mpg mpeg"
 audio_file_extensions="mp3 wav flac aac m4a opus"
 
-# Processing parameters
-target_fps=30
-shutdown=false
-cover_timestamp="00:10:00"
-
-# Utility Functions
-die() {
-    echo >&2 "Error: $1"
-    exit 1
-}
-
-validate_timestamp() {
-    case "$1" in
-        [0-9][0-9]:[0-9][0-9]:[0-9][0-9]) return 0 ;;
-        *) die "Invalid timestamp format: $1" ;;
-    esac
-}
+### UTILITY FUNCTIONS ###
+die() { echo >&2 "Error: $1"; exit 1; }
 
 find_media_files() {
-    type=$1
-    exts=""
-
-    case $type in
+    case "$1" in
         video) exts="$video_extensions" ;;
         audio) exts="$audio_extensions" ;;
         audio_files) exts="$audio_file_extensions" ;;
-        *) die "Invalid media type: $type" ;;
+        *) die "Invalid media type: $1" ;;
     esac
-
-    # Build POSIX-compliant find command
-    find_cmd="find . -maxdepth 1 -type f "
-    first=true
-    for ext in $exts; do
-        if [ "$first" = true ]; then
-            find_cmd="$find_cmd \( -iname '*.$ext'"
-            first=false
-        else
-            find_cmd="$find_cmd -o -iname '*.$ext'"
+    set -- $exts
+    find_expr=""
+    for ext; do
+        if [ -n "$find_expr" ]; then
+            find_expr="$find_expr -o "
         fi
+        find_expr="$find_expr -iname '*.$ext'"
     done
-    [ "$first" = false ] && find_cmd="$find_cmd \)"
+    eval "find . -maxdepth 1 -type f \( $find_expr \)"
+}
 
-    # Execute with proper filename handling
-    eval "$find_cmd" | while IFS= read -r file; do
-        printf "%s\n" "$file"
-    done
+progress_bar() {
+    # Show elapsed time as a progress bar
+    awk '
+        /out_time_ms/ {
+            gsub("out_time_ms=", "", $0)
+            ms=$0
+            sec=int(ms/1000000)
+            min=int(sec/60)
+            sec=sec%60
+            printf "\r    Progress: %02d:%02d elapsed", min, sec
+            fflush()
+        }
+        END { print "" }
+    '
+}
+
+### PARALLEL PROCESSING ###
+run_parallel() {
+    max_jobs="$1"
+    shift
+    cmd="$1"
+    shift
+    filelist="$1"
+    shift
+
+    total_files=$(wc -l < "$filelist")
+    processed_files=0
+
+    while IFS= read -r file || [ -n "$file" ]; do
+        (
+            "$cmd" "$file"
+        ) &
+        processed_files=$((processed_files + 1))
+        echo "Overall progress: $processed_files / $total_files"
+        while [ "$(jobs | wc -l)" -ge "$max_jobs" ]; do
+            sleep 1
+        done
+    done < "$filelist"
+    wait
+}
+
+### VIDEO ENCODING ###
+encode_video_file() {
+    file="$1"
+    base_name=$(basename -- "$file")
+    clean_name=$(echo "${base_name%.*}" | tr -cd '[:alnum:]._-')
+    output_file="$video_output_dir/${clean_name}.mp4"
+
+    if [ -f "$output_file" ]; then
+        echo "[$(date '+%H:%M:%S')] Skipping: $base_name (already exists)"
+        return
+    fi
+
+    # Get video height and framerate
+    height=$(ffprobe -v error -select_streams v:0 -show_entries stream=height -of csv=p=0 "$file")
+    fps=$(ffprobe -v error -select_streams v:0 -show_entries stream=r_frame_rate -of csv=p=0 "$file" | awk -F/ '{if ($2==""||$2==0) print $1; else printf "%.3f", $1/$2;}')
+
+    # Decide scaling
+    if [ "$height" -gt "$target_height" ]; then
+        scale_filter="scale=-2:$target_height"
+    else
+        scale_filter="scale=iw:ih"
+    fi
+
+    # Decide framerate
+    # Only set fps filter if original is above 30
+    fps_int=$(printf "%.0f" "$fps")
+    if [ "$fps_int" -gt 30 ]; then
+        vf_arg="-vf \"$scale_filter,fps=$target_fps\""
+    else
+        vf_arg="-vf \"$scale_filter\""
+    fi
+
+    # Compose the actual ffmpeg command
+    # (We use 'eval' to expand the vf_arg variable properly)
+    echo "[$(date '+%H:%M:%S')] Processing: $base_name"
+    eval ffmpeg -nostdin -y -hide_banner \
+        -i "\"$file\"" \
+        -c:v libx265 -preset "$preset" -crf "$crf" -x265-params no-sao=1:bframes=8 \
+        $vf_arg \
+        -c:a libopus -b:a "$audio_bitrate" -vbr on \
+        -movflags +faststart -tag:v hvc1 \
+        -map_metadata 0 -map_chapters 0 \
+        "\"$output_file\"" >/dev/null 2>&1
+    echo "[$(date '+%H:%M:%S')] Done: $base_name"
 }
 
 encode_videos() {
-    mkdir -p "$video_output_dir" || die "Cannot create $video_output_dir"
-
-    find_media_files video | while IFS= read -r file; do
-        [ -z "$file" ] && continue
-
-        base_name=$(basename -- "$file")
-        clean_name=$(echo "${base_name%.*}" | tr -cd '[:alnum:]._-')
-        output_file="$video_output_dir/${clean_name}.mp4"
-
-        if [ -f "$output_file" ]; then
-            echo "Skipping: $base_name (exists)"
-            continue
-        fi
-
-        echo "Analyzing: $base_name"
-
-        # Get video properties
-        video_codec=$(ffprobe -v error -select_streams v:0 \
-                -show_entries stream=codec_name -of csv=p=0 "$file")
-        height=$(ffprobe -v error -select_streams v:0 \
-                 -show_entries stream=height -of csv=p=0 "$file")
-        fps_input=$(ffprobe -v error -select_streams v:0 \
-                   -show_entries stream=r_frame_rate -of csv=p=0 "$file")
-        fps_original=$(echo "scale=2; $fps_input" | bc -l)
-
-        # Get audio properties
-        audio_codec=$(ffprobe -v error -select_streams a:0 \
-                -show_entries stream=codec_name -of csv=p=0 "$file" 2>/dev/null || echo "none")
-
-        # Compliance check matrix
-        video_compliant=false
-        audio_compliant=false
-
-        [ "$video_codec" = "hevc" ] && [ "$height" -le 720 ] && \
-        [ "$(echo "$fps_original <= 30" | bc)" -eq 1 ] && video_compliant=true
-
-        [ "$audio_codec" = "opus" ] && audio_compliant=true
-
-        # Decision logic
-        if $video_compliant && $audio_compliant; then
-            echo "Skipping: $base_name (fully compliant)"
-            continue
-        elif $video_compliant; then
-            echo "Processing audio only: $base_name"
-            ffmpeg -nostdin -y -i "$file" \
-                -c:v copy \
-                -c:a libopus -b:a 128k -vbr on \
-                -movflags +faststart -tag:v hvc1 \
-                -f mp4 \
-                "$output_file" || echo "Failed to process $base_name"
-            continue
-        fi
-
-        echo "Processing full conversion: $base_name"
-        ffmpeg -nostdin -y -i "$file" \
-            -c:v libx265 -preset fast -x265-params no-sao=1:bframes=8 \
-            -vf "scale=-2:720,fps=$target_fps" \
-            -c:a libopus -b:a 128k -vbr on \
-            -movflags +faststart -tag:v hvc1 \
-            -f mp4 \
-            "$output_file" || echo "Failed to process $base_name"
-    done
+    mkdir -p "$video_output_dir"
+    tmpfile=$(mktemp)
+    find_media_files video | sort > "$tmpfile"
+    run_parallel "$max_jobs" encode_video_file "$tmpfile"
+    rm -f "$tmpfile"
 }
 
-extract_audio_from_video() {
-    mkdir -p "$audio_output_dir" || die "Cannot create $audio_output_dir"
-    timestamp=${1:-$cover_timestamp}
-    validate_timestamp "$timestamp"
+### AUDIO EXTRACTION ###
+extract_audio_file() {
+    file="$1"
+    base_name=$(basename -- "$file")
+    clean_name=$(echo "${base_name%.*}" | tr -cd '[:alnum:]._-')
+    output_file="$audio_output_dir/${clean_name}.m4a"
+    cover_art="/tmp/${clean_name}_cover.jpg"
 
-    find_media_files audio | while IFS= read -r video; do
-        [ -z "$video" ] && continue
+    if [ -f "$output_file" ]; then
+        echo "[$(date '+%H:%M:%S')] Skipping audio: $base_name (already exists)"
+        return
+    fi
 
-        base_name=$(basename "$video")
-        temp_audio="$temp_work_dir/${base_name%.*}.m4a"
-        output_file="$audio_output_dir/${base_name%.*}.m4a"
-        cover_art="$temp_work_dir/${base_name%.*}_cover.jpg"
+    echo "[$(date '+%H:%M:%S')] Extracting audio: $base_name"
+    ffmpeg -nostdin -y -ss "$cover_timestamp" -i "$file" -vframes 1 "$cover_art" 2>/dev/null || true
 
-        echo "Processing audio for: $base_name"
+    if ! ffmpeg -nostdin -y -i "$file" -vn -c:a copy -strict -2 "$output_file" 2>/dev/null; then
+        ffmpeg -nostdin -y -i "$file" -vn -c:a aac -b:a 192k "$output_file"
+    fi
 
-        # Extract cover art at the given timestamp (suppressing errors)
-        ffmpeg -nostdin -y -ss "$timestamp" -i "$video" -vframes 1 "$cover_art" 2>/dev/null || continue
-
-        # Extract and process audio; try copy first, then re-encode if necessary
-        if ! ffmpeg -nostdin -y -i "$video" -vn -c:a copy -strict -2 "$temp_audio" 2>/dev/null; then
-            ffmpeg -nostdin -y -i "$video" -vn -c:a aac -b:a 192k "$temp_audio" || continue
-        fi
-
-        # Embed metadata (cover art) into the final audio file
-        ffmpeg -nostdin -y -i "$temp_audio" -i "$cover_art" \
+    if [ -f "$cover_art" ]; then
+        ffmpeg -nostdin -y -i "$output_file" -i "$cover_art" \
             -map 0:a -map 1 -c copy -disposition:v:0 attached_pic \
             -metadata:s:v title="Album cover" \
             -metadata:s:v comment="Cover (front)" \
-            "$output_file" || echo "Failed to embed metadata for $base_name"
-    done
+            "${output_file%.m4a}_cover.m4a"
+        mv "${output_file%.m4a}_cover.m4a" "$output_file"
+        rm -f "$cover_art"
+    fi
+
+    echo "[$(date '+%H:%M:%S')] Done audio: $base_name"
 }
 
-optimize_audio() {
-    mkdir -p "$optimized_audio_dir" || die "Cannot create $optimized_audio_dir"
-
-    find_media_files audio_files | while IFS= read -r file; do
-        [ -z "$file" ] && continue
-
-        base_name=$(basename -- "$file")
-        clean_name=$(echo "${base_name%.*}" | tr -cd '[:alnum:]._-')
-        output_file="$optimized_audio_dir/${clean_name}.opus"
-
-        if [ -f "$output_file" ]; then
-            echo "Skipping: $base_name (exists)"
-            continue
-        fi
-
-        echo "Optimizing audio: $base_name"
-        ffmpeg -nostdin -y -i "$file" \
-            -c:a libopus -b:a 128k -vbr on \
-            "$output_file" || echo "Failed to optimize $base_name"
-    done
+extract_audios() {
+    mkdir -p "$audio_output_dir"
+    tmpfile=$(mktemp)
+    find_media_files audio | sort > "$tmpfile"
+    run_parallel "$max_jobs" extract_audio_file "$tmpfile"
+    rm -f "$tmpfile"
 }
 
-crop_video() {
-    printf "Enter aspect ratio (e.g., 0.56 for 9:16 vertical): "
-    read -r aspect_ratio
+### AUDIO OPTIMIZATION ###
+optimize_audio_file() {
+    file="$1"
+    base_name=$(basename -- "$file")
+    clean_name=$(echo "${base_name%.*}" | tr -cd '[:alnum:]._-')
+    output_file="$optimized_audio_dir/${clean_name}.opus"
 
-    case $aspect_ratio in
-        *[!0-9.]*) die "Invalid aspect ratio" ;;
-    esac
+    if [ -f "$output_file" ]; then
+        echo "[$(date '+%H:%M:%S')] Skipping audio: $base_name (already exists)"
+        return
+    fi
 
-    printf "Enter input filename: "
-    read -r input_file
-    [ -f "$input_file" ] || die "File not found: $input_file"
-
-    output_file="${input_file%.*}_cropped.mp4"
-    echo "Cropping $input_file to output: $output_file"
-
-    ffmpeg -i "$input_file" -vf "crop=iw:iw/$aspect_ratio" \
-        -c:a copy -c:v libx265 -preset fast \
-        "$output_file" || die "Failed to crop $input_file"
+    echo "[$(date '+%H:%M:%S')] Optimizing audio: $base_name"
+    ffmpeg -nostdin -y -hide_banner -progress pipe:1 \
+        -i "$file" \
+        -c:a libopus -b:a "$audio_bitrate" -vbr on \
+        "$output_file" 2>&1 | progress_bar
+    echo "[$(date '+%H:%M:%S')] Done audio: $base_name"
 }
 
-# Main Execution: dependency checks
-for cmd in ffprobe ffmpeg; do
-    command -v "$cmd" >/dev/null 2>&1 || die "Missing dependency: $cmd"
-done
+optimize_audios() {
+    mkdir -p "$optimized_audio_dir"
+    tmpfile=$(mktemp)
+    find_media_files audio_files | sort > "$tmpfile"
+    run_parallel "$max_jobs" optimize_audio_file "$tmpfile"
+    rm -f "$tmpfile"
+}
 
-# Argument parsing
-action=""
-while [ $# -gt 0 ]; do
-    case "$1" in
-        -h|--help)
-            cat << EOF
-Optimized Media Processing Tool
+### MAIN MENU ###
+show_help() {
+cat <<EOF
+Batch Media Processor with Parallel Encoding and Progress Bars
 
-Usage: $0 [options]
-
+Usage: $0 [option]
 Options:
-  -v, --video        Encode videos to HEVC/H.265
-  -x, --extract [TIME] Extract audio from video with cover art (default: 00:10:00)
-  -a, --audio        Optimize audio files to Opus format
-  -c, --crop         Crop video to custom aspect ratio
-  --fps RATE         Target framerate (number or 'copy')
-  --shutdown         Power off after completion
-  -h, --help         Show this help
+  -v, --video       Batch encode videos to 900p H.265/Opus
+  -x, --extract     Batch extract audio from videos (with cover art)
+  -a, --audio       Batch optimize audio files to Opus
+  -h, --help        Show this help
 
-Examples:
-  $0 -v --fps copy       # Encode videos, preserving original framerate
-  $0 -x 00:03:00         # Extract audio from videos at 3 minutes
-  $0 -a                  # Optimize audio files to Opus
-  $0 -c                  # Crop a video interactively
-  $0 -v --shutdown       # Encode videos and shut down
+Adjust CPU usage by editing max_jobs at the top of the script.
 EOF
-            exit 0
-            ;;
-        -v|--video) action="video" ;;
-        -x|--extract)
-            action="extract"
-            if [ $# -ge 2 ]; then
-                case "$2" in
-                    [0-9][0-9]:[0-9][0-9]:[0-9][0-9])
-                        cover_timestamp=$2
-                        shift
-                        ;;
-                esac
-            fi
-            ;;
-        -a|--audio) action="audio" ;;
-        -c|--crop) action="crop" ;;
-        --fps)
-            target_fps=$2
-            shift
-            case "$target_fps" in
-                ''|*[!0-9]*) [ "$target_fps" = "copy" ] || die "Invalid FPS value" ;;
-            esac
-            ;;
-        --shutdown) shutdown=true ;;
-        *) die "Unknown option: $1" ;;
-    esac
-    shift
-done
+}
 
-# Execute action based on input
-case "$action" in
-    video) encode_videos ;;
-    extract) extract_audio_from_video "$cover_timestamp" ;;
-    audio) optimize_audio ;;
-    crop) crop_video ;;
-    *) die "No action specified. Use -h for help." ;;
+case "${1:-}" in
+    -v|--video)   encode_videos ;;
+    -x|--extract) extract_audios ;;
+    -a|--audio)   optimize_audios ;;
+    -h|--help|"") show_help ;;
+    *) die "Unknown option: $1" ;;
 esac
 
-# Final cleanup and optional shutdown
-if [ "$shutdown" = true ]; then
-    echo "Processing complete. System will shutdown in 60 seconds..."
-    sleep 60
-    sudo poweroff
-fi
+echo "All tasks complete."
+
