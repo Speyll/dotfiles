@@ -9,7 +9,7 @@ ENABLE_AUDIO=false
 ENABLE_WAYBAR=false
 ENABLE_UPDATE_SCAN=true
 
-WALLPAPER_SOURCE="wallhaven" # swaybg, swaybg-random, swaybg-random-online, wallhaven, mpvpaper-local, mpvpaper-online
+WALLPAPER_SOURCE="swaybg-random-online" # swaybg, swaybg-random, swaybg-random-online, wallhaven, mpvpaper-local, mpvpaper-online
 THEME_MODE="fixed"           # auto, fixed, none
 THEME_NAME="gruvbox-dark-medium"
 CURSOR_NAME="Kaela-Kovalskia-v2"
