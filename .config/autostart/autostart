@@ -63,40 +63,58 @@ download_wallhaven_wallpaper() {
 
 set_wallpapers() {
     pkill -x swaybg || true
+
     case "$WALLPAPER_SOURCE" in
         swaybg)
-            swaybg -o DP-2 -i "$DEFAULT_WALLPAPER" -o HDMI-A-1 -i "$DEFAULT_VERT_WALLPAPER" -m fill >>"$LOGFILE" 2>&1 &
+            wide_wall="$DEFAULT_WALLPAPER"
+            vert_wall="$DEFAULT_VERT_WALLPAPER"
             ;;
         swaybg-random)
-            wp=$(find "$HOME/pictures/walls/" -maxdepth 1 -type f -name "*.jpg" | shuf -n1)
-            [ -z "$wp" ] && wp="$DEFAULT_WALLPAPER"
-            vwp=$(find "$HOME/pictures/walls/" -maxdepth 1 -type f -name "vert-*.jpg" | shuf -n1)
-            [ -z "$vwp" ] && vwp="$DEFAULT_VERT_WALLPAPER"
-            swaybg -o DP-2 -i "$wp" -o HDMI-A-1 -i "$vwp" -m fill >>"$LOGFILE" 2>&1 &
+            wide_wall=$(find "$HOME/pictures/walls/" -maxdepth 1 -type f -name "*.jpg" | shuf -n1)
+            [ -z "$wide_wall" ] && wide_wall="$DEFAULT_WALLPAPER"
+            vert_wall=$(find "$HOME/pictures/walls/" -maxdepth 1 -type f -name "vert-*.jpg" | shuf -n1)
+            [ -z "$vert_wall" ] && vert_wall="$DEFAULT_VERT_WALLPAPER"
             ;;
         swaybg-random-online)
             download_random_wallpaper
             download_random_vert_wallpaper
-            swaybg -o DP-2 -i /tmp/wallpaper.jpg -o HDMI-A-1 -i /tmp/vert_wallpaper.jpg -m fill >>"$LOGFILE" 2>&1 &
+            wide_wall="/tmp/wallpaper.jpg"
+            vert_wall="/tmp/vert_wallpaper.jpg"
             ;;
         wallhaven)
             download_wallhaven_wallpaper "16x9" /tmp/wallpaper.jpg "$DEFAULT_WALLPAPER" "1920x1080"
             download_wallhaven_wallpaper "9x16" /tmp/vert_wallpaper.jpg "$DEFAULT_VERT_WALLPAPER" "1080x1920"
-            swaybg -o DP-2 -i /tmp/wallpaper.jpg -o HDMI-A-1 -i /tmp/vert_wallpaper.jpg -m fill >>"$LOGFILE" 2>&1 &
+            wide_wall="/tmp/wallpaper.jpg"
+            vert_wall="/tmp/vert_wallpaper.jpg"
             ;;
         mpvpaper-local)
             video=$(find "$HOME/pictures/walls/" -maxdepth 1 -type f -name "*.mp4" | shuf -n1)
             vert_video=$(find "$HOME/pictures/walls/" -maxdepth 1 -type f -name "vert-*.mp4" | shuf -n1)
             [ -n "$video" ] && mpvpaper -vsp -o "no-audio pause=no --loop" DP-2 "$video" >>"$LOGFILE" 2>&1 &
             [ -n "$vert_video" ] && mpvpaper -vsp -o "no-audio pause=no --loop" HDMI-A-1 "$vert_video" >>"$LOGFILE" 2>&1 &
+            return
             ;;
         mpvpaper-online)
             [ -n "$VIDEO_LINK" ] && {
                 mpvpaper -vsp -o "no-audio pause=no --loop" DP-2 "$VIDEO_LINK" >>"$LOGFILE" 2>&1 &
                 mpvpaper -vsp -o "no-audio pause=no --loop" HDMI-A-1 "$VIDEO_LINK" >>"$LOGFILE" 2>&1 &
             }
+            return
+            ;;
+        *)
+            log "Unknown WALLPAPER_SOURCE: $WALLPAPER_SOURCE"
+            return
             ;;
     esac
+
+    # Always set the wide wallpaper for all outputs (universal fallback)
+    swaybg -i "$wide_wall" -m fill >>"$LOGFILE" 2>&1 &
+    sleep 0.5
+
+    # If both DP-2 and HDMI-A-1 exist, reapply with per-output wallpapers
+    if ls /sys/class/drm/ | grep -q DP-2 && ls /sys/class/drm/ | grep -q HDMI-A-1; then
+        swaybg -o DP-2 -i "$wide_wall" -o HDMI-A-1 -i "$vert_wall" -m fill >>"$LOGFILE" 2>&1 &
+    fi
 }
 
 kill_processes() {
