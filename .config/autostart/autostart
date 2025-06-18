@@ -10,7 +10,7 @@ enable_waybar=false
 enable_update_scan=true
 
 wallpaper_source="swaybg-random-online" # swaybg, swaybg-random, swaybg-random-online, wallhaven, mpvpaper-local, mpvpaper-online
-theme_mode="fixed"           # auto, fixed, none
+theme_mode="fixed" # auto, fixed, none
 theme_name="gruvbox-dark-medium"
 cursor_name="Kaela-Kovalskia-v2"
 
@@ -23,8 +23,6 @@ video_link="https://youtu.be/GIky-GXIBVY"
 # --- Secure temp files for wallpapers ---
 landscape_wallpaper_tmp=$(mktemp /tmp/wallpaper_landscape.XXXXXX)
 portrait_wallpaper_tmp=$(mktemp /tmp/wallpaper_portrait.XXXXXX)
-
-trap 'rm -f "$landscape_wallpaper_tmp" "$portrait_wallpaper_tmp"' EXIT
 
 log() { printf '[%s] %s\n' "$(date '+%F %T')" "$1" >>"$logfile"; }
 
