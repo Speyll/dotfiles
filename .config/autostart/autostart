@@ -20,9 +20,8 @@ landscape_wallpaper_urls="$HOME/.config/autostart/wallpaper_urls.txt"
 portrait_wallpaper_urls="$HOME/.config/autostart/vert-walls_urls.txt"
 video_link="https://youtu.be/GIky-GXIBVY"
 
-# --- Secure temp files for wallpapers ---
-landscape_wallpaper_tmp=$(mktemp /tmp/wallpaper_landscape.XXXXXX)
-portrait_wallpaper_tmp=$(mktemp /tmp/wallpaper_portrait.XXXXXX)
+landscape_wallpaper_tmp="/tmp/landscape_wall.jpg"
+portrait_wallpaper_tmp="/tmp/portrait_wall.jpg"
 
 log() { printf '[%s] %s\n' "$(date '+%F %T')" "$1" >>"$logfile"; }
 
@@ -126,11 +125,9 @@ set_wallpapers() {
             ;;
     esac
 
-    # Always set the landscape wallpaper for all outputs (universal fallback)
     swaybg -i "$landscape" -m fill >>"$logfile" 2>&1 &
     sleep 0.5
 
-    # If both DP-2 and HDMI-A-1 exist, reapply with per-output wallpapers
     if ls /sys/class/drm/ | grep -q DP-2 && ls /sys/class/drm/ | grep -q HDMI-A-1; then
         swaybg -o DP-2 -i "$landscape" -o HDMI-A-1 -i "$portrait" -m fill >>"$logfile" 2>&1 &
     fi
