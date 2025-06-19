@@ -1,87 +1,72 @@
 #!/bin/sh
-# Generalized startup script for Wayland compositors
-# License: GNU General Public License, version 3 or later
+# Unified compositor launcher with optional PipeWire support
 
-# Parse options
+# --- Parse Arguments ---
 START_PIPEWIRE=false
-while [ "$#" -gt 0 ]; do
-    case "$1" in
-        -p) START_PIPEWIRE=true ;;
-        *) COMPOSITOR="$1" ;;
-    esac
-    shift
+COMPOSITOR=""
+
+while [ $# -gt 0 ]; do
+  case "$1" in
+    -p) START_PIPEWIRE=true ;;
+    -*) echo "Unknown option: $1" >&2; exit 1 ;;
+    *) COMPOSITOR="$1" ;;
+  esac
+  shift
 done
 
-if [ -z "$COMPOSITOR" ]; then
-    echo "Usage: $(basename "$0") [-p] <compositor_name>"
-    echo "   -p: Start PipeWire and related services"
-    exit 1
-fi
+[ -z "$COMPOSITOR" ] && {
+  echo "Usage: $(basename "$0") [-p] <compositor>" >&2
+  exit 1
+}
 
-# Define the log file
+# --- Setup Logging ---
 mkdir -p "$HOME/.cache"
 LOGFILE="$HOME/.cache/wsession-errors"
-exec > "$LOGFILE" 2>&1
+echo "$COMPOSITOR session started: $(date)" >> "$LOGFILE"
+exec >> "$LOGFILE" 2>&1
 
-# Log the script start time
-echo "$COMPOSITOR session started: $(date)"
-
-# Common environment variable settings
-## QT Related
+# --- Environment Variables ---
 export QT_QPA_PLATFORM=wayland
-export QT_QPA_PLATFORMTHEME=qt5ct
-export QT_WAYLAND_DISABLE_WINDOWDECORATION="1"
+export QT_QPA_PLATFORMTHEME=qt6ct
+export QT_WAYLAND_DISABLE_WINDOWDECORATION=1
 export ELM_DISPLAY=wl
 export SDL_VIDEODRIVER=wayland
-
-## GTK Related
 export GTK_USE_PORTAL=1
-
-## Firefox
 export MOZ_ENABLE_WAYLAND=1
-
-## Cursor
 export XCURSOR_THEME=Kaela-Kovalskia-v2
 export XCURSOR_SIZE=24
-#export WLR_NO_HARDWARE_CURSORS=1
-
-## XDG
 export XDG_SESSION_TYPE=wayland
-export XDG_DATA_DIRS="$HOME/.local/share/flatpak/exports/share:/var/lib/flatpak/exports/share:/usr/local/share:/usr/share"
 export XDG_SESSION_DESKTOP="$COMPOSITOR"
 export XDG_CURRENT_DESKTOP="$COMPOSITOR"
-
-# Comment out XDG_DESKTOP_PORTAL unless specifically needed
-#export XDG_DESKTOP_PORTAL=wlr
-
-# Remove "Couldn't register with accessibility bus: Did not receive a reply." warnings
+export XDG_DATA_DIRS="$HOME/.local/share/flatpak/exports/share:/var/lib/flatpak/exports/share:/usr/local/share:/usr/share"
 export NO_AT_BRIDGE=1
-
-# Set keyboard layout (optional)
 export XKB_DEFAULT_LAYOUT=fr,us
 export XKB_DEFAULT_OPTIONS=grp:rctrl_rshift_toggle
 
-# D-Bus session setup
+# --- D-Bus Session ---
 if [ -z "$DBUS_SESSION_BUS_ADDRESS" ]; then
-    eval $(/usr/bin/dbus-launch --exit-with-session --sh-syntax)
+  eval "$(/usr/bin/dbus-launch --exit-with-session --sh-syntax)"
 fi
-dbus-update-activation-environment --verbose --all
 
-# Unset variables from old sessions
-unset SWAYSOCK I3SOCK WAYLAND_DISPLAY DISPLAY
+# Ensure desktop services see the updated environment
+dbus-update-activation-environment --all &
 
-# Cleanup older sessions
+# --- Clean Previous Session ---
 rm -f "$HOME"/.cache/*.wob
 
-# Start PipeWire and Services if -p option is given
-if [ "$START_PIPEWIRE" = true ]; then
-    echo "Starting PipeWire services..."
-    pgrep -x pipewire > /dev/null || pipewire &
-    sleep 1
-    pgrep -x wireplumber > /dev/null || wireplumber &
-    pgrep -x pipewire-pulse > /dev/null || pipewire-pulse &
-fi
+# --- PipeWire (Optional) ---
+[ "$START_PIPEWIRE" = true ] && {
+  echo "Launching PipeWire stack..."
+  for svc in pipewire wireplumber pipewire-pulse; do
+    pgrep -x "$svc" > /dev/null || "$svc" &
+  done
+  sleep 1
+}
 
-# Start the compositor
-echo "Starting compositor: $COMPOSITOR"
-dbus-run-session "$COMPOSITOR"
+# --- Launch Compositor ---
+command -v "$COMPOSITOR" >/dev/null 2>&1 || {
+  echo "Compositor not found: $COMPOSITOR" >&2
+  exit 1
+}
+
+exec "$COMPOSITOR"
