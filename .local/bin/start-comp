@@ -54,14 +54,23 @@ dbus-update-activation-environment --all &
 # --- Clean Previous Session ---
 rm -f "$HOME"/.cache/*.wob
 
-# --- PipeWire (Optional) ---
-[ "$START_PIPEWIRE" = true ] && {
+# --- PipeWire Stack ---
+if [ "$START_PIPEWIRE" = true ]; then
   echo "Launching PipeWire stack..."
-  for svc in pipewire wireplumber pipewire-pulse; do
-    pgrep -x "$svc" > /dev/null || "$svc" &
-  done
-  sleep 1
-}
+
+  if ! pgrep -x pipewire >/dev/null; then
+    pipewire &
+    sleep 1
+  fi
+
+  if ! pgrep -x wireplumber >/dev/null; then
+    wireplumber &
+  fi
+
+  if ! pgrep -x pipewire-pulse >/dev/null; then
+    pipewire-pulse &
+  fi
+fi
 
 # --- Launch Compositor ---
 command -v "$COMPOSITOR" >/dev/null 2>&1 || {
