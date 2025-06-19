@@ -1,12 +1,10 @@
 #!/bin/sh
-set -e
-set -u
+set -eu
 
 ### CONFIGURATION ###
 video_output_dir="encVids"
 audio_output_dir="extAudios"
 optimized_audio_dir="optAudios"
-max_jobs=6  # Adjust to your CPU core count for best results
 
 target_height=900
 target_fps=30
@@ -19,8 +17,14 @@ video_extensions="mp4 mkv ts mov avi webm gif"
 audio_extensions="mp4 mkv avi mov webm flv wmv mpg mpeg"
 audio_file_extensions="mp3 wav flac aac m4a opus"
 
+checkpoint_dir=".checkpoints"
+mkdir -p "$checkpoint_dir"
+
 ### UTILITY FUNCTIONS ###
-die() { echo >&2 "Error: $1"; exit 1; }
+die() {
+    echo "Error: $1" >&2
+    exit 1
+}
 
 find_media_files() {
     case "$1" in
@@ -29,19 +33,13 @@ find_media_files() {
         audio_files) exts="$audio_file_extensions" ;;
         *) die "Invalid media type: $1" ;;
     esac
-    set -- $exts
-    find_expr=""
-    for ext; do
-        if [ -n "$find_expr" ]; then
-            find_expr="$find_expr -o "
-        fi
-        find_expr="$find_expr -iname '*.$ext'"
+
+    for ext in $exts; do
+        find . -maxdepth 1 -type f -iname "*.$ext"
     done
-    eval "find . -maxdepth 1 -type f \( $find_expr \)"
 }
 
 progress_bar() {
-    # Show elapsed time as a progress bar
     awk '
         /out_time_ms/ {
             gsub("out_time_ms=", "", $0)
@@ -56,29 +54,40 @@ progress_bar() {
     '
 }
 
-### PARALLEL PROCESSING ###
-run_parallel() {
-    max_jobs="$1"
-    shift
+### PROCESSING LOOP WITH CHECKPOINT ###
+process_files_serial() {
     cmd="$1"
-    shift
-    filelist="$1"
-    shift
+    filelist="$2"
+    checkpoint_file="$3"
+
+    processed_set=""
+    if [ -f "$checkpoint_file" ]; then
+        processed_set=$(cat "$checkpoint_file")
+    fi
 
     total_files=$(wc -l < "$filelist")
     processed_files=0
 
     while IFS= read -r file || [ -n "$file" ]; do
-        (
-            "$cmd" "$file"
-        ) &
-        processed_files=$((processed_files + 1))
-        echo "Overall progress: $processed_files / $total_files"
-        while [ "$(jobs | wc -l)" -ge "$max_jobs" ]; do
-            sleep 1
+        skip=0
+        for pfile in $processed_set; do
+            [ "$pfile" = "$file" ] && skip=1 && break
         done
+        if [ "$skip" -eq 1 ]; then
+            processed_files=$((processed_files + 1))
+            echo "Skipping (checkpoint): $file ($processed_files / $total_files)"
+            continue
+        fi
+
+        if "$cmd" "$file"; then
+            printf '%s\n' "$file" >> "$checkpoint_file"
+        else
+            echo "Error processing: $file" >&2
+        fi
+
+        processed_files=$((processed_files + 1))
+        echo "Progress: $processed_files / $total_files"
     done < "$filelist"
-    wait
 }
 
 ### VIDEO ENCODING ###
@@ -88,50 +97,44 @@ encode_video_file() {
     clean_name=$(echo "${base_name%.*}" | tr -cd '[:alnum:]._-')
     output_file="$video_output_dir/${clean_name}.mp4"
 
-    if [ -f "$output_file" ]; then
+    [ -f "$output_file" ] && {
         echo "[$(date '+%H:%M:%S')] Skipping: $base_name (already exists)"
         return
-    fi
+    }
 
-    # Get video height and framerate
     height=$(ffprobe -v error -select_streams v:0 -show_entries stream=height -of csv=p=0 "$file")
     fps=$(ffprobe -v error -select_streams v:0 -show_entries stream=r_frame_rate -of csv=p=0 "$file" | awk -F/ '{if ($2==""||$2==0) print $1; else printf "%.3f", $1/$2;}')
+    fps_int=${fps%.*}
 
-    # Decide scaling
     if [ "$height" -gt "$target_height" ]; then
-        scale_filter="scale=-2:$target_height"
+        vf_arg="scale=-2:$target_height"
     else
-        scale_filter="scale=iw:ih"
+        vf_arg="scale=iw:ih"
     fi
 
-    # Decide framerate
-    # Only set fps filter if original is above 30
-    fps_int=$(printf "%.0f" "$fps")
     if [ "$fps_int" -gt 30 ]; then
-        vf_arg="-vf \"$scale_filter,fps=$target_fps\""
-    else
-        vf_arg="-vf \"$scale_filter\""
+        vf_arg="$vf_arg,fps=$target_fps"
     fi
 
-    # Compose the actual ffmpeg command
-    # (We use 'eval' to expand the vf_arg variable properly)
     echo "[$(date '+%H:%M:%S')] Processing: $base_name"
-    eval ffmpeg -nostdin -y -hide_banner \
-        -i "\"$file\"" \
+    ionice -c3 2>/dev/null || true
+    nice -n 19 ffmpeg -nostdin -y -hide_banner \
+        -i "$file" \
         -c:v libx265 -preset "$preset" -crf "$crf" -x265-params no-sao=1:bframes=8 \
-        $vf_arg \
+        -vf "$vf_arg" \
         -c:a libopus -b:a "$audio_bitrate" -vbr on \
         -movflags +faststart -tag:v hvc1 \
         -map_metadata 0 -map_chapters 0 \
-        "\"$output_file\"" >/dev/null 2>&1
+        "$output_file" >/dev/null 2>&1
     echo "[$(date '+%H:%M:%S')] Done: $base_name"
 }
 
 encode_videos() {
     mkdir -p "$video_output_dir"
     tmpfile=$(mktemp)
+    checkpoint_file="$checkpoint_dir/encode_videos.chk"
     find_media_files video | sort > "$tmpfile"
-    run_parallel "$max_jobs" encode_video_file "$tmpfile"
+    process_files_serial encode_video_file "$tmpfile" "$checkpoint_file"
     rm -f "$tmpfile"
 }
 
@@ -143,16 +146,17 @@ extract_audio_file() {
     output_file="$audio_output_dir/${clean_name}.m4a"
     cover_art="/tmp/${clean_name}_cover.jpg"
 
-    if [ -f "$output_file" ]; then
+    [ -f "$output_file" ] && {
         echo "[$(date '+%H:%M:%S')] Skipping audio: $base_name (already exists)"
         return
-    fi
+    }
 
     echo "[$(date '+%H:%M:%S')] Extracting audio: $base_name"
     ffmpeg -nostdin -y -ss "$cover_timestamp" -i "$file" -vframes 1 "$cover_art" 2>/dev/null || true
 
     if ! ffmpeg -nostdin -y -i "$file" -vn -c:a copy -strict -2 "$output_file" 2>/dev/null; then
-        ffmpeg -nostdin -y -i "$file" -vn -c:a aac -b:a 192k "$output_file"
+        ionice -c3 2>/dev/null || true
+        nice -n 19 ffmpeg -nostdin -y -i "$file" -vn -c:a aac -b:a 192k "$output_file"
     fi
 
     if [ -f "$cover_art" ]; then
@@ -171,8 +175,9 @@ extract_audio_file() {
 extract_audios() {
     mkdir -p "$audio_output_dir"
     tmpfile=$(mktemp)
+    checkpoint_file="$checkpoint_dir/extract_audios.chk"
     find_media_files audio | sort > "$tmpfile"
-    run_parallel "$max_jobs" extract_audio_file "$tmpfile"
+    process_files_serial extract_audio_file "$tmpfile" "$checkpoint_file"
     rm -f "$tmpfile"
 }
 
@@ -183,13 +188,14 @@ optimize_audio_file() {
     clean_name=$(echo "${base_name%.*}" | tr -cd '[:alnum:]._-')
     output_file="$optimized_audio_dir/${clean_name}.opus"
 
-    if [ -f "$output_file" ]; then
+    [ -f "$output_file" ] && {
         echo "[$(date '+%H:%M:%S')] Skipping audio: $base_name (already exists)"
         return
-    fi
+    }
 
     echo "[$(date '+%H:%M:%S')] Optimizing audio: $base_name"
-    ffmpeg -nostdin -y -hide_banner -progress pipe:1 \
+    ionice -c3 2>/dev/null || true
+    nice -n 19 ffmpeg -nostdin -y -hide_banner -progress pipe:1 \
         -i "$file" \
         -c:a libopus -b:a "$audio_bitrate" -vbr on \
         "$output_file" 2>&1 | progress_bar
@@ -199,15 +205,16 @@ optimize_audio_file() {
 optimize_audios() {
     mkdir -p "$optimized_audio_dir"
     tmpfile=$(mktemp)
+    checkpoint_file="$checkpoint_dir/optimize_audios.chk"
     find_media_files audio_files | sort > "$tmpfile"
-    run_parallel "$max_jobs" optimize_audio_file "$tmpfile"
+    process_files_serial optimize_audio_file "$tmpfile" "$checkpoint_file"
     rm -f "$tmpfile"
 }
 
 ### MAIN MENU ###
 show_help() {
 cat <<EOF
-Batch Media Processor with Parallel Encoding and Progress Bars
+Batch Media Processor - Serial Processing with Checkpointing
 
 Usage: $0 [option]
 Options:
@@ -216,7 +223,7 @@ Options:
   -a, --audio       Batch optimize audio files to Opus
   -h, --help        Show this help
 
-Adjust CPU usage by editing max_jobs at the top of the script.
+Checkpoint files are stored in $checkpoint_dir to resume interrupted runs.
 EOF
 }
 
@@ -229,4 +236,3 @@ case "${1:-}" in
 esac
 
 echo "All tasks complete."
-
