@@ -1,143 +1,184 @@
 #!/bin/sh
 
-# Log file for errors and output
-LOGFILE="/tmp/autostart.log"
+LOG="/tmp/autostart.log"
 
-# Options
-ENABLE_AUDIO=false # Options: true or false
-WALLPAPER_MODE="swaybg-random-online" # Options: "swaybg", "swaybg-random", "mpvpaper-local", "mpvpaper-online", "swaybg-random-online", "wallhaven", "none"
-WAYBAR_STYLE="none" # Options: "stacking", "tiling", "none"
-THEME_MODE="fixed" # Options: "auto", "fixed", "none"
-FLAVOURS_THEME="gruvbox-dark-medium"
-CURSOR_THEME="Kaela-Kovalskia-v2"
-ENABLE_UPDATE_SCAN=true # Options: true or false
+# Config
+AUDIO=false
+MODE="swaybg-random-online" # swaybg, swaybg-random, mpvpaper-local, mpvpaper-online, swaybg-random-online, wallhaven, none
+THEME_MODE="fixed" # auto, fixed, none
+THEME_NAME="gruvbox-dark-medium"
+CURSOR="Kaela-Kovalskia-v2"
+WAYBAR_STYLE="none" # stacking, tiling, none
+UPDATE_SCAN=true
 
-# --- Environment Setup ---
-dbus-update-activation-environment --all >>"$LOGFILE" 2>&1 &
-/usr/libexec/polkit-gnome-authentication-agent-1 >>"$LOGFILE" 2>&1 &
+# Defaults local
+DWALL="$HOME/pictures/walls/wall.jpg"
+DVWALL="$HOME/pictures/walls/vert-wall.jpg"
 
-# --- Monitor Layout ---
-wlr-randr --output DP-2 --on --mode 1920x1080@120.000000Hz --pos 0,0 --transform normal --scale 1 --adaptive-sync enabled && \
-wlr-randr --output HDMI-A-1 --on --mode 1920x1080@60.000000Hz --pos -1080,-840 --transform 270 --scale 1 --adaptive-sync enabled >>"$LOGFILE" 2>&1 &
+# Pastebin URLs
+P_WALL="https://pastebin.com/raw/7YwMgZXg"
+P_VWALL="https://pastebin.com/raw/Q8GUUAse"
+P_VID="https://pastebin.com/raw/yHFpxMDB"
+P_VVID="https://pastebin.com/raw/NTVA8RMd"
+
+# --- Env setup ---
+dbus-update-activation-environment --all >>"$LOG" 2>&1 &
+/usr/libexec/polkit-gnome-authentication-agent-1 >>"$LOG" 2>&1 &
+
+# --- Monitor layout ---
+wlr-randr --output DP-2 --on --mode 1920x1080@120 --pos 0,0 --transform normal --scale 1 --adaptive-sync enabled && \
+wlr-randr --output HDMI-A-1 --on --mode 1920x1080@60 --pos -1080,-840 --transform 270 --scale 1 --adaptive-sync enabled >>"$LOG" 2>&1 &
 
 # --- Process Management ---
-for process in openrgb flavours mpvpaper swaybg fnott wlsunset cliphist; do
-    pkill -x "$process" >>"$LOGFILE" 2>&1
+for p in flavours mpvpaper swaybg fnott wlsunset cliphist; do
+  pkill -x "$p" >>"$LOG" 2>&1
 done
 
-# --- Audio Services ---
-if [ "$ENABLE_AUDIO" = true ]; then
-    for process in pipewire wireplumber pipewire-pulse; do
-        pkill -x "$process" >>"$LOGFILE" 2>&1
-    done
-    pipewire >>"$LOGFILE" 2>&1 &
-    sleep 1
-    wireplumber >>"$LOGFILE" 2>&1 &
-    pipewire-pulse >>"$LOGFILE" 2>&1 &
+# --- Audio ---
+if [ "$AUDIO" = true ]; then
+  for p in pipewire wireplumber pipewire-pulse; do pkill -x "$p" >>"$LOG" 2>&1; done
+  pipewire >>"$LOG" 2>&1 &
+  sleep 1
+  wireplumber >>"$LOG" 2>&1 &
+  pipewire-pulse >>"$LOG" 2>&1 &
 fi
 
 # --- OpenRGB ---
-if command -v openrgb >/dev/null 2>&1; then
-    openrgb --server -p pureWhite >>"$LOGFILE" 2>&1 &
-else
-    echo "OpenRGB is not installed, skipping RGB startup." >>"$LOGFILE"
-fi
+command -v openrgb >/dev/null 2>&1 && openrgb --server -p pureWhite >>"$LOG" 2>&1 || echo "OpenRGB missing" >>"$LOG"
 
-# --- Wallpaper Setup ---
-DEFAULT_WALLPAPER="$HOME/pictures/walls/wall.jpg"
-DEFAULT_VERT_WALLPAPER="$HOME/pictures/walls/vert-wall.jpg"
-URL_FILE="$HOME/.config/autostart/wallpaper_urls.txt"
-VERT_URL_FILE="$HOME/.config/autostart/vert-walls_urls.txt"
-
-# --- Wallhaven Integration ---
-download_wallhaven_wallpaper() {
-    ratio=$1; out=$2; fallback=$3; res=$4
-    page=$(shuf -i 1-5 -n1)
-    json=$(curl -sf "https://wallhaven.cc/api/v1/search?categories=110&purity=100&sorting=toplist&topRange=1y&ratios=$ratio&atleast=$res&page=$page&per_page=24") || {
-        echo "Wallhaven API failed (ratio $ratio)." >>"$LOGFILE"
-        cp "$fallback" "$out"
-        return
-    }
-    count=$(echo "$json" | jq '.data | length')
-    [ "$count" -eq 0 ] && cp "$fallback" "$out" && return
-    idx=$(shuf -i 0-$((count - 1)) -n1)
-    url=$(echo "$json" | jq -r ".data[$idx].path")
-    curl -sfL "$url" -o "$out" || cp "$fallback" "$out"
+# --- Helpers ---
+get_orient() {
+  wlr-randr | awk '
+    /^[A-Za-z0-9-]+/ {o=$1}
+    /Transform:/ {t=$2; print o ":" ((t ~ /90|270/) ? "portrait" : "landscape")}
+  '
 }
 
-# Set wallpaper based on mode
-case "$WALLPAPER_MODE" in
-    wallhaven)
-        download_wallhaven_wallpaper "16x9" /tmp/wallpaper.jpg "$DEFAULT_WALLPAPER" "1920x1080"
-        download_wallhaven_wallpaper "9x16" /tmp/vert_wallpaper.jpg "$DEFAULT_VERT_WALLPAPER" "1080x1920"
-        wallpaper_path="/tmp/wallpaper.jpg"
-        vert_wallpaper_path="/tmp/vert_wallpaper.jpg"
-        swaybg -o DP-2 -i "$wallpaper_path" -o HDMI-A-1 -i "$vert_wallpaper_path" -m fill >>"$LOGFILE" 2>&1 &
-        ;;
-    swaybg)
-        wallpaper_path="$DEFAULT_WALLPAPER"
-        vert_wallpaper_path="$DEFAULT_VERT_WALLPAPER"
-        swaybg -o DP-2 -i "$wallpaper_path" -o HDMI-A-1 -i "$vert_wallpaper_path" -m fill >>"$LOGFILE" 2>&1 &
-        ;;
-    swaybg-random)
-        wallpaper_path=$(find "$HOME/pictures/walls/"*.jpg -type f | shuf -n1)
-        [ -z "$wallpaper_path" ] && wallpaper_path="$DEFAULT_WALLPAPER"
-        vert_wallpaper_path=$(find "$HOME/pictures/walls/"vert-*.jpg -type f | shuf -n1)
-        [ -z "$vert_wallpaper_path" ] && vert_wallpaper_path="$DEFAULT_VERT_WALLPAPER"
-        swaybg -o DP-2 -i "$wallpaper_path" -o HDMI-A-1 -i "$vert_wallpaper_path" -m fill >>"$LOGFILE" 2>&1 &
-        ;;
-    swaybg-random-online)
-        wallpaper_url=$(shuf -n1 "$URL_FILE")
-        curl -sL "$wallpaper_url" -o /tmp/wallpaper.jpg || cp "$DEFAULT_WALLPAPER" /tmp/wallpaper.jpg
-        vert_wallpaper_url=$(shuf -n1 "$VERT_URL_FILE")
-        curl -sL "$vert_wallpaper_url" -o /tmp/vert_wallpaper.jpg || cp "$DEFAULT_VERT_WALLPAPER" /tmp/vert_wallpaper.jpg
-        swaybg -o DP-2 -i /tmp/wallpaper.jpg -o HDMI-A-1 -i /tmp/vert_wallpaper.jpg -m fill >>"$LOGFILE" 2>&1 &
-        ;;
-    none) ;;
-    *) echo "Unknown WALLPAPER_MODE: $WALLPAPER_MODE" >>"$LOGFILE" ;;
-esac
+fetch_url() {
+  curl -fsSL "$1" | shuf -n1 | tr -d '\r\n' | xargs
+}
 
-# --- Theme Configuration ---
-case "$THEME_MODE" in
+download_wallhaven() {
+  r=$1; out=$2; fb=$3; res=$4
+  pg=$(shuf -i1-5 -n1)
+  json=$(curl -sf "https://wallhaven.cc/api/v1/search?categories=110&purity=100&sorting=toplist&topRange=1y&ratios=$r&atleast=$res&page=$pg&per_page=24") || {
+    echo "Wallhaven fail $r" >>"$LOG"
+    cp "$fb" "$out"
+    return
+  }
+  cnt=$(echo "$json" | jq '.data|length')
+  [ "$cnt" -eq 0 ] && { cp "$fb" "$out"; return; }
+  idx=$(shuf -i0-$((cnt-1)) -n1)
+  url=$(echo "$json" | jq -r ".data[$idx].path")
+  curl -sfL "$url" -o "$out" || cp "$fb" "$out"
+}
+
+apply_swaybg() {
+  cmd="swaybg"
+  for entry in $(get_orient); do
+    o=${entry%%:*}
+    or=${entry##*:}
+    if [ "$or" = "portrait" ]; then
+      cmd="$cmd -o $o -i $vw"
+    else
+      cmd="$cmd -o $o -i $w"
+    fi
+  done
+  $cmd -m fill >>"$LOG" 2>&1 &
+}
+
+apply_mpvpaper() {
+  for entry in $(get_orient); do
+    o=${entry%%:*}
+    or=${entry##*:}
+    if [ "$MODE" = "mpvpaper-local" ]; then
+      v=$(find "$HOME/pictures/walls/" -type f -name "*.mp4" | shuf -n1)
+      [ -z "$v" ] && { echo "No local vid" >>"$LOG"; continue; }
+      mpvpaper -vsp -o "no-audio pause=no --loop --ytdl-format='bestvideo[height<=1080]+bestaudio/best'" "$o" "$v" >>"$LOG" 2>&1 &
+    else
+      u=$([ "$or" = "portrait" ] && fetch_url "$P_VVID" || fetch_url "$P_VID")
+      mpvpaper -vsp -o "no-audio pause=no --loop --ytdl-format='bestvideo[height<=1080]+bestaudio/best'" "$o" "$u" >>"$LOG" 2>&1 &
+    fi
+  done
+}
+
+configure_theme() {
+  case "$THEME_MODE" in
     auto)
-        if [ -n "$wallpaper_path" ]; then
-            flavours generate dark "$wallpaper_path" >>"$LOGFILE" 2>&1
-            flavours apply generated >>"$LOGFILE" 2>&1 &
-        fi
-        ;;
+      [ -f /tmp/wall.jpg ] && {
+        flavours generate dark /tmp/wall.jpg >>"$LOG" 2>&1
+        flavours apply generated >>"$LOG" 2>&1 &
+      }
+      ;;
     fixed)
-        flavours apply "$FLAVOURS_THEME" >>"$LOGFILE" 2>&1 &
-        ;;
+      flavours apply "$THEME_NAME" >>"$LOG" 2>&1 &
+      ;;
     none) ;;
-esac
+  esac
+}
 
-# --- GNOME Color Scheme ---
-gsettings set org.gnome.desktop.interface color-scheme prefer-dark >>"$LOGFILE" 2>&1 &
-
-# --- Waybar Configuration ---
-case "$WAYBAR_STYLE" in
+configure_waybar() {
+  case "$WAYBAR_STYLE" in
     stacking)
-        pkill -x waybar >>"$LOGFILE" 2>&1
-        waybar -c "$HOME/.config/waybar/stacking-config" -s "$HOME/.config/waybar/style.css" >>"$LOGFILE" 2>&1 &
-        ;;
+      pkill -x waybar >>"$LOG" 2>&1
+      waybar -c "$HOME/.config/waybar/stacking-config" -s "$HOME/.config/waybar/style.css" >>"$LOG" 2>&1 &
+      ;;
     tiling)
-        pkill -x waybar >>"$LOGFILE" 2>&1
-        waybar -c "$HOME/.config/waybar/tiling-config" -s "$HOME/.config/waybar/style.css" >>"$LOGFILE" 2>&1 &
-        ;;
+      pkill -x waybar >>"$LOG" 2>&1
+      waybar -c "$HOME/.config/waybar/tiling-config" -s "$HOME/.config/waybar/style.css" >>"$LOG" 2>&1 &
+      ;;
     none) ;;
+  esac
+}
+
+# --- Main ---
+case "$MODE" in
+  swaybg-random-online)
+    w=$(fetch_url "$P_WALL")
+    curl -fsSL "$w" -o /tmp/wall.jpg || cp "$DWALL" /tmp/wall.jpg
+    vw=$(fetch_url "$P_VWALL")
+    curl -fsSL "$vw" -o /tmp/vert_wall.jpg || cp "$DVWALL" /tmp/vert_wall.jpg
+    w="/tmp/wall.jpg"
+    vw="/tmp/vert_wall.jpg"
+    apply_swaybg
+    ;;
+  swaybg-random)
+    w=$(find "$HOME/pictures/walls/"*.jpg -type f | shuf -n1)
+    [ -z "$w" ] && w="$DWALL"
+    vw=$(find "$HOME/pictures/walls/"vert-*.jpg -type f | shuf -n1)
+    [ -z "$vw" ] && vw="$DVWALL"
+    apply_swaybg
+    ;;
+  swaybg)
+    w="$DWALL"
+    vw="$DVWALL"
+    apply_swaybg
+    ;;
+  mpvpaper-local|mpvpaper-online)
+    apply_mpvpaper
+    ;;
+  wallhaven)
+    download_wallhaven "16x9" /tmp/wall.jpg "$DWALL" "1920x1080"
+    download_wallhaven "9x16" /tmp/vert_wall.jpg "$DVWALL" "1080x1920"
+    w="/tmp/wall.jpg"
+    vw="/tmp/vert_wall.jpg"
+    apply_swaybg
+    ;;
+  none) ;;
+  *) echo "Unknown MODE: $MODE" >>"$LOG" ;;
 esac
 
-# --- Cursor Theme ---
-gsettings set org.gnome.desktop.interface cursor-theme "$CURSOR_THEME" >>"$LOGFILE" 2>&1 &
-seat seat0 xcursor_theme "$CURSOR_THEME" >>"$LOGFILE" 2>&1 &
+configure_theme
+configure_waybar
 
-# --- Additional Services ---
-fnott >>"$LOGFILE" 2>&1 &
-wlsunset -l 36.7 -L 3.08 >>"$LOGFILE" 2>&1 &
-wl-paste --watch cliphist store -max-items 100 >>"$LOGFILE" 2>&1 &
+# --- Cursor ---
+gsettings set org.gnome.desktop.interface cursor-theme "$CURSOR" >>"$LOG" 2>&1 &
+seat seat0 xcursor_theme "$CURSOR" >>"$LOG" 2>&1 &
 
-# --- Update Scan ---
-if [ "$ENABLE_UPDATE_SCAN" = true ]; then
-    sleep 2
-    "$HOME/.local/bin/updtscan" >>"$LOGFILE" 2>&1 &
-fi
+# --- Extras ---
+fnott >>"$LOG" 2>&1 &
+wlsunset -l 36.7 -L 3.08 >>"$LOG" 2>&1 &
+wl-paste --watch cliphist store -max-items 100 >>"$LOG" 2>&1 &
+
+# --- Updates ---
+[ "$UPDATE_SCAN" = true ] && (sleep 2; "$HOME/.local/bin/updtscan" >>"$LOG" 2>&1 &)
