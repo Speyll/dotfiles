@@ -49,21 +49,42 @@ connect_wifi() {
     [ -z "$list" ] && printf "%s\n" "No networks found." && return
     sel=$(printf "%s\n" "$list" | fzf)
     [ -z "$sel" ] && return
-    IFS=: ; set -- "$sel" ; ssid=$1 ; sec=$3
+
+    ssid=$(printf "%s" "$sel" | cut -d: -f1)
+    sec=$(printf "%s" "$sel" | cut -d: -f3)
 
     if [ "$ssid" = "<Hidden>" ]; then
         printf "%s" "Enter SSID: " ; read -r ssid
-        hidden="hidden yes"
+        hidden="yes"
     else
         hidden=""
     fi
 
-    if [ "$sec" = "--" ] || [ -z "$sec" ]; then
-        nmcli device wifi connect "$ssid" "$hidden" && printf "%s\n" "Connected to $ssid" || printf "%s\n" "Failed to connect."
+    saved_conn=$(get_saved_connection "$ssid")
+
+    if [ -n "$saved_conn" ]; then
+        if ! has_password "$saved_conn"; then
+            printf "%s" "Password for saved network '$ssid': "
+            stty -echo ; read -r pw ; stty echo ; echo
+            run_privileged nmcli connection modify "$saved_conn" 802-11-wireless-security.psk "$pw"
+        fi
+        run_privileged nmcli connection up "$saved_conn" && printf "%s\n" "Connected to $ssid" || printf "%s\n" "Failed to connect."
     else
-        printf "%s" "Password: "
-        stty -echo ; read -r pw ; stty echo ; echo
-        nmcli device wifi connect "$ssid" password "$pw" "$hidden" && printf "%s\n" "Connected to $ssid" || printf "%s\n" "Failed to connect."
+        if [ "$sec" = "--" ] || [ -z "$sec" ]; then
+            if [ -n "$hidden" ]; then
+                nmcli device wifi connect "$ssid" hidden yes && printf "%s\n" "Connected to $ssid" || printf "%s\n" "Failed to connect."
+            else
+                nmcli device wifi connect "$ssid" && printf "%s\n" "Connected to $ssid" || printf "%s\n" "Failed to connect."
+            fi
+        else
+            printf "%s" "Password: "
+            stty -echo ; read -r pw ; stty echo ; echo
+            if [ -n "$hidden" ]; then
+                nmcli device wifi connect "$ssid" password "$pw" hidden yes && printf "%s\n" "Connected to $ssid" || printf "%s\n" "Failed to connect."
+            else
+                nmcli device wifi connect "$ssid" password "$pw" && printf "%s\n" "Connected to $ssid" || printf "%s\n" "Failed to connect."
+            fi
+        fi
     fi
 }
 

@@ -21,6 +21,14 @@ P_VWALL="https://pastebin.com/raw/Q8GUUAse"
 P_VID="https://pastebin.com/raw/yHFpxMDB"
 P_VVID="https://pastebin.com/raw/NTVA8RMd"
 
+# Wait for Wayland compositor to be ready
+timeout=10
+while [ -z "$WAYLAND_DISPLAY" ] || [ ! -S "$XDG_RUNTIME_DIR/$WAYLAND_DISPLAY" ]; do
+  sleep 0.5
+  timeout=$((timeout-1))
+  [ $timeout -le 0 ] && break
+done
+
 # --- Env setup ---
 dbus-update-activation-environment --all >>"$LOG" 2>&1 &
 /usr/libexec/polkit-gnome-authentication-agent-1 >>"$LOG" 2>&1 &
