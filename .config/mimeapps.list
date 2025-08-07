@@ -6,7 +6,10 @@ application/x-trash=text.desktop;
 inode/symlink=text.desktop;
 application/xml=nvim.desktop;
 application/x-executable=nvim.desktop;
-image/webp=video.desktop;
+image/webp=img.desktop;
+image/png=img.desktop;
+image/jpg=img.desktop;
+image/jpeg=img.desktop;
 
 [Default Applications]
 text/*=text.desktop;

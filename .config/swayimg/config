@@ -2,7 +2,9 @@
 
 [general]
 mode = viewer
-position = parent
+position = auto
+overlay = no
+decoration = no
 size = 800,800
 sigusr1 = reload
 sigusr2 = next_file
@@ -13,18 +15,23 @@ app_id = swayimg
 window = 282828
 transparency = grid
 scale = optimal
-fixed = yes
-antialiasing = yes
-slideshow = no
-slideshow_time = 7
+antialiasing = mks13
 history = 1
 preload = 1
+
+[slideshow]
+time = 5
+window = auto
+transparency = grid
+scale = optimal
+position = center
+antialiasing = mks13
 
 [gallery]
 size = 200
 cache = 100
 fill = yes
-antialiasing = no
+antialiasing = none
 window = 282828
 background = 282828
 select = ebdbb2
@@ -33,7 +40,6 @@ shadow = 665c54
 
 [list]
 order = alpha
-loop = yes
 recursive = no
 all = yes
 
@@ -73,7 +79,7 @@ d = next_dir
 Shift+o = prev_frame
 o = next_frame
 c = skip_file
-Shift+s = slideshow
+t = mode slideshow
 s = animation
 f = fullscreen
 Return = mode
@@ -92,7 +98,6 @@ z = zoom fit
 Shift+z = zoom fill
 0 = zoom real
 BackSpace = zoom optimal
-Alt+s = scale
 bracketleft = rotate_left
 bracketright = rotate_right
 m = flip_vertical
@@ -139,6 +144,9 @@ Escape = exit
 q = exit
 Ctrl+w = exec ~/.config/swayimg/set-wall "%"
 Ctrl+c = exec wl-copy < "%"
+
+[keys.slideshow]
+t = mode viewer
 
 # Mouse bindings for gallery mode
 ScrollLeft = step_right
