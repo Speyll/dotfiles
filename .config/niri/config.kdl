@@ -1,0 +1,323 @@
+prefer-no-csd
+
+output "DP-2" {
+    mode "1920x1080@120.000"
+    scale 1.0
+    transform "normal"
+    position x=0 y=0
+    variable-refresh-rate // on-demand=true
+    focus-at-startup
+}
+
+output "HDMI-A-1" {
+    mode "1920x1080@60.000"
+    scale 1.0
+    transform "270"
+    position x=-1080 y=-840
+    variable-refresh-rate // on-demand=true
+}
+
+input {
+    keyboard {
+        xkb {
+            layout "us,fr"
+            options "grp:rctrl_rshift_toggle,numpad:mac,compose:ralt"
+        }
+    }
+
+    touchpad {
+        tap
+        //natural-scroll
+        accel-speed 0.2
+        accel-profile "adaptive"
+        scroll-method "two-finger"
+    }
+
+    mouse {
+        accel-profile "flat"
+    }
+
+    trackpoint {
+        off
+    }
+
+    touch {
+        map-to-output "DP-2"
+    }
+
+    tablet {
+        map-to-output "DP-2"
+    }
+}
+
+cursor {
+    xcursor-theme "Kaela-Kovalskia-v2"
+    xcursor-size 24
+}
+
+
+layout {
+    gaps 3.5
+    center-focused-column "never"
+    always-center-single-column
+    // empty-workspace-above-first
+
+    preset-column-widths {
+        proportion 0.33333
+        proportion 0.5
+        proportion 0.66667
+    }
+
+    default-column-width {}
+
+    focus-ring {
+        off
+        width 1.5
+        active-color "#d5c4a1"
+        inactive-color "#282828"
+        // active-gradient from="#80c8ff" to="#bbddff" angle=45
+        // inactive-gradient from="#505050" to="#808080" angle=45 relative-to="workspace-view"
+    }
+
+    border {
+        off
+        width 0
+        active-color "#d5c4a1"
+        inactive-color "#282828"
+        // active-gradient from="#ffbb66" to="#ffc880" angle=45 relative-to="workspace-view"
+        // inactive-gradient from="#505050" to="#808080" angle=45 relative-to="workspace-view"
+    }
+
+    struts {
+        // left 64
+        // right 64
+        // top 64
+        // bottom 64
+    }
+
+    tab-indicator {
+        // off
+        hide-when-single-tab
+        place-within-column
+        gap 2
+        width 8
+        length total-proportion=0.5
+        position "left"
+        gaps-between-tabs 8
+        corner-radius 5
+        active-color "#d5c4a1"
+        inactive-color "#282828"
+        urgent-color "blue"
+        // active-gradient from="#80c8ff" to="#bbddff" angle=45
+        // inactive-gradient from="#505050" to="#808080" angle=45 relative-to="workspace-view"
+        // urgent-gradient from="#800" to="#a33" angle=45
+    }
+
+}
+
+overview {
+    zoom 0.50
+    backdrop-color "#282828"
+}
+
+hotkey-overlay {
+    skip-at-startup
+}
+
+spawn-at-startup "xwayland-satellite"
+    environment {
+        DISPLAY ":0"
+    }
+spawn-at-startup "~/.config/autostart/autostart"
+spawn-at-startup "~/.config/niri/waybar"
+screenshot-path "~/Pictures/grim/%Y-%m-%d %H-%M-%S.png"
+
+animations {
+    // Uncomment to turn off all animations.
+    // off
+
+    // Slow down all animations by this factor. Values below 1 speed them up instead.
+    // slowdown 3.0
+}
+
+window-rule {
+    geometry-corner-radius 8
+    clip-to-geometry true
+    draw-border-with-background false
+}
+
+window-rule {
+    match app-id=r#"^org\.wezfurlong\.wezterm$"#
+    default-column-width {}
+}
+
+window-rule {
+    match app-id="alacritty"
+    default-column-width { proportion 0.5; }
+}
+
+window-rule {
+    match app-id="LibreWolf"
+    match app-id="pcmanfm-qt"
+    match app-id="com.chatterino.chatterino"
+    match app-id="spotube"
+//    opacity 0.98
+}
+
+window-rule {
+    match app-id="firefox$" title="^Picture-in-Picture$"
+    open-floating true
+    default-floating-position x=16 y=16 relative-to="bottom-left"
+}
+
+window-rule {
+    match app-id="pavucontrol$"
+    open-floating true
+    default-floating-position x=4 y=4 relative-to="bottom-right"
+}
+
+binds {
+// Personal Keybinds
+    Mod+Return { spawn "alacritty"; }
+    Mod+D { spawn "fuzzel"; }
+    Mod+Shift+Return { spawn "fuzz-launcher"; }
+    Super+Alt+L { spawn "swaylock"; }
+    Super+period { spawn "bemoji"; }
+    Super+comma { spawn "clip-manager"; }
+    F10 { spawn "/home/lyes/Videos/rec/pipobs/bin/python3" "/home/lyes/videos/rec/pipobs/replay.py"; }
+
+// Niri Actions
+    Mod+Shift+Q { close-window; }
+    Alt+Tab { toggle-overview; }
+    Mod+Shift+Slash { show-hotkey-overlay; }
+    Mod+T { toggle-column-tabbed-display; }
+
+    Mod+Shift+E { quit; }
+    Ctrl+Alt+Delete { quit; }
+    Mod+Shift+P { power-off-monitors; }
+
+// Float
+    Mod+V       { toggle-window-floating; }
+    Mod+Shift+V { switch-focus-between-floating-and-tiling; }
+
+// Focus
+    // Window/Columns
+    Mod+Left  { focus-column-left; }
+    Mod+Down  { focus-window-down; }
+    Mod+Up    { focus-window-up; }
+    Mod+Right { focus-column-right; }
+    Mod+H     { focus-column-left; }
+    Mod+J     { focus-window-down; }
+    Mod+K     { focus-window-up; }
+    Mod+L     { focus-column-right; }
+
+    Mod+Home { focus-column-first; }
+    Mod+End  { focus-column-last; }
+
+    // Workspace
+    Mod+1 { focus-workspace 1; }
+    Mod+2 { focus-workspace 2; }
+    Mod+3 { focus-workspace 3; }
+    Mod+4 { focus-workspace 4; }
+    Mod+5 { focus-workspace 5; }
+    Mod+6 { focus-workspace 6; }
+    Mod+7 { focus-workspace 7; }
+    Mod+8 { focus-workspace 8; }
+    Mod+9 { focus-workspace 9; }
+
+    Mod+Page_Down      { focus-workspace-down; }
+    Mod+Page_Up        { focus-workspace-up; }
+
+    // Monitor
+    Ctrl+Left  { focus-monitor-left; }
+    Ctrl+Down  { focus-monitor-down; }
+    Ctrl+Up    { focus-monitor-up; }
+    Ctrl+Right { focus-monitor-right; }
+
+// Move
+    // Window/Column
+    Mod+Shift+Left  { move-column-left; }
+    Mod+Shift+Down  { move-window-down; }
+    Mod+Shift+Up    { move-window-up; }
+    Mod+Shift+Right { move-column-right; }
+    Mod+Shift+H     { move-column-left; }
+    Mod+Shift+J     { move-window-down; }
+    Mod+Shift+K     { move-window-up; }
+    Mod+Shift+L     { move-column-right; }
+
+    Mod+Ctrl+Home { move-column-to-first; }
+    Mod+Ctrl+End  { move-column-to-last; }
+
+    // Workspace
+    Mod+Shift+1 { move-column-to-workspace 1; }
+    Mod+Shift+2 { move-column-to-workspace 2; }
+    Mod+Shift+3 { move-column-to-workspace 3; }
+    Mod+Shift+4 { move-column-to-workspace 4; }
+    Mod+Shift+5 { move-column-to-workspace 5; }
+    Mod+Shift+6 { move-column-to-workspace 6; }
+    Mod+Shift+7 { move-column-to-workspace 7; }
+    Mod+Shift+8 { move-column-to-workspace 8; }
+    Mod+Shift+9 { move-column-to-workspace 9; }
+
+    Alt+Up { move-column-to-workspace-up; }
+    Alt+Down { move-column-to-workspace-down; }
+    Alt+Left { consume-or-expel-window-left; }
+    Alt+Right { consume-or-expel-window-right; }
+
+    // Monitor
+    Shift+Ctrl+Left  { move-column-to-monitor-left; }
+    Shift+Ctrl+Down  { move-column-to-monitor-down; }
+    Shift+Ctrl+Up    { move-column-to-monitor-up; }
+    Shift+Ctrl+Right { move-column-to-monitor-right; }
+//    Shift+Ctrl+H     { move-column-to-monitor-left; }
+//    Shift+Ctrl+J     { move-column-to-monitor-down; }
+//    Shift+Ctrl+K     { move-column-to-monitor-up; }
+//    Shift+Ctrl+L     { move-column-to-monitor-right; }
+
+// Consume/Expel
+    Mod+BracketLeft  { consume-window-into-column; }
+    Mod+BracketRight { expel-window-from-column; }
+
+// Size
+    Mod+F { maximize-column; }
+    Mod+Shift+F { fullscreen-window; }
+    Mod+Ctrl+F { expand-column-to-available-width; }
+    Mod+Alt+F { toggle-windowed-fullscreen; }
+    Mod+R { switch-preset-column-width; }
+    Mod+Shift+R { switch-preset-window-height; }
+    Mod+Ctrl+R { reset-window-height; }
+    Mod+C { center-column; }
+
+    Mod+Minus { set-column-width "-10%"; }
+    Mod+Equal { set-column-width "+10%"; }
+
+    Mod+Shift+Minus { set-window-height "-10%"; }
+    Mod+Shift+Equal { set-window-height "+10%"; }
+
+// Mouse
+    Alt+WheelScrollDown      cooldown-ms=150 { focus-workspace-down; }
+    Alt+WheelScrollUp        cooldown-ms=150 { focus-workspace-up; }
+    Mod+Alt+WheelScrollDown cooldown-ms=150 { move-column-to-workspace-down; }
+    Mod+Alt+WheelScrollUp   cooldown-ms=150 { move-column-to-workspace-up; }
+
+    Mod+WheelScrollRight      { focus-column-right; }
+    Mod+WheelScrollLeft       { focus-column-left; }
+    Mod+Shift+WheelScrollRight { move-column-right; }
+    Mod+Shift+WheelScrollLeft  { move-column-left; }
+
+    Mod+WheelScrollDown      { focus-column-right; }
+    Mod+WheelScrollUp        { focus-column-left; }
+    Mod+Shift+WheelScrollDown { move-column-right; }
+    Mod+Shift+WheelScrollUp   { move-column-left; }
+
+// Media Keys
+    Print { screenshot; }
+    Mod+Shift+S { screenshot; }
+    Mod+Print { screenshot-screen; }
+    Alt+Print { screenshot-window; }
+
+    XF86AudioRaiseVolume allow-when-locked=true { spawn "wpctl" "set-volume" "@DEFAULT_AUDIO_SINK@" "0.1+"; }
+    XF86AudioLowerVolume allow-when-locked=true { spawn "wpctl" "set-volume" "@DEFAULT_AUDIO_SINK@" "0.1-"; }
+    XF86AudioMute        allow-when-locked=true { spawn "wpctl" "set-mute" "@DEFAULT_AUDIO_SINK@" "toggle"; }
+    XF86AudioMicMute     allow-when-locked=true { spawn "wpctl" "set-mute" "@DEFAULT_AUDIO_SOURCE@" "toggle"; }
+}

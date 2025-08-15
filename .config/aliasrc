@@ -24,6 +24,8 @@ alias \
     xbs="sudo xbps-install" \
     xbr="sudo xbps-remove -Rv" \
     xbq="xbps-query -Rs" \
+    pac="sudo pacman -S" \
+    prm="sudo pacman -Rns" \
     apti="sudo apt-get install --no-install-recommends" \
     aptr="sudo apt-get --purge autoremove" \
     zyi="sudo zypper install --no-recommends" \
@@ -38,7 +40,7 @@ alias \
     rsync-ssh="rsync -avzh --progress -e ssh" \
     rsync-net="rsync -avzh --progress" \
     gcl='git clone --depth 1' \
-    nfs-mount="sudo mount -t nfs -o soft,timeo=50,retrans=2,intr,noac" \
+    nfs-mount="sudo mount -t nfs -o hard,tcp,rsize=32768,wsize=32768,actimeo=30" \
     ssh-mount="sshfs -o reconnect,ServerAliveInterval=15,ServerAliveCountMax=3,sshfs_sync"
 
 # Safe file operations

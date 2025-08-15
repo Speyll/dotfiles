@@ -17,9 +17,6 @@ video_extensions="mp4 mkv ts mov avi webm gif"
 audio_extensions="mp4 mkv avi mov webm flv wmv mpg mpeg"
 audio_file_extensions="mp3 wav flac aac m4a opus"
 
-checkpoint_dir=".checkpoints"
-mkdir -p "$checkpoint_dir"
-
 ### UTILITY FUNCTIONS ###
 die() {
     echo "Error: $1" >&2
@@ -54,33 +51,17 @@ progress_bar() {
     '
 }
 
-### PROCESSING LOOP WITH CHECKPOINT ###
+### PROCESSING LOOP WITHOUT CHECKPOINT ###
 process_files_serial() {
     cmd="$1"
     filelist="$2"
-    checkpoint_file="$3"
 
-    processed_set=""
-    if [ -f "$checkpoint_file" ]; then
-        processed_set=$(cat "$checkpoint_file")
-    fi
-
-    total_files=$(wc -l < "$filelist")
+    total_files=$(wc -l < "$filelist" | tr -d ' ')
     processed_files=0
 
     while IFS= read -r file || [ -n "$file" ]; do
-        skip=0
-        for pfile in $processed_set; do
-            [ "$pfile" = "$file" ] && skip=1 && break
-        done
-        if [ "$skip" -eq 1 ]; then
-            processed_files=$((processed_files + 1))
-            echo "Skipping (checkpoint): $file ($processed_files / $total_files)"
-            continue
-        fi
-
         if "$cmd" "$file"; then
-            printf '%s\n' "$file" >> "$checkpoint_file"
+            :
         else
             echo "Error processing: $file" >&2
         fi
@@ -97,10 +78,10 @@ encode_video_file() {
     clean_name=$(echo "${base_name%.*}" | tr -cd '[:alnum:]._-')
     output_file="$video_output_dir/${clean_name}.mp4"
 
-    [ -f "$output_file" ] && {
+    if [ -f "$output_file" ]; then
         echo "[$(date '+%H:%M:%S')] Skipping: $base_name (already exists)"
-        return
-    }
+        return 0
+    fi
 
     height=$(ffprobe -v error -select_streams v:0 -show_entries stream=height -of csv=p=0 "$file")
     fps=$(ffprobe -v error -select_streams v:0 -show_entries stream=r_frame_rate -of csv=p=0 "$file" | awk -F/ '{if ($2==""||$2==0) print $1; else printf "%.3f", $1/$2;}')
@@ -131,11 +112,13 @@ encode_video_file() {
 
 encode_videos() {
     mkdir -p "$video_output_dir"
-    tmpfile=$(mktemp)
-    checkpoint_file="$checkpoint_dir/encode_videos.chk"
+    tmpfile=$(mktemp) || die "Failed to create temp file"
+    trap 'rm -f "$tmpfile"' EXIT
+
     find_media_files video | sort > "$tmpfile"
-    process_files_serial encode_video_file "$tmpfile" "$checkpoint_file"
+    process_files_serial encode_video_file "$tmpfile"
     rm -f "$tmpfile"
+    trap - EXIT
 }
 
 ### AUDIO EXTRACTION ###
@@ -146,12 +129,13 @@ extract_audio_file() {
     output_file="$audio_output_dir/${clean_name}.m4a"
     cover_art="/tmp/${clean_name}_cover.jpg"
 
-    [ -f "$output_file" ] && {
+    if [ -f "$output_file" ]; then
         echo "[$(date '+%H:%M:%S')] Skipping audio: $base_name (already exists)"
-        return
-    }
+        return 0
+    fi
 
     echo "[$(date '+%H:%M:%S')] Extracting audio: $base_name"
+    # Generate cover art snapshot safely, ignoring errors.
     ffmpeg -nostdin -y -ss "$cover_timestamp" -i "$file" -vframes 1 "$cover_art" 2>/dev/null || true
 
     if ! ffmpeg -nostdin -y -i "$file" -vn -c:a copy -strict -2 "$output_file" 2>/dev/null; then
@@ -174,11 +158,13 @@ extract_audio_file() {
 
 extract_audios() {
     mkdir -p "$audio_output_dir"
-    tmpfile=$(mktemp)
-    checkpoint_file="$checkpoint_dir/extract_audios.chk"
+    tmpfile=$(mktemp) || die "Failed to create temp file"
+    trap 'rm -f "$tmpfile"' EXIT
+
     find_media_files audio | sort > "$tmpfile"
-    process_files_serial extract_audio_file "$tmpfile" "$checkpoint_file"
+    process_files_serial extract_audio_file "$tmpfile"
     rm -f "$tmpfile"
+    trap - EXIT
 }
 
 ### AUDIO OPTIMIZATION ###
@@ -188,10 +174,10 @@ optimize_audio_file() {
     clean_name=$(echo "${base_name%.*}" | tr -cd '[:alnum:]._-')
     output_file="$optimized_audio_dir/${clean_name}.opus"
 
-    [ -f "$output_file" ] && {
+    if [ -f "$output_file" ]; then
         echo "[$(date '+%H:%M:%S')] Skipping audio: $base_name (already exists)"
-        return
-    }
+        return 0
+    fi
 
     echo "[$(date '+%H:%M:%S')] Optimizing audio: $base_name"
     ionice -c3 2>/dev/null || true
@@ -204,17 +190,19 @@ optimize_audio_file() {
 
 optimize_audios() {
     mkdir -p "$optimized_audio_dir"
-    tmpfile=$(mktemp)
-    checkpoint_file="$checkpoint_dir/optimize_audios.chk"
+    tmpfile=$(mktemp) || die "Failed to create temp file"
+    trap 'rm -f "$tmpfile"' EXIT
+
     find_media_files audio_files | sort > "$tmpfile"
-    process_files_serial optimize_audio_file "$tmpfile" "$checkpoint_file"
+    process_files_serial optimize_audio_file "$tmpfile"
     rm -f "$tmpfile"
+    trap - EXIT
 }
 
 ### MAIN MENU ###
 show_help() {
 cat <<EOF
-Batch Media Processor - Serial Processing with Checkpointing
+Batch Media Processor - Serial Processing
 
 Usage: $0 [option]
 Options:
@@ -223,7 +211,7 @@ Options:
   -a, --audio       Batch optimize audio files to Opus
   -h, --help        Show this help
 
-Checkpoint files are stored in $checkpoint_dir to resume interrupted runs.
+File existence in output directories is used to skip processed files.
 EOF
 }
 
