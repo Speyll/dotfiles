@@ -1,8 +1,7 @@
 #!/bin/sh
-
 # A combined script for extraction and compression with enhanced features
 # Usage:
-#   - To extract: script_name -x [-c] [-v] archive
+#   - To extract: script_name -x [-c] [-v] archive1 [archive2 ...]
 #   - To compress: script_name -z -f FORMAT -l LEVEL [-v] [-o OUTPUT] DIR_TO_COMPRESS
 
 format="zip"
@@ -18,9 +17,9 @@ exit_err() {
 }
 
 show_help() {
-  echo "Usage: $0 [options] file_or_dir"
+  echo "Usage: $0 [options] file_or_dir ..."
   echo "Options for extraction:"
-  echo "  -x           Extract an archive"
+  echo "  -x           Extract archive(s)"
   echo "  -c           Extract into the current directory"
   echo "  -v           Verbose output"
   echo "Options for compression:"
@@ -40,14 +39,14 @@ check_dependency() {
 }
 
 sanitize_name() {
-  echo "$1" | sed -e 's/[^[:alnum:]._-]/_/g'
+  echo "$1" | sed -e 's/[^[:alnum:].*-]/*/g'
 }
 
 sanitize_dir_contents() {
-  find . -depth \( -name '*[[:space:]]*' -o -name '*[^[:alnum:]._-]*' \) | while IFS= read -r path; do
+  find . -depth \( -name '*[[:space:]]*' -o -name '*[^[:alnum:].\_-]*' \) | while IFS= read -r path; do
     dir=$(dirname "$path")
     name=$(basename "$path")
-    newname=$(echo "$name" | sed -e 's/[[:space:]]/_/g' -e 's/[^[:alnum:]._-]/_/g')
+    newname=$(echo "$name" | sed -e 's/[[:space:]]/*/g' -e 's/[^[:alnum:].*-]/_/g')
     [ "$name" != "$newname" ] && mv -- "$path" "$dir/$newname"
   done
 }
@@ -70,96 +69,109 @@ while getopts "xczf:l:hvo:" opt; do
     *) exit_err "Invalid option" ;;
   esac
 done
-
 shift $((OPTIND - 1))
-input="$1"
-[ -z "$input" ] && exit_err "Error: Please specify a file/directory."
 
 if [ -z "$mode" ]; then
   exit_err "Error: Specify either -x (extract) or -z (compress)."
 fi
 
 extract() {
-  [ -f "$input" ] || exit_err "Error: File '$input' not found."
-  archive="$(cd "$(dirname "$input")" && pwd)/$(basename "$input")"
-  original_name=$(basename "$archive")
-  safe_name=$(sanitize_name "$original_name")
+  [ "$#" -gt 0 ] || exit_err "Error: No files specified for extraction."
 
-  if [ "$original_name" != "$safe_name" ]; then
-    mv "$archive" "${archive%/*}/$safe_name" || exit_err "Failed to sanitize filename."
-    archive="${archive%/*}/$safe_name"
-    trap 'mv "$archive" "${archive%/*}/$original_name"' EXIT
-  fi
+  for archive_path in "$@"; do
+    [ -f "$archive_path" ] || { echo "Warning: File '$archive_path' not found, skipping." >&2; continue; }
 
-  if ! $extracthere; then
-    dir="${archive%.*}"
-    mkdir -p "$dir" && cd "$dir" || exit_err "Failed to create directory."
-  fi
+    archive="$(cd "$(dirname "$archive_path")" && pwd)/$(basename "$archive_path")"
+    original_name=$(basename "$archive")
+    safe_name=$(sanitize_name "$original_name")
 
-  case "$archive" in
-    *.tar.bz2|*.tbz2)
-      check_dependency tar
-      tar xjf "$archive" $([ "$verbose" = true ] && echo "v") || exit_err "Extraction failed."
-      ;;
-    *.tar.xz)
-      check_dependency tar
-      tar xf "$archive" $([ "$verbose" = true ] && echo "v") || exit_err "Extraction failed."
-      ;;
-    *.tar.gz|*.tgz)
-      check_dependency tar
-      tar xzf "$archive" $([ "$verbose" = true ] && echo "v") || exit_err "Extraction failed."
-      ;;
-    *.tar.zst)
-      check_dependency tar
-      check_dependency zstd
-      tar -I zstd -xf "$archive" $([ "$verbose" = true ] && echo "v") || exit_err "Extraction failed."
-      ;;
-    *.lzma)
-      check_dependency unlzma
-      unlzma "$archive" || exit_err "Extraction failed."
-      ;;
-    *.bz2)
-      check_dependency bunzip2
-      bunzip2 "$archive" || exit_err "Extraction failed."
-      ;;
-    *.rar)
-      check_dependency unrar
-      unrar x -ad "$archive" $([ "$verbose" = true ] && echo "-or") || exit_err "Extraction failed."
-      ;;
-    *.gz)
-      check_dependency gunzip
-      gunzip "$archive" || exit_err "Extraction failed."
-      ;;
-    *.tar)
-      check_dependency tar
-      tar xf "$archive" $([ "$verbose" = true ] && echo "v") || exit_err "Extraction failed."
-      ;;
-    *.zip)
-      check_dependency unzip
-      unzip "$archive" $([ "$verbose" = true ] && echo "-q") || exit_err "Extraction failed."
-      ;;
-    *.Z)
-      check_dependency uncompress
-      uncompress "$archive" || exit_err "Extraction failed."
-      ;;
-    *.7z)
-      check_dependency 7z
-      7z x "$archive" $([ "$verbose" = true ] || echo "-bso0") || exit_err "Extraction failed."
-      ;;
-    *.xz)
-      check_dependency unxz
-      unxz "$archive" || exit_err "Extraction failed."
-      ;;
-    *.exe)
-      check_dependency cabextract
-      cabextract "$archive" || exit_err "Extraction failed."
-      ;;
-    *) exit_err "Error: Unsupported archive format: $archive" ;;
-  esac
+    if [ "$original_name" != "$safe_name" ]; then
+      mv "$archive" "${archive%/*}/$safe_name" || exit_err "Failed to sanitize filename."
+      archive="${archive%/*}/$safe_name"
+      trap 'mv "$archive" "${archive%/*}/$original_name"' EXIT
+    fi
 
-  sanitize_dir_contents
-  [ "$original_name" != "$safe_name" ] && mv "$archive" "${archive%/*}/$original_name"
-  trap - EXIT
+    if ! $extracthere; then
+      dir="${archive%.*}"
+      mkdir -p "$dir" && cd "$dir" || exit_err "Failed to create directory."
+    fi
+
+    case "$archive" in
+      *.tar.bz2|*.tbz2)
+        check_dependency tar
+        tar xjf "$archive" $([ "$verbose" = true ] && echo "v") || exit_err "Extraction failed."
+        ;;
+      *.tar.xz)
+        check_dependency tar
+        tar xf "$archive" $([ "$verbose" = true ] && echo "v") || exit_err "Extraction failed."
+        ;;
+      *.tar.gz|*.tgz)
+        check_dependency tar
+        tar xzf "$archive" $([ "$verbose" = true ] && echo "v") || exit_err "Extraction failed."
+        ;;
+      *.tar.zst)
+        check_dependency tar
+        check_dependency zstd
+        tar -I zstd -xf "$archive" $([ "$verbose" = true ] && echo "v") || exit_err "Extraction failed."
+        ;;
+      *.lzma)
+        check_dependency unlzma
+        unlzma "$archive" || exit_err "Extraction failed."
+        ;;
+      *.bz2)
+        check_dependency bunzip2
+        bunzip2 "$archive" || exit_err "Extraction failed."
+        ;;
+      *.rar)
+        check_dependency unrar
+        unrar x -ad "$archive" $([ "$verbose" = true ] && echo "-or") || exit_err "Extraction failed."
+        ;;
+      *.gz)
+        check_dependency gunzip
+        gunzip "$archive" || exit_err "Extraction failed."
+        ;;
+      *.tar)
+        check_dependency tar
+        tar xf "$archive" $([ "$verbose" = true ] && echo "v") || exit_err "Extraction failed."
+        ;;
+      *.zip)
+        check_dependency unzip
+        if $verbose; then
+          unzip "$archive" -v || exit_err "Extraction failed."
+        else
+          unzip "$archive" || exit_err "Extraction failed."
+        fi
+        ;;
+      *.Z)
+        check_dependency uncompress
+        uncompress "$archive" || exit_err "Extraction failed."
+        ;;
+      *.7z)
+        check_dependency 7z
+        7z x "$archive" $([ "$verbose" = true ] && echo "" || echo "-bso0") || exit_err "Extraction failed."
+        ;;
+      *.xz)
+        check_dependency unxz
+        unxz "$archive" || exit_err "Extraction failed."
+        ;;
+      *.exe)
+        check_dependency cabextract
+        cabextract "$archive" || exit_err "Extraction failed."
+        ;;
+      *)
+        echo "Warning: Unsupported archive format: $archive, skipping." >&2
+        ;;
+    esac
+
+    sanitize_dir_contents
+
+    [ "$original_name" != "$safe_name" ] && mv "$archive" "${archive%/*}/$original_name"
+    trap - EXIT
+
+    if ! $extracthere; then
+      cd - >/dev/null || exit_err "Failed to return to original directory."
+    fi
+  done
 }
 
 compress() {
@@ -169,39 +181,45 @@ compress() {
   case $format in
     zip)
       check_dependency zip
-      zip -r -$level $([ "$verbose" = true ] || echo "-q") "$output" "$input" || exit_err "Compression failed."
+      zip -r -"$level" $([ "$verbose" = true ] && echo "" || echo "-q") "$output" "$input" || exit_err "Compression failed."
       ;;
     7z)
       check_dependency 7z
-      7z a -mx=$level $([ "$verbose" = true ] || echo "-bso0") "$output" "$input" || exit_err "Compression failed."
+      7z a -mx="$level" $([ "$verbose" = true ] && echo "" || echo "-bso0") "$output" "$input" || exit_err "Compression failed."
       ;;
     tar.gz|tgz)
       check_dependency tar
       check_dependency gzip
-      GZIP=-$level tar czf $([ "$verbose" = true ] && echo "v") "$output" "$input" || exit_err "Compression failed."
+      GZIP=-"$level" tar czf $([ "$verbose" = true ] && echo "v" || echo "") "$output" "$input" || exit_err "Compression failed."
       ;;
     tar.bz2)
       check_dependency tar
       check_dependency bzip2
-      BZIP2=-$level tar cjf $([ "$verbose" = true ] && echo "v") "$output" "$input" || exit_err "Compression failed."
+      BZIP2=-"$level" tar cjf $([ "$verbose" = true ] && echo "v" || echo "") "$output" "$input" || exit_err "Compression failed."
       ;;
     tar.xz)
       check_dependency tar
       check_dependency xz
-      XZ_OPT=-$level tar cJf $([ "$verbose" = true ] && echo "v") "$output" "$input" || exit_err "Compression failed."
+      XZ_OPT=-"$level" tar cJf $([ "$verbose" = true ] && echo "v" || echo "") "$output" "$input" || exit_err "Compression failed."
       ;;
     tar.zst)
       check_dependency tar
       check_dependency zstd
-      tar cf - "$input" | zstd -$level -o "$output" || exit_err "Compression failed."
+      tar cf - "$input" | zstd -"$level" -o "$output" || exit_err "Compression failed."
       ;;
-    *) exit_err "Error: Unsupported format '$format'" ;;
+    *)
+      exit_err "Error: Unsupported format '$format'"
+      ;;
   esac
 
   echo "Created archive: $(readlink -f "$output")"
 }
 
 case $mode in
-  extract) extract ;;
-  compress) compress ;;
+  extract) extract "$@" ;;
+  compress)
+    input="$1"
+    [ -z "$input" ] && exit_err "Error: Please specify a file/directory to compress."
+    compress
+    ;;
 esac
