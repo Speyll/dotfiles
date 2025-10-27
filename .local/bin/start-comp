@@ -27,7 +27,9 @@ exec >> "$LOGFILE" 2>&1
 
 # --- Environment Variables ---
 export QT_QPA_PLATFORM=wayland
+export QT_QPA_PLATFORMTHEME_QT6=wayland
 export QT_QPA_PLATFORMTHEME=qt6ct
+export QT_QPA_PLATFORMTHEME_QT6=qt6ct
 export QT_WAYLAND_DISABLE_WINDOWDECORATION=1
 export ELM_DISPLAY=wl
 export SDL_VIDEODRIVER=wayland

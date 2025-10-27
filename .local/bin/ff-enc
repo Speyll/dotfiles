@@ -75,7 +75,9 @@ process_files_serial() {
 encode_video_file() {
     file="$1"
     base_name=$(basename -- "$file")
-    clean_name=$(echo "${base_name%.*}" | tr -cd '[:alnum:]._-')
+    prefix=$(echo "$base_name" | iconv -f UTF-8 -t ASCII//TRANSLIT | tr -cd '[:alnum:]')
+    hash=$(echo -n "$base_name" | sha1sum | cut -c1-6)
+    clean_name="${prefix}_${hash}"
     output_file="$video_output_dir/${clean_name}.mp4"
 
     if [ -f "$output_file" ]; then
@@ -125,7 +127,9 @@ encode_videos() {
 extract_audio_file() {
     file="$1"
     base_name=$(basename -- "$file")
-    clean_name=$(echo "${base_name%.*}" | tr -cd '[:alnum:]._-')
+    prefix=$(echo "$base_name" | iconv -f UTF-8 -t ASCII//TRANSLIT | tr -cd '[:alnum:]')
+    hash=$(echo -n "$base_name" | sha1sum | cut -c1-6)
+    clean_name="${prefix}_${hash}"
     output_file="$audio_output_dir/${clean_name}.m4a"
     cover_art="/tmp/${clean_name}_cover.jpg"
 

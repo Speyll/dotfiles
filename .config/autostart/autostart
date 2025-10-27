@@ -5,7 +5,7 @@ LOG="/tmp/autostart.log"
 # Config
 AUDIO=false
 MODE="swaybg-random-online" # swaybg, swaybg-random, mpvpaper-local, mpvpaper-online, swaybg-random-online, wallhaven, none
-THEME_MODE="fixed"           # auto, fixed, none
+THEME_MODE="none"           # auto, fixed, none
 THEME_NAME="gruvbox-dark-medium"
 CURSOR="Kaela-Kovalskia-v2"
 WAYBAR_STYLE="none"          # stacking, tiling, none
@@ -208,9 +208,10 @@ gsettings set org.gnome.desktop.interface cursor-theme "$CURSOR" >>"$LOG" 2>&1 &
 seat seat0 xcursor_theme "$CURSOR" >>"$LOG" 2>&1 &
 
 # --- Extras ---
-fnott >>"$LOG" 2>&1 &
+#fnott >>"$LOG" 2>&1 &
 wlsunset -l 36.7 -L 3.08 >>"$LOG" 2>&1 &
 wl-paste --watch cliphist store -max-items 100 >>"$LOG" 2>&1 &
+gsettings set org.gnome.desktop.interface color-scheme 'prefer-dark' &
 
 # --- Updates ---
 if [ "$UPDATE_SCAN" = true ]; then
