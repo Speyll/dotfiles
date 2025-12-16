@@ -1,0 +1,179 @@
+#!/bin/sh
+# POSIX-Compliant Network Manager Script with Wi-Fi and VPN features
+
+LOCKFILE="/tmp/network-manager.lock"
+
+# Cleanup
+cleanup() {
+    rm -f "$LOCKFILE"
+    stty echo 2>/dev/null
+    exit 0
+}
+trap cleanup INT TERM EXIT
+
+# Check for lock
+[ -e "$LOCKFILE" ] && printf "%s\n" "Error: Already running." >&2 && exit 1
+touch "$LOCKFILE"
+
+# Check required tools
+command -v nmcli >/dev/null 2>&1 || { printf "%s\n" "nmcli not found." >&2; exit 1; }
+command -v fzf >/dev/null 2>&1 || { printf "%s\n" "fzf not found." >&2; exit 1; }
+
+# Optional sudo fallback
+run_privileged() {
+    if command -v sudo >/dev/null 2>&1; then
+        sudo "$@"
+    else
+        "$@"
+    fi
+}
+
+# Show network status
+show_status() {
+    printf "\n%s\n" "--- Network Status ---"
+    wifi=$(nmcli -t -f active,ssid dev wifi | awk -F: '$1=="yes"{print $2}')
+    [ -n "$wifi" ] && printf "%s\n" "Wi-Fi: $wifi" || printf "%s\n" "Wi-Fi: Disconnected"
+    vpn=$(nmcli -t -f NAME,TYPE connection show --active | awk -F: '$2=="vpn" || $2=="wireguard"{print $1}')
+    [ -n "$vpn" ] && printf "%s\n" "VPN: $vpn" || printf "%s\n" "VPN: Disconnected"
+}
+
+# Get Wi-Fi list
+wifi_list() {
+    [ "$1" = "yes" ] && nmcli device wifi rescan >/dev/null 2>&1
+    nmcli -t -f SSID,SIGNAL,SECURITY device wifi list --rescan no | awk -F: '!seen[$1]++' | sort -t: -k2 -nr
+}
+
+connect_wifi() {
+    printf "\n%s\n" "--- Available Networks ---"
+    list=$(wifi_list)
+    [ -z "$list" ] && printf "%s\n" "No networks found." && return
+    sel=$(printf "%s\n" "$list" | fzf)
+    [ -z "$sel" ] && return
+
+    ssid=$(printf "%s" "$sel" | cut -d: -f1)
+    sec=$(printf "%s" "$sel" | cut -d: -f3)
+
+    if [ "$ssid" = "<Hidden>" ]; then
+        printf "%s" "Enter SSID: " ; read -r ssid
+        hidden="yes"
+    else
+        hidden=""
+    fi
+
+    saved_conn=$(get_saved_connection "$ssid")
+
+    if [ -n "$saved_conn" ]; then
+        if ! has_password "$saved_conn"; then
+            printf "%s" "Password for saved network '$ssid': "
+            stty -echo ; read -r pw ; stty echo ; echo
+            run_privileged nmcli connection modify "$saved_conn" 802-11-wireless-security.psk "$pw"
+        fi
+        run_privileged nmcli connection up "$saved_conn" && printf "%s\n" "Connected to $ssid" || printf "%s\n" "Failed to connect."
+    else
+        if [ "$sec" = "--" ] || [ -z "$sec" ]; then
+            if [ -n "$hidden" ]; then
+                nmcli device wifi connect "$ssid" hidden yes && printf "%s\n" "Connected to $ssid" || printf "%s\n" "Failed to connect."
+            else
+                nmcli device wifi connect "$ssid" && printf "%s\n" "Connected to $ssid" || printf "%s\n" "Failed to connect."
+            fi
+        else
+            printf "%s" "Password: "
+            stty -echo ; read -r pw ; stty echo ; echo
+            if [ -n "$hidden" ]; then
+                nmcli device wifi connect "$ssid" password "$pw" hidden yes && printf "%s\n" "Connected to $ssid" || printf "%s\n" "Failed to connect."
+            else
+                nmcli device wifi connect "$ssid" password "$pw" && printf "%s\n" "Connected to $ssid" || printf "%s\n" "Failed to connect."
+            fi
+        fi
+    fi
+}
+
+disconnect_wifi() {
+    dev=$(nmcli -t -f DEVICE,TYPE device | awk -F: '$2=="wifi"{print $1}')
+    conn=$(nmcli -t -f NAME,DEVICE connection show --active | awk -F: -v d="$dev" '$2==d{print $1}')
+    [ -n "$conn" ] && nmcli connection down "$conn" && printf "%s\n" "Disconnected $conn" || printf "%s\n" "No Wi-Fi connection."
+}
+
+forget_network() {
+    saved=$(nmcli -t -f NAME,TYPE connection show | awk -F: '$2=="802-11-wireless"{print $1}')
+    [ -z "$saved" ] && printf "%s\n" "No saved networks." && return
+    sel=$(printf "%s\n" "$saved" | fzf)
+    [ -n "$sel" ] && nmcli connection delete "$sel" && printf "%s\n" "Removed $sel"
+}
+
+rescan_wifi() {
+    printf "%s\n" "Rescanning..."
+    wifi_list yes > /dev/null && printf "%s\n" "Scan complete."
+}
+
+import_vpn() {
+    printf "\n%s\n" "--- Import VPN ---"
+    printf "1) OpenVPN\n2) WireGuard\n"
+    printf "Choice (1-2): " ; read -r type
+    [ "$type" = "1" ] && proto="openvpn" && def="protonvpn"
+    [ "$type" = "2" ] && proto="wireguard" && def="spevpn"
+    [ -z "$proto" ] && return
+
+    printf "%s" "Path to .conf: " ; read -r conf
+    [ ! -f "$conf" ] && printf "%s\n" "File not found." && return
+    printf "Name (default: %s): " "$def" ; read -r name
+    name=${name:-$def}
+
+    run_privileged nmcli connection import type "$proto" file "$conf"
+    run_privileged nmcli connection modify "$(basename "$conf" .conf)" connection.id "$name"
+    printf "%s\n" "VPN '$name' imported."
+}
+
+toggle_vpn() {
+    list=$(nmcli -t -f NAME,TYPE connection show | awk -F: '$2=="vpn" || $2=="wireguard"{print $1}')
+    [ -z "$list" ] && printf "%s\n" "No VPNs." && return
+    sel=$(printf "%s\n" "$list" | fzf)
+    [ -z "$sel" ] && return
+    if nmcli connection show --active | grep -q "$sel"; then
+        run_privileged nmcli connection down "$sel" && printf "%s\n" "Disconnected $sel"
+    else
+        run_privileged nmcli connection up "$sel" && printf "%s\n" "Connected $sel"
+    fi
+}
+
+remove_vpn() {
+    list=$(nmcli -t -f NAME,TYPE connection show | awk -F: '$2=="vpn" || $2=="wireguard"{print $1}')
+    [ -z "$list" ] && printf "%s\n" "No VPNs." && return
+    sel=$(printf "%s\n" "$list" | fzf)
+    [ -n "$sel" ] && run_privileged nmcli connection delete "$sel" && printf "%s\n" "Deleted $sel"
+}
+
+vpn_menu() {
+    while :; do
+        show_status
+        printf "\n%s\n" "--- VPN Menu ---"
+        printf "1) Toggle VPN\n2) Import VPN\n3) Remove VPN\n4) Back\n"
+        printf "Choice: " ; read -r choice
+        case "$choice" in
+            1) toggle_vpn ;;
+            2) import_vpn ;;
+            3) remove_vpn ;;
+            4) break ;;
+        esac
+    done
+}
+
+main_menu() {
+    while :; do
+        show_status
+        printf "\n%s\n" "--- Menu ---"
+        printf "1) Connect Wi-Fi\n2) Disconnect Wi-Fi\n3) VPN Menu\n4) Rescan Wi-Fi\n5) Forget Wi-Fi\n6) Exit\n"
+        printf "Choice: " ; read -r choice
+        case "$choice" in
+            1) connect_wifi ;;
+            2) disconnect_wifi ;;
+            3) vpn_menu ;;
+            4) rescan_wifi ;;
+            5) forget_network ;;
+            6) break ;;
+        esac
+    done
+}
+
+main_menu
+cleanup

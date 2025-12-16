@@ -1,0 +1,3 @@
+#!/bin/sh
+
+/home/lyes/Videos/rec/pipobs/bin/python3 /home/lyes/Videos/rec/pipobs/replay.py

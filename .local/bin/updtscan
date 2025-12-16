@@ -1,0 +1,115 @@
+#!/bin/sh
+
+# Configuration
+CHECK_INTERVAL=14400  # 4 hours in seconds
+NOTIFY_TIMEOUT=14400000  # Notification timeout in milliseconds
+LOCKFILE="/tmp/update-checker.lock"
+
+# Create lock file and cleanup on exit
+if [ -e "$LOCKFILE" ]; then
+    echo "Error: Another instance is already running!" >&2
+    exit 1
+fi
+touch "$LOCKFILE"
+trap 'rm -f "$LOCKFILE"; exit' INT TERM EXIT
+
+# Function to check for command availability
+command_exists() {
+    command -v "$1" >/dev/null 2>&1
+}
+
+# Function to execute commands with elevated privileges (simplified for sudoers config)
+run_with_privileges() {
+    if command_exists sudo; then
+        sudo "$@"
+        return $?
+    elif command_exists pkexec; then
+        pkexec "$@"
+        return $?
+    else
+        echo "Error: No privilege escalation tool found!" >&2
+        return 1
+    fi
+}
+
+# Package manager checks (optimized for sudoers configuration)
+check_xbps() {
+    # xbps-install -Sy needs sudo for system-wide update, xbps-install -un might not, but for consistency use sudo
+    if run_with_privileges xbps-install -Sy >/dev/null 2>&1; then
+        run_with_privileges xbps-install -un 2>/dev/null | wc -l
+    else
+        echo 0
+    fi
+}
+
+check_pacman() {
+    # pacman -Sy needs sudo, pacman -Quq should not
+    if run_with_privileges pacman -Sy >/dev/null 2>&1; then
+        pacman -Quq 2>/dev/null | wc -l # pacman -Quq does not need sudo
+    else
+        echo 0
+    fi
+}
+
+check_apt() {
+    # apt update needs sudo, apt list --upgradable should not
+    if run_with_privileges apt update -qq >/dev/null 2>&1; then
+        apt list --upgradable 2>/dev/null | grep -c "upgradable" # apt list --upgradable doesn't need sudo
+    else
+        echo 0
+    fi
+}
+
+check_dnf() {
+    # dnf check-update might need sudo depending on configuration, dnf list updates might also
+    run_with_privileges dnf check-update -q >/dev/null
+    case $? in
+        0|100) dnf list updates -q 2>/dev/null | grep -c '^[a-zA-Z]' ;;
+        *) echo 0 ;;
+    esac
+}
+
+check_zypper() {
+    # zypper refresh needs sudo, zypper list-updates should also
+    if run_with_privileges zypper refresh -q >/dev/null 2>&1; then
+        run_with_privileges zypper -q list-updates -t package 2>/dev/null | wc -l
+    else
+        echo 0
+    fi
+}
+
+check_flatpak() {
+    # flatpak operations usually do not need sudo
+    flatpak remote-ls --updates 2>/dev/null | wc -l # flatpak doesn't need sudo
+}
+
+# Main update check function
+check_updates() {
+    total_updates=0
+    flatpak_updates=0
+
+    # System package managers
+    command_exists xbps-install && total_updates=$((total_updates + $(check_xbps)))
+    command_exists pacman && total_updates=$((total_updates + $(check_pacman)))
+    command_exists apt && total_updates=$((total_updates + $(check_apt)))
+    command_exists dnf && total_updates=$((total_updates + $(check_dnf)))
+    command_exists zypper && total_updates=$((total_updates + $(check_zypper)))
+
+    # Flatpak
+    command_exists flatpak && flatpak_updates=$(check_flatpak)
+
+    # Send notification if updates are available
+    if [ "$total_updates" -gt 0 ] || [ "$flatpak_updates" -gt 0 ]; then
+        notify-send -t "$NOTIFY_TIMEOUT" "System Updates Available" \
+            "Packages: $total_updates\nFlatpaks: $flatpak_updates"
+    fi
+}
+
+# Initial check
+check_updates
+
+# Periodic checks
+#while true; do
+#    sleep "$CHECK_INTERVAL"
+#    check_updates
+#done

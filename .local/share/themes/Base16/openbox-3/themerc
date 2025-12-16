@@ -1,0 +1,100 @@
+!! Colors
+!! Start flavours
+!! Window colors
+window.active.title.bg.color: #d5c4a1
+window.inactive.title.bg.color: #282828
+window.active.label.text.color: #282828
+window.inactive.label.text.color: #d5c4a1
+window.active.border.color: #d5c4a1
+window.inactive.border.color: #282828
+window.active.button.iconify.pressed.image.color: #282828
+window.active.button.iconify.disabled.image.color: #83a598
+window.active.button.iconify.unpressed.image.color: #282828
+window.active.button.iconify.toggled.pressed.image.color: #282828
+window.active.button.iconify.toggled.unpressed.image.color: #282828
+window.active.button.max.pressed.image.color: #282828
+window.active.button.max.disabled.image.color: #83a598
+window.active.button.max.unpressed.image.color: #282828
+window.active.button.max.toggled.pressed.image.color: #282828
+window.active.button.max.toggled.unpressed.image.color: #282828
+window.active.button.close.pressed.image.color: #282828
+window.active.button.close.disabled.image.color: #83a598
+window.active.button.close.unpressed.image.color: #282828
+window.active.button.close.toggled.pressed.image.color: #282828
+window.active.button.close.toggled.unpressed.image.color: #282828
+window.active.button.menu.pressed.image.color: #282828
+window.active.button.menu.disabled.image.color: #83a598
+window.active.button.menu.unpressed.image.color: #282828
+window.active.button.menu.toggled.pressed.image.color: #282828
+window.active.button.menu.toggled.unpressed.image.color: #282828
+window.inactive.button.iconify.pressed.image.color: #665c54
+window.inactive.button.iconify.disabled.image.color: #83a598
+window.inactive.button.iconify.unpressed.image.color: #665c54
+window.inactive.button.iconify.toggled.pressed.image.color: #665c54
+window.inactive.button.iconify.toggled.unpressed.image.color: #665c54
+window.inactive.button.max.pressed.image.color: #665c54
+window.inactive.button.max.disabled.image.color: #83a598
+window.inactive.button.max.unpressed.image.color: #665c54
+window.inactive.button.max.toggled.pressed.image.color: #ebdbb2
+window.inactive.button.max.toggled.unpressed.image.color: #ebdbb2
+window.inactive.button.close.pressed.image.color: #665c54
+window.inactive.button.close.disabled.image.color: #83a598
+window.inactive.button.close.unpressed.image.color: #665c54
+window.inactive.button.close.toggled.pressed.image.color: #665c54
+window.inactive.button.close.toggled.unpressed.image.color: #665c54
+window.inactive.button.menu.pressed.image.color: #665c54
+window.inactive.button.menu.disabled.image.color: #83a598
+window.inactive.button.menu.unpressed.image.color: #665c54
+window.inactive.button.menu.toggled.pressed.image.color: #665c54
+window.inactive.button.menu.toggled.unpressed.image.color: #665c54
+
+!! Menu colors
+menu.items.bg.color: #282828
+menu.items.text.color: #d5c4a1
+menu.items.disabled.text.color: #665c54
+menu.items.active.bg.color: #d5c4a1
+menu.items.active.text.color: #282828
+menu.separator.color: #d5c4a1
+menu.border.color: #d5c4a1
+menu.title.bg.color: #d5c4a1
+menu.title.text.color: #282828
+
+!! OSD colors
+osd.border.color: #d5c4a1
+osd.label.text.color: #d5c4a1
+osd.bg.color: #282828
+!! End flavours
+
+!! Title bar
+window.button.height: 22
+window.titlebar.padding.width: 0
+window.titlebar.padding.height: 0
+window.button.spacing: 0
+
+!! Menu Background
+menu.items.bg: flat
+menu.overlap.x: 0
+menu.overlap.y: 0
+
+!! Menu Separator
+menu.separator.width: 0
+menu.separator.padding.width: 4
+menu.separator.padding.height: 2
+
+!! Menu Headers
+menu.title.bg: flat
+menu.title.text.justify: center
+
+!! Menu Border
+menu.border.width: 0
+
+!! OSD
+osd.bg: flat
+osd.border.width: 1
+osd.window-switcher.width: 500
+osd.window-switcher.padding: 14
+osd.window-switcher.item.padding.x: 4
+osd.window-switcher.item.padding.y: 4
+osd.window-switcher.item.active.border.width: 2
+osd.workspace-switcher.boxes.width: 16
+osd.workspace-switcher.boxes.height: 16

@@ -1,0 +1,76 @@
+#!/bin/sh
+
+# Modified USB Mount Script with RW Access
+# Shows mount path and mounts read-write
+
+MOUNT_BASE="/tmp/usb-$(id -u)"
+
+if [ -t 1 ]; then
+    GREEN='\033[0;32m'
+    RED='\033[0;31m'
+    YELLOW='\033[0;33m'
+    NC='\033[0m'
+else
+    GREEN=''; RED=''; YELLOW=''; NC=''
+fi
+
+die() {
+    printf "${RED}%s${NC}\n" "$1" >&2
+    exit 1
+}
+
+find_mountable() {
+    for dev in /dev/sd*; do
+        [ -e "$dev" ] || continue
+        [ "$(lsblk -d -rno RM,TYPE "$dev")" = "1 disk" ] && {
+            part=$(lsblk -rno NAME "$dev" | awk 'NR==2 {print $0}')
+            [ -n "$part" ] && echo "/dev/$part" || echo "$dev"
+        }
+    done | sort | uniq
+}
+
+mount_workflow() {
+    devices=$(find_mountable)
+    [ -z "$devices" ] && die "No mountable USB devices found"
+
+    printf "${GREEN}Available USB devices:${NC}\n"
+    n=1
+    echo "$devices" | while IFS= read -r dev; do
+        model=$(lsblk -rno MODEL "$dev" | head -1)
+        size=$(lsblk -rno SIZE "$dev" | head -1)
+        printf "%2d) %s (%s %s)${NC}\n" "$n" "$dev" "${model:-Unknown}" "$size"
+        n=$((n+1))
+    done
+
+    printf "Select device (1-%d): " "$(echo "$devices" | wc -l)"
+    read -r choice
+    device=$(echo "$devices" | sed -n "${choice}p")
+    [ -z "$device" ] && die "Invalid selection"
+
+    # Create mount point
+    mount_point=$(mkdir -p "$MOUNT_BASE" && mktemp -d -p "$MOUNT_BASE" usb-XXXXXX) ||
+        die "Failed to create mount point"
+
+    # Mount with read-write access
+    printf "Mounting %s to ${GREEN}%s${NC}...\n" "$device" "$mount_point"
+    if ! sudo mount -o rw,nosuid,nodev,noexec "$device" "$mount_point" 2>/dev/null; then
+        fstype=$(blkid -o value -s TYPE "$device" 2>/dev/null)
+        [ -n "$fstype" ] && sudo mount -t "$fstype" -o rw,nosuid,nodev,noexec "$device" "$mount_point" ||
+            die "Failed to mount:\n- Check filesystem: sudo fsck $device"
+    fi
+
+    printf "${GREEN}Mounted successfully at: %s${NC}\n" "$mount_point"
+    printf "${YELLOW}Press Enter to unmount...${NC}"
+    read -r _
+
+    sudo umount "$mount_point" && rmdir "$mount_point" &&
+        printf "${GREEN}Unmounted successfully!${NC}\n" ||
+        die "Failed to unmount - try manual: sudo umount $mount_point"
+}
+
+cleanup() {
+    [ -d "$MOUNT_BASE" ] && find "$MOUNT_BASE" -type d -empty -delete 2>/dev/null
+}
+trap cleanup EXIT
+
+mount_workflow

@@ -1,0 +1,39 @@
+#!/bin/bash
+
+TARGET_DIR="${1:-.}"
+
+# Create temp input.conf for mpv keys
+TMP_INPUT_CONF=$(mktemp)
+
+cat > "$TMP_INPUT_CONF" <<EOF
+LEFT playlist-prev
+RIGHT playlist-next
+
+KP_PLUS add video-zoom 0.1
+KP_MINUS add video-zoom -0.1
+
+ENTER playlist-next
+BACKSPACE playlist-prev
+EOF
+
+# Find and shuffle files (your existing shuffle code)
+mapfile -d '' files < <(find "$TARGET_DIR" -type f \( -iname '*.jpg' -o -iname '*.jpeg' -o -iname '*.png' -o -iname '*.gif' -o -iname '*.webp' \) -print0)
+
+if ((${#files[@]} == 0)); then
+  echo "No images found in $TARGET_DIR" >&2
+  rm "$TMP_INPUT_CONF"
+  exit 1
+fi
+
+# Fisher-Yates shuffle
+for ((i=${#files[@]} -1; i > 0; i--)); do
+  j=$(( RANDOM % (i+1) ))
+  tmp=${files[i]}
+  files[i]=${files[j]}
+  files[j]=$tmp
+done
+
+# Run mpv with your custom input.conf (temporary) and shuffled images
+mpv --input-conf="$TMP_INPUT_CONF" --vo=gpu --fullscreen --image-display-duration=5 --loop-playlist=inf "${files[@]}"
+
+rm "$TMP_INPUT_CONF"

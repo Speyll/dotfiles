@@ -1,0 +1,74 @@
+layout {
+    gaps 3.5
+    center-focused-column "never"
+    always-center-single-column
+
+    preset-column-widths {
+        proportion 0.33333
+        proportion 0.5
+        proportion 0.66667
+    }
+
+    default-column-width { proportion 0.5; }
+
+    focus-ring {
+        off
+        width 1.5
+        active-color "#d5c4a1"
+        inactive-color "#282828"
+    }
+
+    border {
+        off
+        width 2
+        active-color "#d5c4a1"
+        inactive-color "#282828"
+    }
+
+    tab-indicator {
+        hide-when-single-tab
+        place-within-column
+        gap 2
+        width 8
+        length total-proportion=0.5
+        position "left"
+        gaps-between-tabs 8
+        corner-radius 5
+        active-color "#d5c4a1"
+        inactive-color "#282828"
+        urgent-color "blue"
+    }
+
+    insert-hint {
+        // off
+        on
+        color "#ffc87f80"
+        // gradient from="#ffbb6680" to="#ffc88080" angle=45 relative-to="workspace-view"
+    }
+}
+
+overview {
+    zoom 0.50
+    backdrop-color "#282828"
+}
+
+recent-windows {
+    debounce-ms 750
+    open-delay-ms 50
+    highlight {
+        active-color "#999999ff"
+        urgent-color "#ff9999ff"
+        padding 30
+        corner-radius 8
+    }
+    previews {
+        max-height 480
+        max-scale 0.5
+    }
+    binds {
+        Alt+Tab { next-window; }
+        Alt+Shift+Tab { previous-window; }
+        Alt+grave { next-window filter="app-id"; }
+        Alt+Shift+grave { previous-window filter="app-id"; }
+    }
+}

@@ -1,0 +1,117 @@
+#!/bin/sh
+#
+# spefetch - precise system info display
+
+# Configuration
+: "${USE_NERD_FONTS:=1}"  # Set to 0 for emoji fallback
+
+# ANSI color variables
+reset=$(printf '\033[0m')
+red=$(printf '\033[31m')
+green=$(printf '\033[32m')
+yellow=$(printf '\033[33m')
+blue=$(printf '\033[34m')
+magenta=$(printf '\033[35m')
+cyan=$(printf '\033[36m')
+white=$(printf '\033[37m')
+
+# Symbol configuration with automatic fallback
+if [ "$USE_NERD_FONTS" -eq 1 ]; then
+    os_icon="󰍹" ker_icon="󰌢" up_icon="󰔟" pkg_icon="󰏖"
+    sh_icon="󰆍" de_icon="󰖲" inst_icon="󰄾"
+else
+    os_icon="🏠" ker_icon="💫" up_icon="⏳" pkg_icon="📦"
+    sh_icon="🐚" de_icon="🎨" inst_icon="📅"
+fi
+
+# System info detection (with lowercase OS)
+get_hostname() {
+    (hostname -f || uname -n) 2>/dev/null | cut -d'.' -f1 | tr -d ' ' | head -c 15
+}
+
+user=$(id -un | tr '[:upper:]' '[:lower:]')
+host=$(get_hostname | tr '[:upper:]' '[:lower:]')
+os=$( ( . /etc/os-release && echo "${PRETTY_NAME:-$NAME}" || uname -o || uname -s ) | tr '[:upper:]' '[:lower:]')
+kernel=$(uname -sr | tr '[:upper:]' '[:lower:]')
+uptime=$(uptime -p 2>/dev/null | sed 's/up //;s/ days\?/d/;s/ hours\?/h/;s/ minutes\?/m/' | tr -d ',')
+shell=$(basename "${SHELL:-unknown}" | tr '[:upper:]' '[:lower:]')
+
+# Estimate installation age using /lost+found directory
+install_days="unknown"
+if [ -d /lost+found ]; then
+    install_date=$(stat -c %W /lost+found 2>/dev/null)
+    if [ "$install_date" -gt 0 ] 2>/dev/null; then
+        install_days=$(( ( $(date +%s) - install_date ) / 86400 ))
+    fi
+fi
+
+# Enhanced package detection
+detect_pkgs() {
+    if command -v xbps-query >/dev/null; then       # Void
+        xbps-query -l | wc -l
+    elif command -v dpkg >/dev/null; then          # Debian
+        dpkg -l | grep -c '^ii'
+    elif command -v pacman >/dev/null; then        # Arch
+        pacman -Qq | wc -l
+    elif command -v rpm >/dev/null; then           # RPM
+        rpm -qa | wc -l
+    elif command -v dnf >/dev/null; then           # Fedora
+        dnf list installed | wc -l
+    elif command -v zypper >/dev/null; then        # openSUSE
+        zypper se -i | wc -l
+    elif command -v apk >/dev/null; then           # Alpine
+        apk info | wc -l
+    else
+        echo 0
+    fi
+}
+
+# Fixed package manager detection
+detect_pkg_manager() {
+    for cmd in xbps-query dpkg pacman rpm dnf zypper apk; do
+        if command -v $cmd >/dev/null; then
+            case $cmd in
+                "xbps-query") echo "xbps" ;;
+                *) echo "${cmd}" ;;
+            esac
+            return
+        fi
+    done
+    echo "unknown"
+}
+
+pkg_count=$(detect_pkgs)
+pkg_manager=$(detect_pkg_manager)
+nix_pkgs=$(
+    (nix-store -q --references /run/current-system/sw 2>/dev/null
+     nix-store -q --references ~/.nix-profile 2>/dev/null
+    ) | sort -u | wc -l
+)
+flat_pkgs=$(flatpak list --columns=app 2>/dev/null | tail -n +1 | wc -l)
+snap_pkgs=$(snap list 2>/dev/null | tail -n +2 | wc -l)
+
+# DE/WM detection
+ui=$(echo "${XDG_CURRENT_DESKTOP:-$DESKTOP_SESSION}" | tr '[:upper:]' '[:lower:]')
+
+# Fixed color package string builder (blue count)
+build_pkg_string() {
+    printf "%s  %s%s (%s) %s%s (flatpak) %s%s (nix) %s%s (snap)" \
+        "${magenta}${pkg_icon}" \
+        "${blue}" "${pkg_count}" "${blue}${pkg_manager}" \
+        "${cyan}" "${flat_pkgs}" \
+        "${green}" "${nix_pkgs}" \
+        "${red}" "${snap_pkgs}"
+}
+
+# Perfectly aligned output
+cat <<EOF
+${reset}
+${cyan}     /\_/\     ${green}${user}${yellow}@${magenta}${host}
+${cyan}    / ${white}o${blue} ${white}o${cyan} \    ${red}${os_icon}  ${white}${os}
+${cyan}    \   ^ /    ${yellow}${ker_icon}  ${white}${kernel}
+${cyan}     './ \     ${green}${up_icon} ${white} ${uptime} ${magenta}${inst_icon} ${white}${install_days}d
+${cyan}      |||      $(build_pkg_string)
+${cyan}     /   \     ${blue}${sh_icon}  ${white}${shell}
+${cyan}               ${yellow}${de_icon}  ${white}${ui:-unknown}
+${reset}
+EOF

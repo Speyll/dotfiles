@@ -1,0 +1,29 @@
+#!/bin/sh
+
+# Check if directories are provided
+if [ -z "$1" ] || [ -z "$2" ]; then
+    echo "Usage: $0 <dir1> <dir2>"
+    exit 1
+fi
+
+dir1="$1"
+dir2="$2"
+
+# Ensure both directories exist
+if [ ! -d "$dir1" ] || [ ! -d "$dir2" ]; then
+    echo "Error: One or both directories do not exist."
+    exit 1
+fi
+
+# Create named pipes
+mkfifo fifo1 fifo2
+
+# List files in the top-level of both directories, sort, and write to named pipes
+(find "$dir1" -maxdepth 1 -type f -exec basename {} \; | sort > fifo1) &
+(find "$dir2" -maxdepth 1 -type f -exec basename {} \; | sort > fifo2) &
+
+# Compare file lists using comm
+comm -23 fifo1 fifo2
+
+# Clean up named pipes
+rm fifo1 fifo2

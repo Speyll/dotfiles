@@ -1,0 +1,39 @@
+#!/bin/sh
+
+ps -e -o pgid= -o rss= -o comm= | awk '
+{
+    pgid = $1
+    rss = $2
+    cmd = $3
+
+    # Handle kernel threads (bracketed names)
+    if (cmd ~ /^\[.*\]$/) {
+        cmd = "[" cmd "]"
+    }
+
+    # Group by pgid and command
+    key = pgid "|" cmd
+    mem[key] += rss
+    cmds[key] = cmd
+}
+END {
+    for (key in mem) {
+        # Convert to MB and filter out 0MB entries
+        mem_mb = mem[key] / 1024
+        if (mem_mb >= 0.1) {  # Only show processes using at least 0.1 MB
+            printf "%.2f|%s\n", mem_mb, cmds[key]
+        }
+    }
+}' | sort -nr | awk -F'|' '
+BEGIN {
+    print "Process               RAM Usage"
+    print "-------------------  ----------"
+}
+{
+    printf "%-20s %9.2f MB\n", $2, $1
+    total += $1
+}
+END {
+    print "-------------------  ----------"
+    printf "%-20s %9.2f MB\n", "Total RAM Usage:", total
+}'

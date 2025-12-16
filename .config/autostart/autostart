@@ -1,0 +1,221 @@
+#!/bin/sh
+
+LOG="/tmp/autostart.log"
+
+# Config
+AUDIO=false
+MODE="swaybg-random-online" # swaybg, swaybg-random, mpvpaper-local, mpvpaper-online, swaybg-random-online, wallhaven, none
+THEME_MODE="none" # auto, fixed, none
+THEME_NAME="gruvbox-dark-medium"
+CURSOR="Kaela-Kovalskia-v2"
+WAYBAR_STYLE="none" # stacking, tiling, none
+UPDATE_SCAN=true
+
+# Defaults local
+DWALL="$HOME/pictures/walls/wall.jpg"
+DVWALL="$HOME/pictures/walls/vert-wall.jpg"
+
+# Pastebin URLs
+P_WALL="https://pastebin.com/raw/7YwMgZXg"
+P_VWALL="https://pastebin.com/raw/Q8GUUAse"
+P_VID="https://pastebin.com/raw/yHFpxMDB"
+P_VVID="https://pastebin.com/raw/NTVA8RMd"
+
+# Wait for Wayland compositor to be ready (max 10s)
+timeout=20
+while { [ -z "$WAYLAND_DISPLAY" ] || [ ! -S "$XDG_RUNTIME_DIR/$WAYLAND_DISPLAY" ]; } && [ "$timeout" -gt 0 ]; do
+  sleep 0.5
+  timeout=$((timeout - 1))
+done
+
+# --- Env setup ---
+dbus-update-activation-environment --all >>"$LOG" 2>&1 &
+#/usr/libexec/polkit-gnome-authentication-agent-1 >>"$LOG" 2>&1 &
+/usr/lib/polkit-gnome/polkit-gnome-authentication-agent-1 >>"$LOG" 2>&1 &
+
+# --- Monitor layout ---
+#wlr-randr --output DP-2 --on --mode 1920x1080@120 --pos 0,0 --transform normal --scale 1 --adaptive-sync enabled >>"$LOG" 2>&1
+#wlr-randr --output HDMI-A-1 --on --mode 1920x1080@60 --pos -1080,-840 --transform 270 --scale 1 --adaptive-sync enabled >>"$LOG" 2>&1 &
+
+# --- Process Management ---
+for p in flavours mpvpaper swaybg fnott wlsunset cliphist; do
+  pkill -x "$p" >>"$LOG" 2>&1 || :
+done
+
+# --- Audio ---
+if [ "$AUDIO" = true ]; then
+  for p in pipewire wireplumber pipewire-pulse; do pkill -x "$p" >>"$LOG" 2>&1 || :; done
+  pipewire >>"$LOG" 2>&1 &
+  sleep 1
+  wireplumber >>"$LOG" 2>&1 &
+  pipewire-pulse >>"$LOG" 2>&1 &
+fi
+
+# --- OpenRGB ---
+if command -v openrgb >/dev/null 2>&1; then
+  openrgb --server -p pureWhite >>"$LOG" 2>&1 &
+else
+  echo "OpenRGB not found" >>"$LOG"
+fi
+
+# --- Helpers ---
+get_orient() {
+  wlr-randr | awk '
+    /^[A-Za-z0-9-]+/ { o = $1 }
+    /Transform:/ {
+      t = $2
+      if (t ~ /90|270/)
+        print o ":portrait"
+      else
+        print o ":landscape"
+    }
+  '
+}
+
+fetch_url() {
+  curl -fsSL "$1" | shuf -n1 | tr -d '\r\n' | xargs
+}
+
+download_wallhaven() {
+  r=$1
+  out=$2
+  fb=$3
+  res=$4
+
+  pg=$(shuf -i1-5 -n1)
+  json=$(curl -sf "https://wallhaven.cc/api/v1/search?categories=110&purity=100&sorting=toplist&topRange=1y&ratios=$r&atleast=$res&page=$pg&per_page=24") || {
+    echo "Wallhaven fail $r" >>"$LOG"
+    cp "$fb" "$out"
+    return
+  }
+
+  cnt=$(echo "$json" | jq '.data|length')
+  if [ "$cnt" -eq 0 ]; then
+    cp "$fb" "$out"
+    return
+  fi
+
+  idx=$(shuf -i0-$((cnt - 1)) -n1)
+  url=$(echo "$json" | jq -r ".data[$idx].path")
+  curl -sfL "$url" -o "$out" || cp "$fb" "$out"
+}
+
+apply_swaybg() {
+  w=$1
+  vw=$2
+  while IFS=: read -r o or; do
+    if [ "$or" = "portrait" ]; then
+      swaybg -o "$o" -i "$vw" -m fill >>"$LOG" 2>&1 &
+    else
+      swaybg -o "$o" -i "$w" -m fill >>"$LOG" 2>&1 &
+    fi
+  done <<EOF
+$(get_orient)
+EOF
+}
+
+apply_mpvpaper() {
+  for entry in $(get_orient); do
+    o=${entry%%:*}
+    or=${entry##*:}
+    if [ "$MODE" = "mpvpaper-local" ]; then
+      v=$(find "$HOME/pictures/walls/" -type f -name "*.mp4" | shuf -n1)
+      if [ -z "$v" ]; then
+        echo "No local vid found" >>"$LOG"
+        continue
+      fi
+      mpvpaper -vsp -o "no-audio pause=no --loop --ytdl-format='bestvideo[height<=1080]+bestaudio/best'" "$o" "$v" >>"$LOG" 2>&1 &
+    else
+      if [ "$or" = "portrait" ]; then
+        u=$(fetch_url "$P_VVID")
+      else
+        u=$(fetch_url "$P_VID")
+      fi
+      mpvpaper -vsp -o "no-audio pause=no --loop --ytdl-format='bestvideo[height<=1080]+bestaudio/best'" "$o" "$u" >>"$LOG" 2>&1 &
+    fi
+  done
+}
+
+configure_theme() {
+  case "$THEME_MODE" in
+    auto)
+      if [ -f /tmp/wall.jpg ]; then
+        flavours generate dark /tmp/wall.jpg >>"$LOG" 2>&1
+        flavours apply generated >>"$LOG" 2>&1 &
+      fi
+      ;;
+    fixed)
+      flavours apply "$THEME_NAME" >>"$LOG" 2>&1 &
+      ;;
+    none)
+      ;;
+  esac
+}
+
+configure_waybar() {
+  case "$WAYBAR_STYLE" in
+    stacking)
+      pkill -x waybar >>"$LOG" 2>&1 || :
+      waybar -c "$HOME/.config/waybar/stacking-config" -s "$HOME/.config/waybar/style.css" >>"$LOG" 2>&1 &
+      ;;
+    tiling)
+      pkill -x waybar >>"$LOG" 2>&1 || :
+      waybar -c "$HOME/.config/waybar/tiling-config" -s "$HOME/.config/waybar/style.css" >>"$LOG" 2>&1 &
+      ;;
+    none)
+      ;;
+  esac
+}
+
+# --- Main ---
+case "$MODE" in
+  swaybg-random-online)
+    w=$(fetch_url "$P_WALL")
+    curl -fsSL "$w" -o /tmp/wall.jpg || cp "$DWALL" /tmp/wall.jpg
+    vw=$(fetch_url "$P_VWALL")
+    curl -fsSL "$vw" -o /tmp/vert_wall.jpg || cp "$DVWALL" /tmp/vert_wall.jpg
+    apply_swaybg /tmp/wall.jpg /tmp/vert_wall.jpg
+    ;;
+  swaybg-random)
+    w=$(find "$HOME/pictures/walls/"*.jpg -type f | shuf -n1)
+    [ -z "$w" ] && w="$DWALL"
+    vw=$(find "$HOME/pictures/walls/"vert-*.jpg -type f | shuf -n1)
+    [ -z "$vw" ] && vw="$DVWALL"
+    apply_swaybg "$w" "$vw"
+    ;;
+  swaybg)
+    apply_swaybg "$DWALL" "$DVWALL"
+    ;;
+  mpvpaper-local|mpvpaper-online)
+    apply_mpvpaper
+    ;;
+  wallhaven)
+    download_wallhaven "16x9" /tmp/wall.jpg "$DWALL" "1920x1080"
+    download_wallhaven "9x16" /tmp/vert_wall.jpg "$DVWALL" "1080x1920"
+    apply_swaybg /tmp/wall.jpg /tmp/vert_wall.jpg
+    ;;
+  none)
+    ;;
+  *)
+    echo "Unknown MODE: $MODE" >>"$LOG"
+    ;;
+esac
+
+configure_theme
+configure_waybar
+
+# --- Cursor ---
+gsettings set org.gnome.desktop.interface cursor-theme "$CURSOR" >>"$LOG" 2>&1 &
+seat seat0 xcursor_theme "$CURSOR" >>"$LOG" 2>&1 &
+
+# --- Extras ---
+#fnott >>"$LOG" 2>&1 &
+wlsunset -l 36.7 -L 3.08 >>"$LOG" 2>&1 &
+wl-paste --watch cliphist store -max-items 100 >>"$LOG" 2>&1 &
+gsettings set org.gnome.desktop.interface color-scheme 'prefer-dark' &
+
+# --- Updates ---
+if [ "$UPDATE_SCAN" = true ]; then
+  sleep 2
+  "$HOME/.local/bin/updtscan" >>"$LOG" 2>&1 &
+fi

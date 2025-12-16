@@ -1,0 +1,83 @@
+#!/bin/sh
+# Unified compositor launcher with optional PipeWire support
+
+# --- Parse Arguments ---
+START_PIPEWIRE=false
+COMPOSITOR=""
+
+while [ $# -gt 0 ]; do
+  case "$1" in
+    -p) START_PIPEWIRE=true ;;
+    -*) echo "Unknown option: $1" >&2; exit 1 ;;
+    *) COMPOSITOR="$1" ;;
+  esac
+  shift
+done
+
+[ -z "$COMPOSITOR" ] && {
+  echo "Usage: $(basename "$0") [-p] <compositor>" >&2
+  exit 1
+}
+
+# --- Setup Logging ---
+mkdir -p "$HOME/.cache"
+LOGFILE="$HOME/.cache/wsession-errors"
+echo "$COMPOSITOR session started: $(date)" >> "$LOGFILE"
+exec >> "$LOGFILE" 2>&1
+
+# --- Environment Variables ---
+export QT_QPA_PLATFORM=wayland
+export QT_QPA_PLATFORMTHEME_QT6=wayland
+export QT_QPA_PLATFORMTHEME=qt6ct
+export QT_QPA_PLATFORMTHEME_QT6=qt6ct
+export QT_WAYLAND_DISABLE_WINDOWDECORATION=1
+export ELM_DISPLAY=wl
+export SDL_VIDEODRIVER=wayland
+export GTK_USE_PORTAL=1
+export MOZ_ENABLE_WAYLAND=1
+export XCURSOR_THEME=Kaela-Kovalskia-v2
+export XCURSOR_SIZE=24
+export XDG_SESSION_TYPE=wayland
+export XDG_SESSION_DESKTOP="$COMPOSITOR"
+export XDG_CURRENT_DESKTOP="$COMPOSITOR"
+export XDG_DATA_DIRS="$HOME/.local/share/flatpak/exports/share:/var/lib/flatpak/exports/share:/usr/local/share:/usr/share"
+export NO_AT_BRIDGE=1
+export XKB_DEFAULT_LAYOUT=fr,us
+export XKB_DEFAULT_OPTIONS=grp:rctrl_rshift_toggle
+
+# --- D-Bus Session ---
+if [ -z "$DBUS_SESSION_BUS_ADDRESS" ]; then
+  eval "$(/usr/bin/dbus-launch --exit-with-session --sh-syntax)"
+fi
+
+# Ensure desktop services see the updated environment
+dbus-update-activation-environment --all &
+
+# --- Clean Previous Session ---
+rm -f "$HOME"/.cache/*.wob
+
+# --- PipeWire Stack ---
+if [ "$START_PIPEWIRE" = true ]; then
+  echo "Launching PipeWire stack..."
+
+  if ! pgrep -x pipewire >/dev/null; then
+    pipewire &
+    sleep 1
+  fi
+
+  if ! pgrep -x wireplumber >/dev/null; then
+    wireplumber &
+  fi
+
+  if ! pgrep -x pipewire-pulse >/dev/null; then
+    pipewire-pulse &
+  fi
+fi
+
+# --- Launch Compositor ---
+command -v "$COMPOSITOR" >/dev/null 2>&1 || {
+  echo "Compositor not found: $COMPOSITOR" >&2
+  exit 1
+}
+
+exec "$COMPOSITOR"

@@ -1,0 +1,16 @@
+output "DP-2" {
+    mode "1920x1080@120.000"
+    scale 1.0
+    transform "normal"
+    position x=1080 y=840
+    variable-refresh-rate
+    focus-at-startup
+}
+
+output "HDMI-A-1" {
+    mode "1920x1080@60.000"
+    scale 1.0
+    transform "270"
+    position x=-0 y=0
+    variable-refresh-rate
+}

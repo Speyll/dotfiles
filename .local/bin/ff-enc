@@ -1,0 +1,230 @@
+#!/bin/sh
+set -eu
+
+### CONFIGURATION ###
+video_output_dir="encVids"
+audio_output_dir="extAudios"
+optimized_audio_dir="optAudios"
+
+target_height=900
+target_fps=30
+crf=26
+preset="medium"
+audio_bitrate="128k"
+cover_timestamp="00:10:00"
+
+video_extensions="mp4 mkv ts mov avi webm gif m4v"
+audio_extensions="mp4 mkv avi mov webm flv wmv mpg mpeg"
+audio_file_extensions="mp3 wav flac aac m4a opus"
+
+### UTILITY FUNCTIONS ###
+die() {
+    echo "Error: $1" >&2
+    exit 1
+}
+
+find_media_files() {
+    case "$1" in
+        video) exts="$video_extensions" ;;
+        audio) exts="$audio_extensions" ;;
+        audio_files) exts="$audio_file_extensions" ;;
+        *) die "Invalid media type: $1" ;;
+    esac
+
+    for ext in $exts; do
+        find . -maxdepth 1 -type f -iname "*.$ext"
+    done
+}
+
+progress_bar() {
+    awk '
+        /out_time_ms/ {
+            gsub("out_time_ms=", "", $0)
+            ms=$0
+            sec=int(ms/1000000)
+            min=int(sec/60)
+            sec=sec%60
+            printf "\r    Progress: %02d:%02d elapsed", min, sec
+            fflush()
+        }
+        END { print "" }
+    '
+}
+
+### PROCESSING LOOP WITHOUT CHECKPOINT ###
+process_files_serial() {
+    cmd="$1"
+    filelist="$2"
+
+    total_files=$(wc -l < "$filelist" | tr -d ' ')
+    processed_files=0
+
+    while IFS= read -r file || [ -n "$file" ]; do
+        if "$cmd" "$file"; then
+            :
+        else
+            echo "Error processing: $file" >&2
+        fi
+
+        processed_files=$((processed_files + 1))
+        echo "Progress: $processed_files / $total_files"
+    done < "$filelist"
+}
+
+### VIDEO ENCODING ###
+encode_video_file() {
+    file="$1"
+    base_name=$(basename -- "$file")
+    prefix=$(echo "$base_name" | iconv -f UTF-8 -t ASCII//TRANSLIT | tr -cd '[:alnum:]')
+    hash=$(echo -n "$base_name" | sha1sum | cut -c1-6)
+    clean_name="${prefix}_${hash}"
+    output_file="$video_output_dir/${clean_name}.mp4"
+
+    if [ -f "$output_file" ]; then
+        echo "[$(date '+%H:%M:%S')] Skipping: $base_name (already exists)"
+        return 0
+    fi
+
+    height=$(ffprobe -v error -select_streams v:0 -show_entries stream=height -of csv=p=0 "$file")
+    fps=$(ffprobe -v error -select_streams v:0 -show_entries stream=r_frame_rate -of csv=p=0 "$file" | awk -F/ '{if ($2==""||$2==0) print $1; else printf "%.3f", $1/$2;}')
+    fps_int=${fps%.*}
+
+    if [ "$height" -gt "$target_height" ]; then
+        vf_arg="scale=-2:$target_height"
+    else
+        vf_arg="scale=iw:ih"
+    fi
+
+    if [ "$fps_int" -gt 30 ]; then
+        vf_arg="$vf_arg,fps=$target_fps"
+    fi
+
+    echo "[$(date '+%H:%M:%S')] Processing: $base_name"
+    ionice -c3 2>/dev/null || true
+    nice -n 19 ffmpeg -nostdin -y -hide_banner \
+        -i "$file" \
+        -c:v libx265 -preset "$preset" -crf "$crf" -x265-params no-sao=1:bframes=8 \
+        -vf "$vf_arg" \
+        -c:a libopus -b:a "$audio_bitrate" -vbr on \
+        -movflags +faststart -tag:v hvc1 \
+        -map_metadata 0 -map_chapters 0 \
+        "$output_file" >/dev/null 2>&1
+    echo "[$(date '+%H:%M:%S')] Done: $base_name"
+}
+
+encode_videos() {
+    mkdir -p "$video_output_dir"
+    tmpfile=$(mktemp) || die "Failed to create temp file"
+    trap 'rm -f "$tmpfile"' EXIT
+
+    find_media_files video | sort > "$tmpfile"
+    process_files_serial encode_video_file "$tmpfile"
+    rm -f "$tmpfile"
+    trap - EXIT
+}
+
+### AUDIO EXTRACTION ###
+extract_audio_file() {
+    file="$1"
+    base_name=$(basename -- "$file")
+    prefix=$(echo "$base_name" | iconv -f UTF-8 -t ASCII//TRANSLIT | tr -cd '[:alnum:]')
+    hash=$(echo -n "$base_name" | sha1sum | cut -c1-6)
+    clean_name="${prefix}_${hash}"
+    output_file="$audio_output_dir/${clean_name}.m4a"
+    cover_art="/tmp/${clean_name}_cover.jpg"
+
+    if [ -f "$output_file" ]; then
+        echo "[$(date '+%H:%M:%S')] Skipping audio: $base_name (already exists)"
+        return 0
+    fi
+
+    echo "[$(date '+%H:%M:%S')] Extracting audio: $base_name"
+    # Generate cover art snapshot safely, ignoring errors.
+    ffmpeg -nostdin -y -ss "$cover_timestamp" -i "$file" -vframes 1 "$cover_art" 2>/dev/null || true
+
+    if ! ffmpeg -nostdin -y -i "$file" -vn -c:a copy -strict -2 "$output_file" 2>/dev/null; then
+        ionice -c3 2>/dev/null || true
+        nice -n 19 ffmpeg -nostdin -y -i "$file" -vn -c:a aac -b:a 192k "$output_file"
+    fi
+
+    if [ -f "$cover_art" ]; then
+        ffmpeg -nostdin -y -i "$output_file" -i "$cover_art" \
+            -map 0:a -map 1 -c copy -disposition:v:0 attached_pic \
+            -metadata:s:v title="Album cover" \
+            -metadata:s:v comment="Cover (front)" \
+            "${output_file%.m4a}_cover.m4a"
+        mv "${output_file%.m4a}_cover.m4a" "$output_file"
+        rm -f "$cover_art"
+    fi
+
+    echo "[$(date '+%H:%M:%S')] Done audio: $base_name"
+}
+
+extract_audios() {
+    mkdir -p "$audio_output_dir"
+    tmpfile=$(mktemp) || die "Failed to create temp file"
+    trap 'rm -f "$tmpfile"' EXIT
+
+    find_media_files audio | sort > "$tmpfile"
+    process_files_serial extract_audio_file "$tmpfile"
+    rm -f "$tmpfile"
+    trap - EXIT
+}
+
+### AUDIO OPTIMIZATION ###
+optimize_audio_file() {
+    file="$1"
+    base_name=$(basename -- "$file")
+    clean_name=$(echo "${base_name%.*}" | tr -cd '[:alnum:]._-')
+    output_file="$optimized_audio_dir/${clean_name}.opus"
+
+    if [ -f "$output_file" ]; then
+        echo "[$(date '+%H:%M:%S')] Skipping audio: $base_name (already exists)"
+        return 0
+    fi
+
+    echo "[$(date '+%H:%M:%S')] Optimizing audio: $base_name"
+    ionice -c3 2>/dev/null || true
+    nice -n 19 ffmpeg -nostdin -y -hide_banner -progress pipe:1 \
+        -i "$file" \
+        -c:a libopus -b:a "$audio_bitrate" -vbr on \
+        "$output_file" 2>&1 | progress_bar
+    echo "[$(date '+%H:%M:%S')] Done audio: $base_name"
+}
+
+optimize_audios() {
+    mkdir -p "$optimized_audio_dir"
+    tmpfile=$(mktemp) || die "Failed to create temp file"
+    trap 'rm -f "$tmpfile"' EXIT
+
+    find_media_files audio_files | sort > "$tmpfile"
+    process_files_serial optimize_audio_file "$tmpfile"
+    rm -f "$tmpfile"
+    trap - EXIT
+}
+
+### MAIN MENU ###
+show_help() {
+cat <<EOF
+Batch Media Processor - Serial Processing
+
+Usage: $0 [option]
+Options:
+  -v, --video       Batch encode videos to 900p H.265/Opus
+  -x, --extract     Batch extract audio from videos (with cover art)
+  -a, --audio       Batch optimize audio files to Opus
+  -h, --help        Show this help
+
+File existence in output directories is used to skip processed files.
+EOF
+}
+
+case "${1:-}" in
+    -v|--video)   encode_videos ;;
+    -x|--extract) extract_audios ;;
+    -a|--audio)   optimize_audios ;;
+    -h|--help|"") show_help ;;
+    *) die "Unknown option: $1" ;;
+esac
+
+echo "All tasks complete."

@@ -1,0 +1,60 @@
+prefer-no-csd
+
+// Includes
+include "outputs.kdl"
+include "layout.kdl"
+include "dms.kdl"
+include "keybinds.kdl"
+include "rules.kdl"
+
+// Input & Cursor (core, stay inline)
+input {
+    keyboard {
+        xkb {
+            layout "us,fr"
+            options "grp:rctrl_rshift_toggle,numpad:mac,compose:ralt"
+        }
+    }
+    touchpad {
+        tap
+        accel-speed 0.2
+        accel-profile "adaptive"
+        scroll-method "two-finger"
+    }
+    mouse {
+        accel-profile "flat"
+    }
+    trackpoint {
+        off
+    }
+    touch {
+        map-to-output "DP-2"
+    }
+    tablet {
+        map-to-output "DP-2"
+    }
+}
+
+cursor {
+    xcursor-theme "Kaela-Kovalskia-v2"
+    xcursor-size 24
+}
+
+// Core spawns & globals
+spawn-at-startup "xwayland-satellite"
+    environment {
+        DISPLAY ":0"
+    }
+
+spawn-at-startup "~/.config/autostart/autostart"
+screenshot-path "~/Pictures/grim/%Y-%m-%d %H-%M-%S.png"
+
+hotkey-overlay {
+    skip-at-startup
+}
+config-notification {
+    disable-failed
+}
+debug {
+    honor-xdg-activation-with-invalid-serial
+}

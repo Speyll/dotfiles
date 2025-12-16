@@ -1,0 +1,10 @@
+[Desktop Entry]
+Type=Application
+Name=File manager
+Comment=File manager
+Icon=folder
+Exec=pcmanfm-qt
+Terminal=false
+MimeType=inode/directory;
+Categories=System;FileTools;FileManager;ConsoleOnly;
+Keywords=File;Manager;Management;Explorer;Launcher;

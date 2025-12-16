@@ -1,0 +1,79 @@
+#!/bin/sh
+
+# Function to exit with an error message
+exit_err() {
+  printf '%s\n' "$1" >&2
+  exit 1
+}
+
+# Check if origin remote exists
+check_origin() {
+  if ! git config --get remote.origin.url >/dev/null 2>&1; then
+    exit_err "Remote 'origin' is not configured."
+  fi
+}
+
+# Validate there are changes to commit
+check_changes() {
+  if git diff --cached --quiet; then
+    exit_err "No changes to commit."
+  fi
+}
+
+# Prompt for commit message
+get_commit_message() {
+  printf "Commit message: "
+  read -r commit || exit_err "Failed to read input."
+  [ -z "$commit" ] && exit_err "Commit message cannot be empty."
+}
+
+# Standard commit and push
+push_changes() {
+  check_origin
+  git add -A || exit_err "Failed to stage changes."
+  check_changes
+  git commit -m "$commit" || exit_err "Failed to commit changes."
+  git push || exit_err "Failed to push changes."
+  printf '%s\n' "Changes pushed successfully."
+}
+
+# Clean repository history
+clean_repo() {
+  check_origin
+
+  # Safety checks
+  if ! git diff --quiet; then
+    exit_err "Uncommitted changes detected. Aborting clean operation."
+  fi
+
+  temp_branch="tmp-$(date +%s)"
+  git checkout --orphan "$temp_branch" || exit_err "Failed to create orphan branch."
+  git add -A || exit_err "Failed to stage changes."
+  git commit --allow-empty -m "$commit" || exit_err "Failed to initial commit."
+
+  # Force update main branch
+  if git show-ref --verify --quiet refs/heads/main; then
+    git branch -D main || exit_err "Failed to remove existing main branch."
+  fi
+
+  git branch -m main || exit_err "Failed to rename temporary branch."
+  git push -f origin main || exit_err "Failed to force push new history."
+  git gc --aggressive --prune=now --quiet || exit_err "Failed to optimize repository."
+  printf '%s\n' "Repository history cleaned successfully."
+}
+
+# Main execution
+get_commit_message
+
+case "$1" in
+  push)
+    push_changes
+    ;;
+  clean)
+    clean_repo
+    ;;
+  *)
+    printf '%s\n' "Usage: $0 {push|clean}"
+    exit 1
+    ;;
+esac

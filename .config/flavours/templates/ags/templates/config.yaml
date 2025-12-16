@@ -1,0 +1,3 @@
+colors:
+    extension: .scss
+    output: colors

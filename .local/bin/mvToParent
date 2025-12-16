@@ -1,0 +1,14 @@
+#!/bin/sh
+
+parent_dir=$(pwd)
+
+find "$parent_dir" -mindepth 2 -type f | while IFS= read -r filepath; do
+  relative_path=${filepath#"$parent_dir"/}
+  dir_path=$(dirname "$relative_path")
+  filename=$(basename "$filepath")
+
+  prefix=$(echo "$dir_path" | sed 's/\//_/g')
+  newname="${prefix}_$filename"
+
+  mv "$filepath" "$parent_dir/$newname"
+done

@@ -1,0 +1,37 @@
+#!/bin/sh
+
+if [ -z "$1" ]; then
+  printf "search query: "
+  read -r query
+else
+  query="$1"
+fi
+
+query=$(echo "$query" | sed 's/ /+/g')
+echo "$query"
+
+# yt_api_key location
+home="$HOME"  # Define home variable
+yt_api_key="$(cat "${home}/.local/share/apis/YT_API_KEY")"
+urlstring="https://www.googleapis.com/youtube/v3/search?part=snippet&q=${query}&type=video&maxResults=20&key=${yt_api_key}"
+
+# Using a temporary file to hold the output
+tempfile=$(mktemp) || exit 1
+
+# Fetching data and processing it
+curl -s "${urlstring}" | \
+  jq -r '.items[] | select(.id.videoId != null) | "\(.snippet.channelTitle) => \(.snippet.title) https://youtu.be/\(.id.videoId)"' > "$tempfile"
+
+# Using fzf to select a video
+selected_video=$(fzf --with-nth='1..-2' +m < "$tempfile")
+
+# Clean up temporary file
+rm -f "$tempfile"
+
+# Extracting the last field for the URL
+if [ -n "$selected_video" ]; then
+  video_url=$(echo "$selected_video" | awk '{print $NF}' | sed 's/[[:space:]]*//g')  # Remove any trailing spaces
+  mpv "$video_url"
+else
+  echo "No video selected."
+fi

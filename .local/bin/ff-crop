@@ -1,0 +1,18 @@
+#!/bin/bash
+
+if [ -z "$1" ]; then
+  echo "Usage: ff-crop <aspect_ratio>"
+  echo "Example: ff-crop 0.75:1"
+  exit 1
+fi
+
+# Parse aspect ratio input, e.g. "0.75:1"
+aspect_ratio_input=$1
+width_ratio=$(echo $aspect_ratio_input | cut -d':' -f1)
+height_ratio=$(echo $aspect_ratio_input | cut -d':' -f2)
+
+for f in *.{mp4,mkv,avi}; do
+  [ -e "$f" ] || continue
+  echo "Cropping $f to aspect ratio $aspect_ratio_input"
+  ffmpeg -i "$f" -vf "crop='if(gt(a,${width_ratio}/${height_ratio}),ih*${width_ratio}/${height_ratio},iw)':'if(gt(a,${width_ratio}/${height_ratio}),ih,iw*${height_ratio}/${width_ratio})'" -c:a copy "cropped_$f"
+done

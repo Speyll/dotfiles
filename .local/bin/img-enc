@@ -1,0 +1,58 @@
+#!/bin/sh
+
+target_format="${1:-webp}"  # Default to webp if not specified
+output_dir="opt_${target_format}"
+quality=82
+max_dimension=1920
+
+mkdir -p "$output_dir"
+
+find . -maxdepth 1 -type f \( -iname "*.jpg" -o -iname "*.jpeg" -o -iname "*.png" -o -iname "*.webp" -o -iname "*.bmp" -o -iname "*.tiff" -o -iname "*.heic" -o -iname "*.avif" \) -print | while IFS= read -r file; do
+    [ -e "$file" ] || continue
+    base_name=$(basename "$file")
+    extension="${file##*.}"
+    clean_name=$(printf "%s" "${base_name%.*}" | tr -cd '[:alnum:]._-')
+    output_file="$output_dir/${clean_name}_${extension}.$target_format"
+
+    if [ -f "$output_file" ]; then
+        printf "Skipping: %s (output exists)\n" "$base_name"
+        continue
+    fi
+
+    printf "Processing: %s -> %s\n" "$base_name" "$output_file"
+
+    geometry=$(magick identify -format "%wx%h" "$file" 2>/dev/null)
+    if [ -z "$geometry" ]; then
+        printf "Error: Cannot read image file: %s\n" "$file" >&2
+        continue
+    fi
+    width=$(echo "$geometry" | cut -d 'x' -f1)
+    height=$(echo "$geometry" | cut -d 'x' -f2)
+
+    resize_arg=""
+    if [ "$width" -gt "$max_dimension" ] || [ "$height" -gt "$max_dimension" ]; then
+        resize_arg="-resize ${max_dimension}x${max_dimension}"
+    fi
+
+    # Choose format-specific options
+    case "$target_format" in
+        webp)
+            magick "$file" -strip $resize_arg -auto-orient -quality "$quality" -define webp:method=6,webp:auto-filter=true -colorspace sRGB "$output_file"
+            ;;
+        jpg|jpeg)
+            magick "$file" -strip $resize_arg -auto-orient -quality "$quality" -sampling-factor 4:2:0 -interlace Plane -colorspace sRGB "$output_file"
+            ;;
+        png)
+            magick "$file" -strip $resize_arg -auto-orient -define png:compression-level=9 -colorspace sRGB "$output_file"
+            ;;
+        *)
+            printf "Unsupported output format: %s\n" "$target_format" >&2
+            continue
+            ;;
+    esac
+
+    # Preserve timestamp
+    touch -r "$file" "$output_file"
+done
+
+printf "Processing complete. Results in: %s\n" "$output_dir"

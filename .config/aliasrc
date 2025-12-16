@@ -1,0 +1,68 @@
+#!/bin/sh
+# Colorized commands
+alias \
+    ls="ls -shA --color=auto" \
+    dir="dir --color=auto" \
+    vdir="vdir --color=auto" \
+    grep="grep --color=auto" \
+    fgrep="fgrep --color=auto" \
+    egrep="egrep --color=auto" \
+    diff="diff --color=auto" \
+    ccat="highlight --out-format=ansi" \
+    dfg="df -BG" \
+    dfm="df -BM" \
+    ip="ip --color=auto"
+
+# LS aliases with preserved color flags
+alias \
+    ll="ls -l --color=auto" \
+    la="ls -A --color=auto" \
+    llt="ls -latrG --color=auto"
+
+# Package management
+alias \
+    xbs="sudo xbps-install" \
+    xbr="sudo xbps-remove -Rv" \
+    xbq="xbps-query -Rs" \
+    pac="sudo pacman" \
+    prm="sudo pacman -Rns" \
+    apti="sudo apt-get install --no-install-recommends" \
+    aptr="sudo apt-get --purge autoremove" \
+    zyi="sudo zypper install --no-recommends" \
+    zyr="sudo zypper remove --clean-deps --no-confirm" \
+    flinst="flatpak install" \
+    flrem="flatpak uninstall --delete-data" \
+    flclean="flatpak uninstall --unused --delete-data -y && flatpak repair"
+
+# Network aliases
+alias \
+    rsync="rsync -avh --progress" \
+    rsync-ssh="rsync -avzh --progress -e ssh" \
+    rsync-net="rsync -avzh --progress" \
+    nfs-mount="sudo mount -t nfs -o hard,tcp,rsize=32768,wsize=32768,actimeo=30" \
+    ssh-mount="sshfs -o reconnect,ServerAliveInterval=15,ServerAliveCountMax=3,sshfs_sync"
+
+# Safe file operations
+alias \
+    cp="cp -iv" \
+    mv="mv -iv" \
+    rm="rm -vI" \
+    mkd="mkdir -pv" \
+    clear="tput clear" \
+    reset="tput reset"
+
+# System utilities
+alias \
+    pyserv="python3 -m http.server" \
+    pyenv="python -m venv" \
+    cleanup-gamescope='pkill -9 -f "wine|wineserver|winedevice.exe|explorer.exe|gamescope-wl"' \
+    reset="tput reset"
+
+# Version control
+alias gcl='git clone --depth 1'
+
+# Use neovim if available
+command -v nvim >/dev/null && alias vim="nvim" vimdiff="nvim -d"
+
+# XDG-compliant tmux configuration
+alias tmux="tmux -f ${XDG_CONFIG_HOME:-$HOME/.config}/tmux/tmux.conf"

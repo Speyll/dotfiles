@@ -1,0 +1,62 @@
+#!/bin/sh
+
+# Check for required commands
+for cmd in grim swayimg slurp wl-copy fuzzel; do
+    command -v "$cmd" >/dev/null 2>&1 || {
+        printf '%s is required but not installed.\n' "$cmd" >&2
+        exit 1
+    }
+done
+
+# Avoid multiple concurrent instances
+pidof -o %PPID -x "$0" >/dev/null && exit 0
+
+# Capture monitors and let user choose one to crop
+capture_region() {
+    tmp_dp2=$(mktemp --suffix=.png)
+    tmp_hdmi=$(mktemp --suffix=.png)
+    tmp_all=$(mktemp --suffix=.png)
+
+    # Concurrent captures
+    grim -o DP-2 "$tmp_dp2" &
+    grim -o HDMI-A-1 "$tmp_hdmi" &
+    grim "$tmp_all" &
+    wait
+
+    # Menu selection
+    choice=$(printf 'Main\nSecondary\nCombined' | \
+             fuzzel -d -f 'monospace:size=14' -a center -w 11 -l 3 --prompt="")
+
+    case "$choice" in
+        Main)      selected="$tmp_dp2" ;;
+        Secondary) selected="$tmp_hdmi" ;;
+        Combined)  selected="$tmp_all" ;;
+        *)         rm -f "$tmp_dp2" "$tmp_hdmi" "$tmp_all"; return 1 ;;
+    esac
+
+    # Show image full screen
+    swayimg -f "$selected" &
+    viewer_pid=$!
+    sleep 0.1
+
+    if region=$(slurp); then
+        grim -g "$region" - | wl-copy -t image/png
+    fi
+
+    kill "$viewer_pid" 2>/dev/null
+    wait "$viewer_pid" 2>/dev/null
+    rm -f "$tmp_dp2" "$tmp_hdmi" "$tmp_all"
+
+    [ -n "$region" ]
+}
+
+# Copy full screen to clipboard
+copy_full_screen() {
+    grim - | wl-copy -t image/png
+}
+
+# Argument parsing
+case "$1" in
+    slurp) capture_region ;;
+    copy | *) copy_full_screen ;;
+esac

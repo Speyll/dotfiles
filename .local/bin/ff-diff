@@ -1,0 +1,45 @@
+#!/bin/sh
+set -eu
+
+src_dir="."
+out_dir="encVids"
+
+[ -d "$out_dir" ] || { echo "Output dir '$out_dir' not found"; exit 1; }
+
+echo "Analyzing cleanup candidates..."
+echo
+
+deleted=0
+kept=0
+
+for src_file in "$src_dir"/*; do
+    [ -f "$src_file" ] || continue
+
+    ext="${src_file##*.}"
+    case "$ext" in
+        mp4|mkv|ts|mov|avi|webm|gif) ;;
+        *) continue ;;
+    esac
+
+    base_name=$(basename -- "$src_file")
+    prefix=$(echo "$base_name" | iconv -f UTF-8 -t ASCII//TRANSLIT | tr -cd '[:alnum:]')
+    hash=$(echo -n "$base_name" | sha1sum | cut -c1-6)
+    clean_name="${prefix}_${hash}"
+
+    out_file="$out_dir/${clean_name}.mp4"
+
+    if [ -f "$out_file" ]; then
+        echo "Encoded found: $out_file"
+        echo "  -> Deleting original: $src_file"
+        rm -f -- "$src_file"
+        deleted=$((deleted+1))
+    else
+        echo "Not encoded yet: $src_file"
+        kept=$((kept+1))
+    fi
+done
+
+echo
+echo "Cleanup summary:"
+echo "  Originals ready for deletion : $deleted"
+echo "  Originals kept (not encoded) : $kept"

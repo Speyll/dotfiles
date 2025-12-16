@@ -1,0 +1,55 @@
+window-rule {
+    geometry-corner-radius 8
+    clip-to-geometry true
+    draw-border-with-background false
+}
+
+window-rule {
+    match app-id="alacritty"
+    default-column-width {
+        proportion 0.5
+    }
+}
+
+window-rule {
+    match app-id="chatterino"
+    match app-id="com.chatterino.chatterino"
+    default-column-width {
+            proportion 0.298
+    }
+}
+
+window-rule {
+    match app-id="pcmanfm-qt"
+    match app-id="dolphin$"
+    match app-id="LibreWolf"
+    match app-id="firefox$"
+    default-column-width {
+            proportion 0.65
+    }
+}
+
+window-rule {
+    match app-id="LibreWolf"
+    match app-id="pcmanfm-qt"
+    match app-id="com.chatterino.chatterino"
+    match app-id="spotube"
+    //opacity 0.95
+}
+
+window-rule {
+    match app-id="firefox$" title="^Picture-in-Picture$"
+    match app-id="LibreWolf$" title="^Picture-in-Picture$"
+    open-floating true
+    default-floating-position x=16 y=16 relative-to="bottom-left"
+}
+
+window-rule {
+    match title=r#"(?i)dialog"#
+    match title=r#"^Extension: "#
+    match title=r#"^File Properties"#
+
+    open-floating true
+    default-column-width {}
+    default-window-height {}
+}

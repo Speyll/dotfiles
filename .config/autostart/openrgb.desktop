@@ -1,0 +1,8 @@
+[Desktop Entry]
+Type=Application
+Exec=bash -c 'if command -v openrgb >/dev/null 2>&1; then openrgb --server -p pureWhite >>"$HOME/openrgb.log" 2>&1 & else echo "OpenRGB is not installed, skipping RGB startup." >>"$HOME/openrgb.log"; fi'
+Hidden=false
+NoDisplay=false
+X-GNOME-Autostart-enabled=true
+Name=OpenRGB Autostart
+Comment=Start OpenRGB server with pureWhite profile at login
