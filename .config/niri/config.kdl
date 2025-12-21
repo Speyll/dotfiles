@@ -24,12 +24,6 @@ input {
     mouse {
         accel-profile "flat"
     }
-    trackpoint {
-        off
-    }
-    touch {
-        map-to-output "DP-2"
-    }
     tablet {
         map-to-output "DP-2"
     }
