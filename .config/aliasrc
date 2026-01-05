@@ -26,6 +26,7 @@ alias \
     xbq="xbps-query -Rs" \
     pac="sudo pacman" \
     prm="sudo pacman -Rns" \
+    pror="sudo pacman -Rns $(pacman -Qtdq)" \
     apti="sudo apt-get install --no-install-recommends" \
     aptr="sudo apt-get --purge autoremove" \
     zyi="sudo zypper install --no-recommends" \
