@@ -1,0 +1,39 @@
+#!/bin/bash
+
+# --- CONFIGURATION ---
+THRESHOLD="98%"         # 85-90% is ideal for "near-duplicates"
+DB_FILE="fingerprints.db"
+DEST_DIR="duplicates_backup"
+mkdir -p "$DEST_DIR"
+
+# 1. INITIAL SCAN & DATABASE GENERATION
+# Creating a fingerprint database drastically speeds up subsequent runs
+echo "Step 1: Refreshing fingerprint database ($DB_FILE)..."
+find . -type f \( -iname "*.jpg" -o -iname "*.png" -o -iname "*.jpeg" \) -print0 | \
+    findimagedupes -0 -f "$DB_FILE" --rescan -
+
+# 2. ACCURACY-FOCUSED COMPARISON
+# We use the -0 flag (null-terminated) to safely handle spaces/quotes in filenames
+echo "Step 2: Comparing images at ${THRESHOLD} similarity..."
+findimagedupes -t "$THRESHOLD" -f "$DB_FILE" . | while read -r line; do
+    # Convert space-separated line into an array safely
+    # Note: findimagedupes output format for sets is 'file1 file2 file3'
+    read -a files <<< "$line"
+
+    if [ ${#files[@]} -gt 1 ]; then
+        # Keep the FIRST file, move the rest to backup
+        original="${files[0]}"
+        echo "Found set: $(basename "$original") has ${#files[@]} duplicates"
+
+        for ((i=1; i<${#files[@]}; i++)); do
+            duplicate="${files[$i]}"
+            if [ -f "$duplicate" ]; then
+                # Move to backup without overwriting existing files
+                mv -n "$duplicate" "$DEST_DIR/"
+                echo "  [MOVED] -> $(basename "$duplicate")"
+            fi
+        done
+    fi
+done
+
+echo "Done! Check $DEST_DIR for moved files."

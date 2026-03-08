@@ -1,0 +1,27 @@
+#!/bin/bash
+THRESHOLD="70"
+BACKUP_DIR="duplicates_backup"
+TREE_EXCLUDE=" -not -path \"./$BACKUP_DIR/*\""
+
+echo "Scanning $BACKUP_DIR/* against tree (${THRESHOLD}%)..."
+
+for backup_file in "$BACKUP_DIR"/*; do
+    [ -f "$backup_file" ] || continue
+
+    # Compare THIS backup file against entire tree
+    matches=$(find . -type f \( -iname "*.jpg" -o -iname "*.jpeg" -o -iname "*.png" -o -iname "*.webp" \) \
+        $TREE_EXCLUDE -print0 | findimagedupes -t "$THRESHOLD" -0 "$backup_file" -- - 2>/dev/null)
+
+    if [ -n "$matches" ]; then
+        # Get first tree match as target
+        set -- $matches
+        target_file="${files[0]}"  # First match (tree file)
+        target_dir=$(dirname "$target_file")
+        filename=$(basename "$backup_file")
+
+        echo "RESTORE: $filename → $target_dir/"
+        mv -n "$backup_file" "$target_dir/"
+    fi
+done
+
+echo "Done! True uniques remain in $BACKUP_DIR"
