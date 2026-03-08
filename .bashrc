@@ -7,7 +7,8 @@ case $- in
 esac
 
 # History settings
-export HISTCONTROL=ignoredups:erasedups
+export HISTCONTROL=ignoreboth:erasedups
+export HISTIGNORE="ls:cd:exit:history*"
 export HISTSIZE=1000
 export HISTFILESIZE=2000
 shopt -s histappend
@@ -119,10 +120,3 @@ if command -v bat >/dev/null 2>&1; then
 else
     export FZF_CTRL_T_OPTS="--preview 'cat {}'"
 fi
-
-# Run command without logging to history
-nhist() {
-    HISTFILE=/dev/null
-    bash -ic "$*"
-    history -d $(history 1)
-}
