@@ -54,3 +54,14 @@ window-rule {
     default-column-width {}
     default-window-height {}
 }
+
+window-rule {
+    match app-id=r#"^steam_app_.*$"#
+    match app-id="gamescope"
+    // This catches Wine/Proton games:
+    match app-id=r#".*\.exe$"#
+
+    match title=r#"(?i)emulator|yuzu|ryujinx|pcsx2|rpcs3|edin|dolphin|retroarch"#
+    variable-refresh-rate true
+}
+

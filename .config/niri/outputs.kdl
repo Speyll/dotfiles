@@ -3,7 +3,7 @@ output "DP-2" {
     scale 1.0
     transform "normal"
     position x=1080 y=840
-    variable-refresh-rate
+    variable-refresh-rate on-demand=true
     focus-at-startup
 }
 
@@ -12,11 +12,11 @@ output "HDMI-A-1" {
     scale 1.0
     transform "270"
     position x=-0 y=0
-    variable-refresh-rate
+    variable-refresh-rate on-demand=true
 }
 
 output "eDP-1" {
     mode "1920x1200@60.003"
     scale 1.25
-    variable-refresh-rate
+    variable-refresh-rate on-demand=true
 }
