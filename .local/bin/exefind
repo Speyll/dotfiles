@@ -1,0 +1,43 @@
+#!/bin/bash
+
+# Expanded noise list
+IGNORE="librewolf|vesktop|alacritty|swaybg|gvfs|xdg|pipewire|wireplumber|lsfg-vk-ui|Isolated|Web Content|niri|Xwayland|bash|grep|stat|cat|basename|readlink|tr|head"
+
+for pid_path in /proc/[0-9]*; do
+    pid=$(basename "$pid_path")
+
+    # Quick check for ownership to avoid permission errors
+    [[ ! -O "$pid_path" ]] && continue
+    owner=$(stat -c %U "$pid_path" 2>/dev/null)
+
+    if [[ "$owner" == "$USER" ]]; then
+        # Check for GPU driver usage
+        if grep -qiE 'vulkan|amdvlk|radv|nvidia' "$pid_path/maps" 2>/dev/null; then
+            procname=$(cat "$pid_path/comm" 2>/dev/null)
+            [[ "$procname" =~ $IGNORE ]] && continue
+
+            # 1. Try to find the Windows .exe in cmdline
+            # Changed 'steam\.exe' to '^steam\.exe$' or specific patterns to avoid nuking games with 'steam' in the name
+            wine_exe=$(tr '\0' '\n' < "$pid_path/cmdline" 2>/dev/null | \
+                grep -i '\.exe' | \
+                grep -ivE 'reaper\.exe|/steam\.exe|^steam\.exe$|explorer\.exe|services\.exe|svchost\.exe' | \
+                head -n1 | \
+                sed 's/.*[\/ \\]//' | \
+                sed 's/\.exe.*/.exe/i')
+
+            # 2. Better Fallback: Use the actual binary path if wine_exe is empty
+            # This avoids the "main" or "python" names found in /proc/pid/comm
+            if [[ -z "$wine_exe" ]]; then
+                real_exe=$(readlink -f "$pid_path/exe" 2>/dev/null)
+                lsfg_name=$(basename "$real_exe")
+            else
+                lsfg_name="$wine_exe"
+            fi
+
+            # Final check: if we are still stuck with 'main' or empty, use the comm name
+            [[ "$lsfg_name" == "main" || -z "$lsfg_name" ]] && lsfg_name="$procname"
+
+            printf "PID %-6s | Name: %-15s | LSFG Profile Name: %s\n" "$pid" "$procname" "$lsfg_name"
+        fi
+    fi
+done

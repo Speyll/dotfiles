@@ -42,7 +42,7 @@ export XDG_SESSION_DESKTOP="$COMPOSITOR"
 export XDG_CURRENT_DESKTOP="$COMPOSITOR"
 export XDG_DATA_DIRS="$HOME/.local/share/flatpak/exports/share:/var/lib/flatpak/exports/share:/usr/local/share:/usr/share"
 export NO_AT_BRIDGE=1
-export XKB_DEFAULT_LAYOUT=fr,us
+export XKB_DEFAULT_LAYOUT=us,fr
 export XKB_DEFAULT_OPTIONS=grp:rctrl_rshift_toggle
 
 # --- D-Bus Session ---
