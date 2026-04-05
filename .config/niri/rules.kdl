@@ -46,13 +46,18 @@ window-rule {
 }
 
 window-rule {
+    match app-id=r#"xdg-desktop-portal-.*"#
     match title=r#"(?i)dialog"#
     match title=r#"^Extension: "#
     match title=r#"^File Properties"#
 
     open-floating true
-    default-column-width {}
-    default-window-height {}
+    default-column-width {
+        proportion 0.65
+    }
+    default-window-height {
+        proportion 0.35
+    }
 }
 
 window-rule {
@@ -64,4 +69,3 @@ window-rule {
     match title=r#"(?i)emulator|yuzu|ryujinx|pcsx2|rpcs3|edin|dolphin|retroarch"#
     variable-refresh-rate true
 }
-
