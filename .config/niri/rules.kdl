@@ -4,26 +4,38 @@ window-rule {
     draw-border-with-background false
 }
 
-window-rule {
-    match app-id="alacritty"
-    default-column-width {
-        proportion 0.5
+layer-rule {
+    match layer="top"
+    match layer="overlay"
+
+    background-effect {
+        xray false
     }
 }
 
 window-rule {
-    match app-id="chatterino"
-    match app-id="com.chatterino.chatterino"
+    match app-id="^Alacritty$"
+    default-column-width {
+        proportion 0.5
+    }
+    background-effect {
+        blur true
+    }
+}
+
+window-rule {
+    match app-id="^chatterino$"
+    match app-id="^com.chatterino.chatterino$"
     default-column-width {
             proportion 0.298
     }
 }
 
 window-rule {
-    match app-id="pcmanfm-qt"
-    match app-id="dolphin$"
-    match app-id="librewolf$"
-    match app-id="firefox$"
+    match app-id="^pcmanfm-qt$"
+    match app-id="^dolphin$"
+    match app-id="^librewolf$"
+    match app-id="^firefox$"
     open-maximized true
     default-column-width {
             proportion 1.0;
@@ -31,16 +43,14 @@ window-rule {
 }
 
 window-rule {
-    match app-id="librewolf$"
-    match app-id="pcmanfm-qt"
-    match app-id="com.chatterino.chatterino"
-    match app-id="spotube"
-    //opacity 0.95
+    match app-id="^librewolf$"
+    opacity 1.0;
 }
 
+
 window-rule {
-    match app-id="firefox$" title="^Picture-in-Picture$"
-    match app-id="librewolf$" title="^Picture-in-Picture$"
+    match app-id="^firefox$" title="^Picture-in-Picture$"
+    match app-id="^librewolf$" title="^Picture-in-Picture$"
     open-floating true
     default-floating-position x=16 y=16 relative-to="bottom-left"
 }

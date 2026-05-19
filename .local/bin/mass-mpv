@@ -8,6 +8,7 @@ TMP_PLAYLIST=$(mktemp)
 
 trap 'rm -f "$TMP_INPUT_CONF" "$TMP_PLAYLIST"' EXIT
 
+# Custom keybindings
 cat > "$TMP_INPUT_CONF" <<EOF
 LEFT playlist-prev
 RIGHT playlist-next
@@ -15,13 +16,22 @@ KP_PLUS add video-zoom 0.1
 KP_MINUS add video-zoom -0.1
 ENTER playlist-next
 BACKSPACE playlist-prev
+# Added seek controls for videos
+UP add seek 60
+DOWN add seek -60
 EOF
 
-# find will now output absolute paths because $TARGET_DIR is absolute
-find "$TARGET_DIR" -type f \( -iname '*.jpg' -o -iname '*.jpeg' -o -iname '*.png' -o -iname '*.gif' -o -iname '*.webp' \) -print0 | shuf -z | tr '\0' '\n' > "$TMP_PLAYLIST"
+# Define supported extensions
+IMG_EXT="jpg|jpeg|png|gif|webp"
+VID_EXT="mp4|mkv|mov|avi|webm|flv|wmv|m4v|m4a"
+
+# find using extended regex to catch both images and videos
+find "$TARGET_DIR" -type f -regextype posix-extended \
+    -iregex ".*\.($IMG_EXT|$VID_EXT)" -print0 | \
+    shuf -z | tr '\0' '\n' > "$TMP_PLAYLIST"
 
 if [ ! -s "$TMP_PLAYLIST" ]; then
-  echo "No images found in $TARGET_DIR" >&2
+  echo "No media files found in $TARGET_DIR" >&2
   exit 1
 fi
 
@@ -29,4 +39,6 @@ mpv --input-conf="$TMP_INPUT_CONF" \
     --playlist="$TMP_PLAYLIST" \
     --vo=gpu \
     --image-display-duration=5 \
-    --loop-playlist=inf
+    --loop-playlist=inf \
+    --osd-level=1 \
+    --reset-on-next-file=video-zoom

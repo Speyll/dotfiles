@@ -12,7 +12,6 @@ output "HDMI-A-1" {
     scale 1.0
     transform "270"
     position x=-0 y=0
-    variable-refresh-rate on-demand=true
 }
 
 output "eDP-1" {

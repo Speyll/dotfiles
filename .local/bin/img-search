@@ -1,0 +1,44 @@
+#!/bin/bash
+
+# Usage: ./script.sh [browser_command] [delay_in_seconds]
+# Example: ./script.sh helium-browser 0.5
+
+BROWSER=${1:-"helium-browser"}
+DELAY=${2:-"1"}
+
+# Basic check for required tools
+for tool in curl python3 "$BROWSER"; do
+    if ! command -v "$tool" &> /dev/null; then
+        echo "Error: $tool is not installed."
+        exit 1
+    fi
+done
+
+for file in *; do
+    # Only process common image formats
+    if [[ "$file" =~ \.(jpg|jpeg|png|webp|JPG|JPEG|PNG|WEBP)$ ]]; then
+
+        echo "Uploading: $file"
+
+        # Litterbox API call with a 10s connection timeout and 40s total limit
+        IMG_URL=$(curl -s --connect-timeout 10 --max-time 40 \
+            -F "reqtype=fileupload" \
+            -F "time=1h" \
+            -F "fileToUpload=@$file" \
+            https://litterbox.catbox.moe/resources/internals/api.php)
+
+        # Ensure we actually got a URL back before trying to open it
+        if [[ "$IMG_URL" == http* ]]; then
+            ENCODED_URL=$(python3 -c "import urllib.parse; print(urllib.parse.quote('$IMG_URL'))")
+            LENS_URL="https://lens.google.com/uploadbyurl?url=${ENCODED_URL}&hl=en-DZ"
+
+            "$BROWSER" "$LENS_URL" 2>/dev/null &
+            echo "Opened: $file"
+            sleep "$DELAY"
+        else
+            echo "Failed: $file (Server error or timeout)"
+        fi
+    fi
+done
+
+echo "Done."

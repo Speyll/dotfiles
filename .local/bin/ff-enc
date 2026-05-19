@@ -11,7 +11,7 @@ target_fps=30
 crf=26
 preset="medium"
 audio_bitrate="128k"
-cover_timestamp="00:10:00"
+cover_timestamp="00:10:00" # Default value
 
 video_extensions="mp4 mkv ts mov avi webm gif m4v"
 audio_extensions="mp4 mkv avi mov webm flv wmv mpg mpeg"
@@ -31,9 +31,9 @@ find_media_files() {
         *) die "Invalid media type: $1" ;;
     esac
 
-    for ext in $exts; do
-        find . -maxdepth 1 -type f -iname "*.$ext"
-    done
+    # Optimization: Use a single find command piped to grep instead of looping find
+    ext_pattern=$(echo "$exts" | tr ' ' '|')
+    find . -maxdepth 1 -type f | grep -iE "\.(${ext_pattern})$" || true
 }
 
 progress_bar() {
@@ -51,12 +51,14 @@ progress_bar() {
     '
 }
 
-### PROCESSING LOOP WITHOUT CHECKPOINT ###
+### PROCESSING LOOP ###
 process_files_serial() {
     cmd="$1"
     filelist="$2"
 
     total_files=$(wc -l < "$filelist" | tr -d ' ')
+    [ "$total_files" -eq 0 ] && { echo "No files found to process."; return 0; }
+
     processed_files=0
 
     while IFS= read -r file || [ -n "$file" ]; do
@@ -85,8 +87,13 @@ encode_video_file() {
         return 0
     fi
 
-    height=$(ffprobe -v error -select_streams v:0 -show_entries stream=height -of csv=p=0 "$file")
-    fps=$(ffprobe -v error -select_streams v:0 -show_entries stream=r_frame_rate -of csv=p=0 "$file" | awk -F/ '{if ($2==""||$2==0) print $1; else printf "%.3f", $1/$2;}')
+    # Optimization: Extract height and fps in a single ffprobe call
+    eval "$(ffprobe -v error -select_streams v:0 -show_entries stream=height,r_frame_rate -of csv=p=0 "$file" | awk -F',' '{
+        height = $1;
+        split($2, a, "/");
+        fps = (a[2] == 0 || a[2] == "") ? a[1] : a[1] / a[2];
+        printf "height=%d\nfps=%.3f\n", height, fps
+    }')"
     fps_int=${fps%.*}
 
     if [ "$height" -gt "$target_height" ]; then
@@ -138,7 +145,8 @@ extract_audio_file() {
         return 0
     fi
 
-    echo "[$(date '+%H:%M:%S')] Extracting audio: $base_name"
+    echo "[$(date '+%H:%M:%S')] Extracting audio: $base_name (Cover timestamp: $cover_timestamp)"
+
     # Generate cover art snapshot safely, ignoring errors.
     ffmpeg -nostdin -y -ss "$cover_timestamp" -i "$file" -vframes 1 "$cover_art" 2>/dev/null || true
 
@@ -152,7 +160,7 @@ extract_audio_file() {
             -map 0:a -map 1 -c copy -disposition:v:0 attached_pic \
             -metadata:s:v title="Album cover" \
             -metadata:s:v comment="Cover (front)" \
-            "${output_file%.m4a}_cover.m4a"
+            "${output_file%.m4a}_cover.m4a" >/dev/null 2>&1
         mv "${output_file%.m4a}_cover.m4a" "$output_file"
         rm -f "$cover_art"
     fi
@@ -210,21 +218,56 @@ Batch Media Processor - Serial Processing
 
 Usage: $0 [option]
 Options:
-  -v, --video       Batch encode videos to 900p H.265/Opus
-  -x, --extract     Batch extract audio from videos (with cover art)
-  -a, --audio       Batch optimize audio files to Opus
-  -h, --help        Show this help
+  -v, --video           Batch encode videos to 900p H.265/Opus
+  -x, --extract [time]  Batch extract audio from videos. Optional: Provide timestamp for cover art (e.g., 00:01:00). Defaults to 00:10:00.
+  -a, --audio           Batch optimize audio files to Opus
+  -h, --help            Show this help
 
 File existence in output directories is used to skip processed files.
 EOF
 }
 
-case "${1:-}" in
-    -v|--video)   encode_videos ;;
-    -x|--extract) extract_audios ;;
-    -a|--audio)   optimize_audios ;;
-    -h|--help|"") show_help ;;
-    *) die "Unknown option: $1" ;;
+[ $# -eq 0 ] && { show_help; exit 0; }
+
+mode=""
+
+# Argument Parser
+while [ $# -gt 0 ]; do
+    case "$1" in
+        -v|--video)
+            mode="video"
+            shift
+            ;;
+        -x|--extract)
+            mode="extract"
+            # If a second argument exists and doesn't start with a hyphen, assume it's a timestamp
+            if [ $# -gt 1 ]; then
+                case "$2" in
+                    -*) ;; # Next arg is another flag, keep default cover_timestamp
+                    *) cover_timestamp="$2"; shift ;;
+                esac
+            fi
+            shift
+            ;;
+        -a|--audio)
+            mode="audio"
+            shift
+            ;;
+        -h|--help)
+            show_help
+            exit 0
+            ;;
+        *)
+            die "Unknown option: $1"
+            ;;
+    esac
+done
+
+case "$mode" in
+    video)   encode_videos ;;
+    extract) extract_audios ;;
+    audio)   optimize_audios ;;
+    *)       die "No valid operation specified. Use -h for help." ;;
 esac
 
 echo "All tasks complete."
