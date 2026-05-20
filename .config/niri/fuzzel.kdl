@@ -1,0 +1,8 @@
+binds {
+    Mod+D { spawn "fuzzel"; }
+    Mod+Shift+Return { spawn "fuzz-launcher"; }
+    Mod+m { spawn "bemoji"; }
+    Mod+comma hotkey-overlay-title="Clipboard Manager" {
+        spawn "clip-manager"
+    }
+}

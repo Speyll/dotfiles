@@ -3,7 +3,8 @@ prefer-no-csd
 // Includes
 include "outputs.kdl"
 include "layout.kdl"
-include "dms.kdl"
+//include "dms.kdl"
+include "fuzzel.kdl"
 include "keybinds.kdl"
 include "rules.kdl"
 

@@ -1,16 +1,24 @@
-window-rule {
-    geometry-corner-radius 8
-    clip-to-geometry true
-    draw-border-with-background false
-}
-
 layer-rule {
     match layer="top"
     match layer="overlay"
 
     background-effect {
+        blur true
         xray false
     }
+}
+
+layer-rule {
+    match namespace="^launcher$"
+    background-effect {
+        blur true
+    }
+}
+
+window-rule {
+    geometry-corner-radius 8
+    clip-to-geometry true
+    draw-border-with-background false
 }
 
 window-rule {

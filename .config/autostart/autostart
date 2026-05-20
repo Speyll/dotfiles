@@ -30,7 +30,7 @@ while [ -z "$WAYLAND_DISPLAY" ] && [ "$timeout" -gt 0 ]; do
 done
 
 # 2. Cleanup (DO THIS BEFORE STARTING NEW SERVICES)
-for p in flavours mpvpaper swaybg fnott wlsunset cliphist waybar; do
+for p in flavours mpvpaper swaybg fnott wlsunset cliphist waybar mako; do
     pkill -x "$p" >/dev/null 2>&1
 done
 
@@ -54,6 +54,10 @@ command -v swaymsg >/dev/null && swaymsg seat seat0 xcursor_theme "$CURSOR"
 
 # 5. Core Services
 wlsunset -l 36.7 -L 3.08 &
+mako &
+wl-paste --type text --watch cliphist store &
+wl-paste --type image --watch cliphist store &
+hypridle &
 
 if [ "$WAYBAR_STYLE" != "none" ]; then
     waybar -c "$HOME/.config/waybar/$WAYBAR_STYLE-config" -s "$HOME/.config/waybar/style.css" &

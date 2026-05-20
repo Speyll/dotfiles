@@ -1,0 +1,14 @@
+version = 2
+
+[global]
+allow_fp16 = true
+dll = "/home/lyes/.local/share/Steam/steamapps/common/Lossless Scaling/Lossless.dll"
+
+[[profile]]
+active_in = [ "pcsx2", "ZenlessZoneZero", "PathOfExileSteam.exe" ]
+flow_scale = 1.0
+gpu = "AMD Radeon RX 6800 XT (RADV NAVI21)"
+multiplier = 2
+name = "Gaming Profile"
+pacing = "none"
+performance_mode = true

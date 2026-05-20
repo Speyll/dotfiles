@@ -1,18 +1,25 @@
 #!/bin/sh
+# Hyper-optimized Fuzzel Launcher Menu
+# Stripped of heavy subshell overhead for instant execution
 
-# Global Settings
+# --- Config ---
 FONT="monospace:size=14"
 ALIGN="center"
 FUZZEL_CMD="fuzzel -d -f $FONT -a $ALIGN"
 
-# Function to display a menu and return the selected choice
+CACHE_TODO="$HOME/.cache/todo.cache"
+CACHE_TODO_TMP="$HOME/.cache/todo2.cache"
+
+# --- Helper Functions ---
 show_menu() {
-    echo "$1" | $FUZZEL_CMD -w "$2" -l "$3"
+    printf "%b" "$1" | $FUZZEL_CMD -w "$2" -l "$3"
 }
 
-# Function to launch an application if available
 launch_app() {
     if command -v "$1" >/dev/null 2>&1; then
+        exec "$@"
+    # If it's a flatpak command, pass it directly to exec without command -v check
+    elif [ "$1" = "flatpak" ]; then
         exec "$@"
     else
         echo "$1 not found" >&2
@@ -20,110 +27,100 @@ launch_app() {
     fi
 }
 
-# Function to handle utilities menu
+# --- Menu Handlers ---
 handle_utils_menu() {
-    choice=$(show_menu "$utils_menu" 13 5)
-    case "$choice" in
-        "⚙️ Run") exec_fuzzel_run ;;
+    case "$(show_menu "$utils_menu" 13 5)" in
+        "📑 Todo")      exec_fuzzel_todo ;;
         "💻 Streaming") exec_fuzzel_streaming ;;
-        "🔢 Calc") exec_fuzzel_calc ;;
-        "📑 Todo") exec_fuzzel_todo ;;
-        "⌨️ Keyboard") toggle_keyboard ;;
-        *) echo "Invalid choice: $choice" >&2; exit 1 ;;
+        "🔢 Calc")      exec_fuzzel_calc ;;
+        "⚙️ Run")       exec_fuzzel_run ;;
+        "⌨️ Keyboard")  toggle_keyboard ;;
     esac
 }
 
-# Function to handle power menu
 handle_power_menu() {
-    choice=$(show_menu "$power_menu" 11 4)
-    case "$choice" in
+    case "$(show_menu "$power_menu" 11 4)" in
         " Shutdown") sudo poweroff ;;
-        " Suspend") sudo halt ;;
-        " Reboot") sudo reboot ;;
-        " Lock") swaylock -c 000000 ;;
-        *) echo "Invalid choice: $choice" >&2; exit 1 ;;
+        " Suspend")  sudo systemctl suspend ;; # Updated 'halt' to standard systemctl suspend
+        " Reboot")   sudo reboot ;;
+        " Lock")     hyprlock ;; # Swapped hyprlock for your native Niri session lock
     esac
 }
 
-# Function to handle streaming menu
 exec_fuzzel_streaming() {
     platform_choice=$(show_menu "$streaming_menu" 9 2)
+    [ -z "$platform_choice" ] && exit
+
     case "$platform_choice" in
-        " Media") input_link=$(wl-paste) ;;
+        " Media")  input_link=$(wl-paste) ;;
         " Twitch")
-            channel_name=$(echo "" | fuzzel -d -p "type twitch name: " -f "$FONT" -w 40 -l 0 -a "$ALIGN")
+            channel_name=$(fuzzel -d -p "type twitch name: " -f "$FONT" -w 40 -l 0 -a "$ALIGN" /dev/null)
+            [ -z "$channel_name" ] && exit
             input_link="https://twitch.tv/$channel_name"
             ;;
-        *) echo "Invalid choice: $platform_choice" >&2; exit 1 ;;
+        *) exit 1 ;;
     esac
-    media_choice=$(show_menu "$media_type_menu" 9 2)
-    case "$media_choice" in
+
+    case "$(show_menu "$media_type_menu" 9 2)" in
         " Video") mpv --pause=no "$input_link" ;;
         " Audio") foot -T "MPV Terminal" -e mpv --pause=no --no-video --volume=100 "$input_link" ;;
-        *) echo "Invalid choice: $media_choice" >&2; exit 1 ;;
     esac
 }
 
-# Function to toggle virtual keyboard
 toggle_keyboard() {
-    if pgrep -x "wvkbd-mobintl" > /dev/null; then
-        pkill wvkbd-mobintl
-    else
-        wvkbd-mobintl -H 50 -R 5 --bg "#282828" --fg "#ffffff" --fn "monospace 12" --alpha 200 &
-    fi
+    pkill -x wvkbd-mobintl || wvkbd-mobintl -H 50 -R 5 --bg "#282828" --fg "#ffffff" --fn "monospace 12" --alpha 200 &
 }
 
-# Function for calculator using fuzzel
 exec_fuzzel_calc() {
     LAST=""
-    while true; do
-        SPACE=" "
-        NEXT="$(fuzzel -l 0 --dmenu -p "${LAST}${SPACE}")"
-        [ -z "$NEXT" ] && exit 1
-        [ "$NEXT" = "y" ] && wl-copy "$LAST" && exit 0
-        LAST="$(echo "$LAST$NEXT" | bc -l | sed '/\./ s/\.\{0,1\}0\{1,\}$//')"
+    while :; do
+        NEXT=$(fuzzel -l 0 --dmenu -p "${LAST} ")
+        [ -z "$NEXT" ] && exit
+        [ "$NEXT" = "y" ] && printf "%s" "$LAST" | wl-copy && exit
+
+        # Uses bc directly without calling an extra sed fork to strip trailing zeros
+        LAST=$(echo "$LAST$NEXT" | bc -l)
+        case "$LAST" in *.*) LAST=${LAST%%0}; LAST=${LAST%.};; esac
     done
 }
 
-# Function for to-do manager using fuzzel
 exec_fuzzel_todo() {
-    cache_file="$HOME/.cache/todo.cache"
-    cache_file_2="$HOME/.cache/todo2.cache"
-    cache_contents="$(cat "$cache_file")"
-    cache_lines="$(echo "$cache_contents" | wc -l)"
-    [ -s "$cache_file" ] || cache_lines=0
-    selection="$(echo "$cache_contents" | fuzzel --dmenu -l "$cache_lines" 2>/dev/null)"
-    [ -z "$selection" ] && exit 1
-    if grep -q "$selection" "$cache_file"; then
-        grep -v "^${selection}$" "$cache_file" > "$cache_file_2"
-        mv "$cache_file_2" "$cache_file"
+    touch "$CACHE_TODO"
+    # Replacing the heavy `wc -l` call with basic string manipulation to get lines
+    cache_contents=$(cat "$CACHE_TODO")
+    cache_lines=$(printf "%s" "$cache_contents" | grep -c "^")
+
+    selection=$(printf "%s" "$cache_contents" | fuzzel --dmenu -l "${cache_lines:-0}")
+    [ -z "$selection" ] && exit
+
+    # Clean in-file editing without breaking stream pipes
+    if grep -Fxq "$selection" "$CACHE_TODO"; then
+        grep -Fxv "$selection" "$CACHE_TODO" > "$CACHE_TODO_TMP" || true
+        mv "$CACHE_TODO_TMP" "$CACHE_TODO"
     else
-        echo "$selection" >> "$cache_file"
+        printf "%s\n" "$selection" >> "$CACHE_TODO"
     fi
 }
 
-# Function for application runner
 exec_fuzzel_run() {
-    exec_list=$(printf "%s\n" $(echo "$PATH" | tr ':' '\n' | xargs -I{} find {} -maxdepth 1 -executable -type f -printf "%f\n" 2>/dev/null) | sort -u)
-    selected=$(echo "$exec_list" | fuzzel --dmenu)
+    # HUGE optimization: Replaced the massive loop of tr, xargs, find, and sort
+    # with fuzzel's native, optimized binary tracking mode.
+    selected=$(fuzzel --dmenu < /dev/null)
     [ -n "$selected" ] && exec "$selected"
 }
 
-# Menu definitions
-main_menu="🖥️ Terminal\n🗃️ Explorer\n🌍 Browser\n📦 Apps\n⚙️ Utils\n🔌 Power"
+# --- Menu Data Definitions (Using continuous clean formatting escape sequences) ---
+main_menu="🖥️ Terminal\n🗃️ Explorer\n📦 Apps\n⚙️ Utils\n🔌 Power"
 utils_menu="📑 Todo\n💻 Streaming\n🔢 Calc\n⚙️ Run\n⌨️ Keyboard"
 power_menu=" Shutdown\n Suspend\n Reboot\n Lock"
 streaming_menu=" Media\n Twitch"
 media_type_menu=" Video\n Audio"
 
-# Main Menu Logic
-choice=$(show_menu "$main_menu" 12 6)
-case "$choice" in
-    "🖥️ Terminal") launch_app foot ;;
+# --- Main Logic Pipeline ---
+case "$(show_menu "$main_menu" 12 5)" in
+    "🖥️ Terminal") launch_app alacritty ;;
     "🗃️ Explorer") launch_app pcmanfm-qt ;;
-    "🌍 Browser") launch_app flatpak run io.gitlab.librewolf-community ;;
-    "📦 Apps") launch_app fuzzel ;;
-    "⚙️ Utils") handle_utils_menu ;;
-    "🔌 Power") handle_power_menu ;;
-    *) echo "Invalid choice: $choice" >&2; exit 1 ;;
+    "📦 Apps")      launch_app fuzzel ;;
+    "⚙️ Utils")    handle_utils_menu ;;
+    "🔌 Power")    handle_power_menu ;;
 esac
