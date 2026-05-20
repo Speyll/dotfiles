@@ -4,8 +4,8 @@
 
 # --- 1. Fast Metrics Gathering (All in-memory parsing) ---
 
-# Time & Date (Single process execution)
-DATETIME=$(date +"%A, %b %d | %I:%M %p")
+# Time & Date (24h format)
+DATETIME=$(date +"%A, %d %b | %H:%M")
 
 # Battery Stats via direct kernel sysfs read
 BAT_DIR="/sys/class/power_supply/BAT0"
@@ -13,7 +13,6 @@ if [ -d "$BAT_DIR" ]; then
     BAT_PCT=$(cat "$BAT_DIR/capacity" 2>/dev/null)
     BAT_STAT=$(cat "$BAT_DIR/status" 2>/dev/null)
 
-    # Map raw charging states to clean visual indicators
     case "$BAT_STAT" in
         "Charging")    BAT_ICON="⚡" ;;
         "Full")        BAT_ICON="🔌" ;;
@@ -35,14 +34,13 @@ MEM_STR=$(awk '
 ' /proc/meminfo)
 
 # Network State tracking via operstate
-NET_STR="󰈀 Offline"
+NET_STR="Offline"
 for dev in /sys/class/net/*; do
-    # Skip loopback interface
     [ "${dev##*/}" = "lo" ] && continue
     if [ "$(cat "$dev/operstate" 2>/dev/null)" = "up" ]; then
         case "${dev##*/}" in
-            wlan*|wlp*) NET_STR=" Wi-Fi Connected" ;;
-            eth*|enp*)  NET_STR="󰈀 Ethernet Connected" ;;
+            wlan*|wlp*) NET_STR="Wi-Fi" ;;
+            eth*|enp*)  NET_STR="Ethernet" ;;
         esac
         break
     fi
@@ -50,11 +48,13 @@ done
 
 # --- 2. Actionable Output Dispatch ---
 
-# We inject an explicit category ("status-popup") so Mako drops old versions
-# immediately instead of generating spam bubbles.
+# Clean, structured pseudo-tree that respects center alignment
+BODY="<b>System Status</b>\n├── <b>Power:</b>   ${BAT_STR}\n├── <b>Memory:</b>  🧠 ${MEM_STR}\n└── <b>Network:</b> 󰈀 ${NET_STR}"
+
+# -t 0 forces the notification to stay pinned indefinitely until dismissed
 notify-send \
     -a "System Status" \
     -h string:x-canonical-private-synchronous:status-popup \
-    -t 4000 \
+    -t 0 \
     "${DATETIME}" \
-    "<b>Battery:</b>  ${BAT_STR}\n<b>Memory:</b>  ${MEM_STR}\n<b>Network:</b>  ${NET_STR}"
+    "${BODY}"
