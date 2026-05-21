@@ -28,6 +28,13 @@ launch_app() {
 }
 
 # --- Menu Handlers ---
+handle_conn_menu() {
+    case "$(show_menu "$conn_menu" 14 2)" in
+        "󰈀 Network")   exec alacritty -T "Network Manager" -e nmtui ;;
+        " Bluetooth") exec alacritty -T "Bluetooth Manager" -e bluetui ;;
+    esac
+}
+
 handle_utils_menu() {
     case "$(show_menu "$utils_menu" 13 5)" in
         "📑 Todo")      exec_fuzzel_todo ;;
@@ -41,9 +48,9 @@ handle_utils_menu() {
 handle_power_menu() {
     case "$(show_menu "$power_menu" 11 4)" in
         " Shutdown") sudo poweroff ;;
-        " Suspend")  sudo systemctl suspend ;; # Updated 'halt' to standard systemctl suspend
+        " Suspend")  sudo systemctl suspend ;;
         " Reboot")   sudo reboot ;;
-        " Lock")     hyprlock ;; # Swapped hyprlock for your native Niri session lock
+        " Lock")     hyprlock ;;
     esac
 }
 
@@ -78,7 +85,6 @@ exec_fuzzel_calc() {
         [ -z "$NEXT" ] && exit
         [ "$NEXT" = "y" ] && printf "%s" "$LAST" | wl-copy && exit
 
-        # Uses bc directly without calling an extra sed fork to strip trailing zeros
         LAST=$(echo "$LAST$NEXT" | bc -l)
         case "$LAST" in *.*) LAST=${LAST%%0}; LAST=${LAST%.};; esac
     done
@@ -86,14 +92,12 @@ exec_fuzzel_calc() {
 
 exec_fuzzel_todo() {
     touch "$CACHE_TODO"
-    # Replacing the heavy `wc -l` call with basic string manipulation to get lines
     cache_contents=$(cat "$CACHE_TODO")
     cache_lines=$(printf "%s" "$cache_contents" | grep -c "^")
 
     selection=$(printf "%s" "$cache_contents" | fuzzel --dmenu -l "${cache_lines:-0}")
     [ -z "$selection" ] && exit
 
-    # Clean in-file editing without breaking stream pipes
     if grep -Fxq "$selection" "$CACHE_TODO"; then
         grep -Fxv "$selection" "$CACHE_TODO" > "$CACHE_TODO_TMP" || true
         mv "$CACHE_TODO_TMP" "$CACHE_TODO"
@@ -103,24 +107,25 @@ exec_fuzzel_todo() {
 }
 
 exec_fuzzel_run() {
-    # HUGE optimization: Replaced the massive loop of tr, xargs, find, and sort
-    # with fuzzel's native, optimized binary tracking mode.
     selected=$(fuzzel --dmenu < /dev/null)
     [ -n "$selected" ] && exec "$selected"
 }
 
-# --- Menu Data Definitions (Using continuous clean formatting escape sequences) ---
-main_menu="🖥️ Terminal\n🗃️ Explorer\n📦 Apps\n⚙️ Utils\n🔌 Power"
+# --- Menu Data Definitions ---
+main_menu="🖥️ Terminal\n🗃️ Explorer\n📦 Apps\n🌐 Network\n⚙️ Utils\n🔌 Power"
+conn_menu="󰈀 Network\n Bluetooth"
 utils_menu="📑 Todo\n💻 Streaming\n🔢 Calc\n⚙️ Run\n⌨️ Keyboard"
 power_menu=" Shutdown\n Suspend\n Reboot\n Lock"
 streaming_menu=" Media\n Twitch"
 media_type_menu=" Video\n Audio"
 
 # --- Main Logic Pipeline ---
-case "$(show_menu "$main_menu" 12 5)" in
+# Note: I bumped the layout lines count to 6 since we added a new option to the main list
+case "$(show_menu "$main_menu" 13 6)" in
     "🖥️ Terminal") launch_app alacritty ;;
     "🗃️ Explorer") launch_app pcmanfm-qt ;;
     "📦 Apps")      launch_app fuzzel ;;
+    "🌐 Network")      handle_conn_menu ;;
     "⚙️ Utils")    handle_utils_menu ;;
     "🔌 Power")    handle_power_menu ;;
 esac

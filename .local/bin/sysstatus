@@ -14,7 +14,7 @@ if [ -d "$BAT_DIR" ]; then
     BAT_STAT=$(cat "$BAT_DIR/status" 2>/dev/null)
 
     case "$BAT_STAT" in
-        "Charging")    BAT_ICON="⚡" ;;
+        "Charging")    BAT_ICON="🪫" ;;
         "Full")        BAT_ICON="🔌" ;;
         *)             BAT_ICON="🔋" ;;
     esac
@@ -49,7 +49,7 @@ done
 # --- 2. Actionable Output Dispatch ---
 
 # Clean, structured pseudo-tree that respects center alignment
-BODY="<b>System Status</b>\n├── <b>Power:</b>   ${BAT_STR}\n├── <b>Memory:</b>  🧠 ${MEM_STR}\n└── <b>Network:</b> 󰈀 ${NET_STR}"
+BODY="<b>System Status</b>\n├── <b>Power:</b>   ${BAT_STR}\n├── <b>Memory:</b>  🧠 ${MEM_STR}\n└── <b>Network:</b> 🌐 ${NET_STR}"
 
 # -t 0 forces the notification to stay pinned indefinitely until dismissed
 notify-send \
