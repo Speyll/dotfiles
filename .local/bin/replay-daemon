@@ -1,0 +1,33 @@
+#!/bin/sh
+# Lean replay daemon - Direct application audio isolation
+
+# Configurations
+MONITOR="DP-2"
+OUTPUT_DIR="$HOME/Videos/Replays"
+BUFFER_TIME="60"
+CONTAINER="mp4"
+VIDEO_CODEC="hevc"
+AUDIO_CODEC="opus"
+FPS="60"
+EXCLUDE_APP="Helium"
+
+# Ensure output directory exists
+mkdir -p "$OUTPUT_DIR"
+[ -d "$OUTPUT_DIR/replay.mp4" ] && rmdir "$OUTPUT_DIR/replay.mp4"
+
+# Kill any existing instances first to avoid conflicts
+killall gpu-screen-recorder 2>/dev/null
+
+# Start the recorder
+# Passing ONLY app-inverse creates a global system capture that drops the target application natively via PipeWire
+exec gpu-screen-recorder \
+    -w "$MONITOR" \
+    -c "$CONTAINER" \
+    -f "$FPS" \
+    -k "$VIDEO_CODEC" \
+    -ac "$AUDIO_CODEC" \
+    -a "app-inverse:$EXCLUDE_APP" \
+    -r "$BUFFER_TIME" \
+    -replay-storage ram \
+    -o "$OUTPUT_DIR" \
+    -v no >/dev/null 2>&1

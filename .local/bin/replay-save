@@ -1,0 +1,9 @@
+#!/bin/sh
+# Send the exact 60-second dump signal to the recorder
+
+if pkill -SIGRTMIN+3 -f gpu-screen-recorder; then
+    # Lightweight desktop notification if you have mako/dunst
+    notify-send -t 2000 "Replay Captured" "Last 60 seconds saved straight to your Replays folder!"
+else
+    notify-send -t 2000 "Replay Error" "The background recording daemon isn't running."
+fi

@@ -1,0 +1,104 @@
+#!/bin/sh
+# Hyper-lean Replay Daemon TUI Dashboard - Fixed Signaling
+
+# Configurations (Matches your verified working layout)
+MONITOR="DP-2"
+OUTPUT_DIR="$HOME/Videos/Replays"
+BUFFER_TIME="60"
+CONTAINER="mp4"
+VIDEO_CODEC="hevc"
+AUDIO_CODEC="opus"
+FPS="60"
+EXCLUDE_APP="Helium"
+
+# Ensure output directory exists
+mkdir -p "$OUTPUT_DIR"
+[ -d "$OUTPUT_DIR/replay.mp4" ] && rmdir "$OUTPUT_DIR/replay.mp4"
+
+# Kill any existing instances first to avoid conflicts
+killall gpu-screen-recorder 2>/dev/null
+
+# Clean up and restore terminal state on exit
+cleanup() {
+    kill "$GSR_PID" 2>/dev/null
+    stty sane             # Restore normal terminal settings
+    tput cnorm            # Restore cursor visibility
+    clear
+    echo "[+] Replay daemon stopped cleanly."
+    exit 0
+}
+trap cleanup INT TERM EXIT
+
+# Hide terminal cursor and clear screen
+tput civvis
+clear
+
+# Start your verified replay command in the background
+gpu-screen-recorder \
+    -w "$MONITOR" \
+    -c "$CONTAINER" \
+    -f "$FPS" \
+    -k "$VIDEO_CODEC" \
+    -ac "$AUDIO_CODEC" \
+    -a "app-inverse:$EXCLUDE_APP" \
+    -r "$BUFFER_TIME" \
+    -replay-storage ram \
+    -o "$OUTPUT_DIR" \
+    -v no >/dev/null 2>&1 &
+GSR_PID=$!
+
+# Ensure the process actually initialized
+sleep 0.5
+if ! kill -0 "$GSR_PID" 2>/dev/null; then
+    tput cnorm
+    echo "[-] Error: gpu-screen-recorder failed to start."
+    exit 1
+fi
+
+# Set terminal to raw input mode so we can capture single keypresses immediately
+stty -icanon -echo min 0 time 0
+
+start_time=$(date +%s)
+last_save_status="None"
+
+# Main Interface Loop
+while kill -0 "$GSR_PID" 2>/dev/null; do
+    # 1. Calculate Uptime Clock
+    current_time=$(date +%s)
+    elapsed=$((current_time - start_time))
+    hours=$((elapsed / 3600))
+    mins=$(((elapsed % 3600) / 60))
+    secs=$((elapsed % 60))
+
+    # 2. Render Interface to Terminal
+    printf "\033[H" # Move cursor to top-left corner
+    echo "=================================================="
+    echo "          🎥  GPU REPLAY BUFFER DAEMON            "
+    echo "=================================================="
+    echo " Status:      [ ACTIVE BUFFERING ]"
+    echo " Target:      Monitor $MONITOR (Helium Ignored)"
+    echo " Directory:   $OUTPUT_DIR"
+    echo " Daemon PID:  $GSR_PID"
+    printf " Running:     %02d:%02d:%02d\n" $hours $mins $secs
+    echo "--------------------------------------------------"
+    echo " Last Action: $last_save_status"
+    echo "--------------------------------------------------"
+    echo " Shortcuts:   [Spacebar]  Save Last 60 Seconds    "
+    echo "              [q]         Stop Daemon & Quit      "
+    echo "=================================================="
+
+    # 3. Handle Key Interactions
+    key=$(dd bs=1 count=1 2>/dev/null)
+    if [ "$key" = " " ]; then
+        # Use your verified working signal method to dump the 60 second buffer
+        if pkill -SIGRTMIN+3 -f gpu-screen-recorder; then
+            last_save_status="$(date +%H:%M:%S) - Replay Saved! ✅"
+        else
+            last_save_status="$(date +%H:%M:%S) - Save Failed ❌"
+        fi
+    elif [ "$key" = "q" ]; then
+        break
+    fi
+
+    sleep 0.2
+done
