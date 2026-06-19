@@ -30,14 +30,11 @@ while [ -z "$WAYLAND_DISPLAY" ] && [ "$timeout" -gt 0 ]; do
 done
 
 # 2. Cleanup (DO THIS BEFORE STARTING NEW SERVICES)
-for p in flavours mpvpaper swaybg fnott wlsunset cliphist waybar mako; do
+for p in flavours mpvpaper swaybg fnott wlsunset cliphist waybar mako hypridle xdg-desktop-portal; do
     pkill -x "$p" >/dev/null 2>&1
 done
 
 # 3. Environment & Auth
-dbus-update-activation-environment --all
-export XDG_CURRENT_DESKTOP=sway # or Hyprland, adjust as needed
-
 if command -v gnome-keyring-daemon >/dev/null; then
     eval $(gnome-keyring-daemon --start --components=secrets)
     export SSH_AUTH_SOCK
@@ -46,11 +43,13 @@ fi
 /usr/lib/polkit-gnome/polkit-gnome-authentication-agent-1 &
 
 # 4. Interface Settings
+/usr/lib/xdg-desktop-portal &
 gsettings set org.gnome.desktop.interface cursor-theme "$CURSOR"
 gsettings set org.gnome.desktop.interface color-scheme 'prefer-dark'
 # Note: seat command is specific to Sway config; if running in a script,
 # ensure it's piped to swaymsg if you are using Sway.
 command -v swaymsg >/dev/null && swaymsg seat seat0 xcursor_theme "$CURSOR"
+dbus-update-activation-environment --all
 
 # 5. Core Services
 wlsunset -l 36.7 -L 3.08 &
@@ -58,6 +57,7 @@ mako &
 wl-paste --type text --watch cliphist store &
 wl-paste --type image --watch cliphist store &
 hypridle &
+#sunshine &
 
 if [ "$WAYBAR_STYLE" != "none" ]; then
     waybar -c "$HOME/.config/waybar/$WAYBAR_STYLE-config" -s "$HOME/.config/waybar/style.css" &

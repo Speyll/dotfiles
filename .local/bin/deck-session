@@ -1,0 +1,2 @@
+#!/bin/sh
+gamescope -W 1920 -H 1080 -r 120 -f -e -O DP-2 -- steam -gamepadui

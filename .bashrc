@@ -36,7 +36,6 @@ if [ -x /usr/bin/tput ] && tput setaf 1 >&/dev/null; then
     prompt_command() {
         history -a          # Append current session history to file
         history -n          # Read new history entries from file
-        cleanup-history     # Clean up the history file
         set_prompt          # Set the prompt dynamically
     }
     PROMPT_COMMAND=prompt_command
@@ -46,26 +45,29 @@ fi
 
 # Enable programmable completion
 if ! shopt -oq posix; then
-  if [ -f /usr/share/bash-completion/bash_completion ]; then
-    . /usr/share/bash-completion/bash_completion
-  elif [ -f /etc/bash_completion ]; then
-    . /etc/bash_completion
-  fi
+    if [ -f /usr/share/bash-completion/bash_completion ]; then
+        . /usr/share/bash-completion/bash_completion
+    elif [ -f /etc/bash_completion ]; then
+        . /etc/bash_completion
+    fi
 fi
 
 # Load aliases
 [[ -f ~/.config/aliasrc ]] && . ~/.config/aliasrc
 
-# Proper FZF integration
-if [[ -f /usr/share/doc/fzf/examples/key-bindings.bash ]]; then
-    source /usr/share/doc/fzf/examples/key-bindings.bash
-elif [[ -f ~/.fzf.bash ]]; then
-    source ~/.fzf.bash
-elif [[ -f /usr/share/fzf/key-bindings.bash ]]; then
-    source /usr/share/fzf/key-bindings.bash
-fi
+# Optimized FZF key-bindings discovery loop
+for fzf_script in \
+    "/usr/share/doc/fzf/examples/key-bindings.bash" \
+    "$HOME/.fzf.bash" \
+    "/usr/share/fzf/key-bindings.bash" \
+    "/usr/share/fzf/shell/key-bindings.bash"; do
+    if [[ -f "$fzf_script" ]]; then
+        source "$fzf_script"
+        break
+    fi
+done
 
-# Keep bash history clean
+# Keep bash history clean (Optimized: Now running strictly on exit)
 cleanup-history() {
     local histfile="$HOME/.bash_history"
     [[ -r "$histfile" ]] || return
@@ -94,6 +96,9 @@ cleanup-history() {
     history -c
     history -r
 }
+
+# Trap terminal exits to clean the history file once per session
+trap cleanup-history EXIT
 
 # Enhanced history search (CTRL-R)
 __fzf_history__() {

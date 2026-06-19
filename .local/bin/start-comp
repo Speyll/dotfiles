@@ -25,14 +25,15 @@ LOGFILE="$HOME/.cache/wsession-errors"
 echo "$COMPOSITOR session started: $(date)" >> "$LOGFILE"
 exec >> "$LOGFILE" 2>&1
 
-# --- Environment Variables ---
-export QT_QPA_PLATFORM=wayland
-export QT_QPA_PLATFORMTHEME_QT6=wayland
+# --- Environment Variables (Flexible Fallbacks) ---
+export QT_QPA_PLATFORM="wayland;xcb"
+export GDK_BACKEND="wayland,x11"
+export SDL_VIDEODRIVER="wayland,x11"
+export CLUTTER_BACKEND="wayland,x11"
 export QT_QPA_PLATFORMTHEME=qt6ct
 export QT_QPA_PLATFORMTHEME_QT6=qt6ct
 export QT_WAYLAND_DISABLE_WINDOWDECORATION=1
 export ELM_DISPLAY=wl
-export SDL_VIDEODRIVER=wayland
 export GTK_USE_PORTAL=1
 export MOZ_ENABLE_WAYLAND=1
 export XCURSOR_THEME=Kaela-Kovalskia-v2

@@ -1,0 +1,91 @@
+#!/bin/sh
+# Hyper-lean Manual Recording Daemon TUI Dashboard
+
+# Configurations
+MONITOR="DP-2"
+OUTPUT_DIR="$HOME/Videos/Recordings"
+CONTAINER="mp4"
+VIDEO_CODEC="hevc"
+AUDIO_CODEC="opus"
+FPS="60"
+EXCLUDE_APP="Helium"
+
+# Ensure output directory exists
+mkdir -p "$OUTPUT_DIR"
+
+# State variables
+IS_RECORDING=false
+GSR_PID=""
+
+# Cleanup function
+cleanup() {
+    if [ -n "$GSR_PID" ]; then
+        kill -SIGINT "$GSR_PID" 2>/dev/null
+    fi
+    stty sane
+    tput cnorm
+    clear
+    echo "[+] Recording daemon stopped cleanly."
+    exit 0
+}
+trap cleanup INT TERM EXIT
+
+# Hide terminal cursor and clear screen
+tput civvis
+clear
+stty -icanon -echo min 0 time 0
+
+# Main Interface Loop
+while true; do
+    # 1. Status Check
+    status_text="[ IDLE ]"
+    if [ -n "$GSR_PID" ]; then
+        if kill -0 "$GSR_PID" 2>/dev/null; then
+            status_text="[ RECORDING... ]"
+            IS_RECORDING=true
+        else
+            IS_RECORDING=false
+            GSR_PID=""
+        fi
+    fi
+
+    # 2. Render Interface
+    printf "\033[H"
+    echo "=================================================="
+    echo "          🎥  GPU MANUAL RECORDER DAEMON          "
+    echo "=================================================="
+    echo " Status:      $status_text"
+    echo " Target:      Monitor $MONITOR (Helium Ignored)"
+    echo " Directory:   $OUTPUT_DIR"
+    echo "--------------------------------------------------"
+    echo " Shortcuts:   [Spacebar]  Toggle Recording        "
+    echo "              [q]         Quit Dashboard          "
+    echo "=================================================="
+
+    # 3. Handle Key Interactions
+    key=$(dd bs=1 count=1 2>/dev/null)
+    if [ "$key" = " " ]; then
+        if [ "$IS_RECORDING" = true ]; then
+            # STOP RECORDING
+            kill -SIGINT "$GSR_PID" 2>/dev/null
+            GSR_PID=""
+        else
+            # START RECORDING
+            filename="$OUTPUT_DIR/recording_$(date +%Y%m%d_%H%M%S).mp4"
+            gpu-screen-recorder \
+                -w "$MONITOR" \
+                -c "$CONTAINER" \
+                -f "$FPS" \
+                -k "$VIDEO_CODEC" \
+                -ac "$AUDIO_CODEC" \
+                -a "app-inverse:$EXCLUDE_APP" \
+                -o "$filename" \
+                -v no >/dev/null 2>&1 &
+            GSR_PID=$!
+        fi
+    elif [ "$key" = "q" ]; then
+        break
+    fi
+
+    sleep 0.2
+done

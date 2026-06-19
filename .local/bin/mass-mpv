@@ -2,24 +2,9 @@
 
 # Convert TARGET_DIR to an absolute path immediately
 TARGET_DIR="$(realpath "${1:-.}")"
-
-TMP_INPUT_CONF=$(mktemp)
 TMP_PLAYLIST=$(mktemp)
 
-trap 'rm -f "$TMP_INPUT_CONF" "$TMP_PLAYLIST"' EXIT
-
-# Custom keybindings
-cat > "$TMP_INPUT_CONF" <<EOF
-LEFT playlist-prev
-RIGHT playlist-next
-KP_PLUS add video-zoom 0.1
-KP_MINUS add video-zoom -0.1
-ENTER playlist-next
-BACKSPACE playlist-prev
-# Added seek controls for videos
-UP add seek 60
-DOWN add seek -60
-EOF
+trap 'rm -f "$TMP_PLAYLIST"' EXIT
 
 # Define supported extensions
 IMG_EXT="jpg|jpeg|png|gif|webp"
@@ -35,9 +20,8 @@ if [ ! -s "$TMP_PLAYLIST" ]; then
   exit 1
 fi
 
-mpv --input-conf="$TMP_INPUT_CONF" \
-    --playlist="$TMP_PLAYLIST" \
-    --vo=gpu \
+# We let mpv use your global mpv.conf, autoprofile.lua, and media-tools.lua!
+mpv --playlist="$TMP_PLAYLIST" \
     --image-display-duration=5 \
     --loop-playlist=inf \
     --osd-level=1 \
