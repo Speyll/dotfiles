@@ -3,6 +3,7 @@ max-history=5
 sort=-time
 font=monospace 12
 text-alignment=left
+default-timeout=5000
 
 # Style Options
 ## Size
