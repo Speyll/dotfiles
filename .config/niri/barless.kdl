@@ -1,0 +1,3 @@
+binds {
+    Mod+Space { spawn "~/.local/bin/sysstatus"; }
+}

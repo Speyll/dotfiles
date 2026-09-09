@@ -2,11 +2,13 @@ prefer-no-csd
 
 // Includes
 include "outputs.kdl"
-include "layout.kdl"
-//include "dms.kdl"
-include "fuzzel.kdl"
-include "keybinds.kdl"
 include "rules.kdl"
+include "layout.kdl"
+include "keybinds.kdl"
+//include "dms.kdl"
+//include "noctalia.kdl"
+include "barless.kdl"
+include "fuzzel.kdl"
 
 // Input & Cursor (core, stay inline)
 input {
@@ -43,6 +45,13 @@ spawn-at-startup "xwayland-satellite"
 
 spawn-at-startup "~/.config/autostart/autostart"
 screenshot-path "~/Pictures/grim/%Y-%m-%d %H-%M-%S.png"
+
+blur {
+  passes 2        // more passes = stronger blur (default: 3)
+  offset 3.0      // sample distance per pass (default: 3.0)
+  noise 0.03      // grain overlay (default: 0.02)
+  saturation 1.0  // color saturation boost (default: 1.5)
+}
 
 hotkey-overlay {
     skip-at-startup

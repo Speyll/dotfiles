@@ -1,8 +1,7 @@
 binds {
     // Personal
     Mod+Return { spawn "alacritty"; }
-    F10 { spawn "~/.config/niri/scripts/obs-replay"; }
-    Mod+Space { spawn "~/.local/bin/sysstatus"; }
+    F10 { spawn "replay-save"; }
 
     // Niri Actions
     Mod+Shift+Q { close-window; }

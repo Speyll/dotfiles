@@ -1,20 +1,3 @@
-layer-rule {
-    match layer="top"
-    match layer="overlay"
-
-    background-effect {
-        blur true
-        xray false
-    }
-}
-
-layer-rule {
-    match namespace="^launcher$"
-    background-effect {
-        blur true
-    }
-}
-
 window-rule {
     geometry-corner-radius 8
     clip-to-geometry true
@@ -31,6 +14,14 @@ window-rule {
     }
 }
 
+layer-rule {
+    match namespace="^launcher$"
+    background-effect {
+        blur true
+        xray false
+    }
+}
+
 window-rule {
     match app-id="^chatterino$"
     match app-id="^com.chatterino.chatterino$"
@@ -44,6 +35,7 @@ window-rule {
     match app-id="^dolphin$"
     match app-id="^librewolf$"
     match app-id="^firefox$"
+    match app-id="^helium$"
     open-maximized true
     default-column-width {
             proportion 1.0;
@@ -81,9 +73,19 @@ window-rule {
 window-rule {
     match app-id=r#"^steam_app_.*$"#
     match app-id="gamescope"
-    // This catches Wine/Proton games:
+    // Catch Wine/Proton games:
     match app-id=r#".*\.exe$"#
 
-    match title=r#"(?i)emulator|yuzu|ryujinx|pcsx2|rpcs3|edin|dolphin|retroarch"#
+    // Catch shadPS4 by app-id (handles variants like shadps4-sdl)
+    match app-id=r#"(?i)shadps4.*"#
+
+    // Updated title regex to include shadps4
+    match title=r#"(?i)emulator|yuzu|ryujinx|pcsx2|rpcs3|edin|dolphin|retroarch|shadps4"#
+
     variable-refresh-rate true
+}
+
+window-rule {
+    match app-id="steam" title=r#"^notificationtoasts_\d+_desktop$"#
+    default-floating-position x=10 y=10 relative-to="bottom-right"
 }
