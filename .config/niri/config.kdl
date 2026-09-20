@@ -43,7 +43,7 @@ spawn-at-startup "xwayland-satellite"
         DISPLAY ":0"
     }
 
-spawn-at-startup "~/.config/autostart/autostart"
+spawn-at-startup "autostart"
 screenshot-path "~/Pictures/grim/%Y-%m-%d %H-%M-%S.png"
 
 blur {
