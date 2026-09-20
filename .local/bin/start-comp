@@ -27,7 +27,6 @@ exec >> "$LOGFILE" 2>&1
 
 # --- Environment Variables (Flexible Fallbacks) ---
 export QT_QPA_PLATFORM="wayland;xcb"
-export GDK_BACKEND="wayland,x11"
 export SDL_VIDEODRIVER="wayland,x11"
 export CLUTTER_BACKEND="wayland,x11"
 export QT_QPA_PLATFORMTHEME=qt6ct
@@ -47,9 +46,8 @@ export XKB_DEFAULT_LAYOUT=us,fr
 export XKB_DEFAULT_OPTIONS=grp:rctrl_rshift_toggle
 
 # --- D-Bus Session ---
-if [ -z "$DBUS_SESSION_BUS_ADDRESS" ]; then
-  eval "$(/usr/bin/dbus-launch --exit-with-session --sh-syntax)"
-fi
+export XDG_RUNTIME_DIR="/run/user/$(id -u)"
+export DBUS_SESSION_BUS_ADDRESS="unix:path=${XDG_RUNTIME_DIR}/bus"
 
 # Ensure desktop services see the updated environment
 dbus-update-activation-environment --all &

@@ -1,60 +1,32 @@
 #!/bin/sh
-# Lightweight, ultra-lean barless status reporter for Mako
-# Uses raw system files to avoid heavy CLI execution overhead.
 
-# --- 1. Fast Metrics Gathering (All in-memory parsing) ---
-
-# Time & Date (24h format)
+# 1. Date & Time (Requires 1 fork: date)
 DATETIME=$(date +"%A, %d %b | %H:%M")
 
-# Battery Stats via direct kernel sysfs read
-BAT_DIR="/sys/class/power_supply/BAT0"
-if [ -d "$BAT_DIR" ]; then
-    BAT_PCT=$(cat "$BAT_DIR/capacity" 2>/dev/null)
-    BAT_STAT=$(cat "$BAT_DIR/status" 2>/dev/null)
+BODY=""
+
+# 2. Battery (Requires 0 forks: uses shell built-in 'read')
+# Safely find the first battery directory without external commands like 'ls' or 'find'
+set -- /sys/class/power_supply/BAT*
+
+if [ -f "$1/capacity" ]; then
+    # Using 'read' avoids spawning a 'cat' subshell, making this virtually zero-cost
+    read -r BAT_PCT < "$1/capacity"
+    read -r BAT_STAT < "$1/status"
 
     case "$BAT_STAT" in
-        "Charging")    BAT_ICON="🪫" ;;
-        "Full")        BAT_ICON="🔌" ;;
-        *)             BAT_ICON="🔋" ;;
+        "Charging") BAT_ICON="⚡" ;; # Changed from 🪫 (low battery) to ⚡
+        "Full")     BAT_ICON="🔌" ;;
+        *)          BAT_ICON="🔋" ;;
     esac
-    BAT_STR="${BAT_ICON} ${BAT_PCT}%"
-else
-    BAT_STR="🔌 Desktop Mode"
+    BODY="${BAT_ICON}  ${BAT_PCT}%"
 fi
 
-# RAM Consumption via direct /proc/meminfo parsing with awk
-MEM_STR=$(awk '
-    /^MemTotal:/ {total=$2}
-    /^MemAvailable:/ {avail=$2}
-    END {
-        used=(total-avail)/1024/1024;
-        print sprintf("%.2f GB", used)
-    }
-' /proc/meminfo)
-
-# Network State tracking via operstate
-NET_STR="Offline"
-for dev in /sys/class/net/*; do
-    [ "${dev##*/}" = "lo" ] && continue
-    if [ "$(cat "$dev/operstate" 2>/dev/null)" = "up" ]; then
-        case "${dev##*/}" in
-            wlan*|wlp*) NET_STR="Wi-Fi" ;;
-            eth*|enp*)  NET_STR="Ethernet" ;;
-        esac
-        break
-    fi
-done
-
-# --- 2. Actionable Output Dispatch ---
-
-# Clean, structured pseudo-tree that respects center alignment
-BODY="<b>System Status</b>\n├── <b>Power:</b>   ${BAT_STR}\n├── <b>Memory:</b>  🧠 ${MEM_STR}\n└── <b>Network:</b> 🌐 ${NET_STR}"
-
-# -t 0 forces the notification to stay pinned indefinitely until dismissed
+# 3. Actionable Output Dispatch (Requires 1 fork: notify-send)
+# The ${BODY:+"$BODY"} trick only passes the body argument if BODY is not empty.
 notify-send \
     -a "System Status" \
     -h string:x-canonical-private-synchronous:status-popup \
     -t 0 \
     "${DATETIME}" \
-    "${BODY}"
+    ${BODY:+"$BODY"}

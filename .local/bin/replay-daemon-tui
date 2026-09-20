@@ -4,12 +4,12 @@
 # Configurations (Matches your verified working layout)
 MONITOR="DP-2"
 OUTPUT_DIR="$HOME/Videos/Replays"
-BUFFER_TIME="60"
+BUFFER_TIME="90"
 CONTAINER="mp4"
 VIDEO_CODEC="hevc"
 AUDIO_CODEC="opus"
 FPS="60"
-EXCLUDE_APP="Helium"
+EXCLUDE_APP="firefox"
 
 # Ensure output directory exists
 mkdir -p "$OUTPUT_DIR"
@@ -83,7 +83,7 @@ while kill -0 "$GSR_PID" 2>/dev/null; do
     echo "--------------------------------------------------"
     echo " Last Action: $last_save_status"
     echo "--------------------------------------------------"
-    echo " Shortcuts:   [Spacebar]  Save Last 60 Seconds    "
+    echo " Shortcuts:   [Spacebar]  Save Last 90 Seconds   "
     echo "              [q]         Stop Daemon & Quit      "
     echo "=================================================="
 

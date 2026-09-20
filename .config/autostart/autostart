@@ -7,7 +7,7 @@ MODE="swaybg-random-online"
 THEME_MODE="none" # auto, fixed, none
 THEME_NAME="gruvbox-dark-medium"
 CURSOR="Kaela-Kovalskia-v2"
-WAYBAR_STYLE="none"
+WAYBAR_STYLE="notch"
 UPDATE_SCAN=true
 
 # URLs & Paths
@@ -30,20 +30,20 @@ while [ -z "$WAYLAND_DISPLAY" ] && [ "$timeout" -gt 0 ]; do
 done
 
 # 2. Cleanup (DO THIS BEFORE STARTING NEW SERVICES)
-for p in flavours mpvpaper swaybg fnott wlsunset cliphist waybar mako hypridle xdg-desktop-portal; do
+for p in flavours mpvpaper swaybg fnott wlsunset cliphist waybar mako hypridle; do
     pkill -x "$p" >/dev/null 2>&1
 done
 
 # 3. Environment & Auth
 if command -v gnome-keyring-daemon >/dev/null; then
-    eval $(gnome-keyring-daemon --start --components=secrets)
-    export SSH_AUTH_SOCK
+    eval "$(gnome-keyring-daemon --start --components=secrets)"
+    export GNOME_KEYRING_CONTROL
+    export GNOME_KEYRING_PKCS11_SOCK
 fi
 
 /usr/lib/polkit-gnome/polkit-gnome-authentication-agent-1 &
 
 # 4. Interface Settings
-/usr/lib/xdg-desktop-portal &
 gsettings set org.gnome.desktop.interface cursor-theme "$CURSOR"
 gsettings set org.gnome.desktop.interface color-scheme 'prefer-dark'
 # Note: seat command is specific to Sway config; if running in a script,
@@ -132,4 +132,4 @@ handle_aesthetics() {
 handle_aesthetics &
 
 # 7. Delayed Tasks
-[ "$UPDATE_SCAN" = true ] && (sleep 10; "$HOME/.local/bin/updtscan") &
+#[ "$UPDATE_SCAN" = true ] && (sleep 10; "$HOME/.local/bin/updtscan") &

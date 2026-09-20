@@ -2,7 +2,7 @@
 # Hyper-lean Manual Recording Daemon TUI Dashboard
 
 # Configurations
-MONITOR="DP-2"
+MONITOR="HDMI-A-1"
 OUTPUT_DIR="$HOME/Videos/Recordings"
 CONTAINER="mp4"
 VIDEO_CODEC="hevc"
