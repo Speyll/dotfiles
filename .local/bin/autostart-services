@@ -1,0 +1,27 @@
+#!/bin/sh
+
+CONFIG="$HOME/.config/autostart.env"
+[ -f "$CONFIG" ] && . "$CONFIG"
+
+wlsunset -l 36.7 -L 3.08 &
+mako &
+wl-paste --type text --watch cliphist store &
+wl-paste --type image --watch cliphist store &
+hypridle &
+#sunshine &
+
+if [ "$WAYBAR_STYLE" != "none" ]; then
+    waybar -c "$HOME/.config/waybar/$WAYBAR_STYLE-config" -s "$HOME/.config/waybar/style.css" &
+fi
+
+if command -v openrgb >/dev/null; then
+    openrgb --server -p pureWhite &
+fi
+
+# 6. Audio
+if [ "$AUDIO" = true ]; then
+    pipewire &
+    sleep 1
+    wireplumber &
+    pipewire-pulse &
+fi

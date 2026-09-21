@@ -1,0 +1,69 @@
+#!/bin/sh
+
+CONFIG="$HOME/.config/autostart.env"
+[ -f "$CONFIG" ] && . "$CONFIG"
+
+# --- Helper Functions ---
+get_orient() {
+    wlr-randr | awk '/^[A-Za-z0-9-]+/ {o=$1} /Transform:/ {print o ":" ($2 ~ /90|270/ ? "portrait" : "landscape")}'
+}
+
+fetch_url() {
+    curl --connect-timeout 5 --max-time 10 -fsSL "$1" | shuf -n1 | tr -d '\r\n'
+}
+
+apply_swaybg() {
+    get_orient | while IFS=: read -r o or; do
+        img=$([ "$or" = "portrait" ] && echo "$2" || echo "$1")
+        swaybg -o "$o" -i "$img" -m fill &
+    done
+}
+
+apply_mpvpaper() {
+    get_orient | while IFS=: read -r o or; do
+        [ "$or" = "portrait" ] && fmt="bestvideo[width<=?1080]" vid="$2" || fmt="bestvideo[height<=?1080]" vid="$1"
+        mpvpaper -vsp -o "no-audio pause=no --loop --ytdl-format=$fmt" "$o" "$vid" &
+    done
+}
+
+# --- Aesthetics Logic ---
+case "$MODE" in
+    swaybg-random-online)
+        # Apply local fallback immediately
+        apply_swaybg "$DWALL" "$DVWALL"
+
+        w_url=$(fetch_url "$P_WALL")
+        vw_url=$(fetch_url "$P_VWALL")
+
+        # Only proceed if we actually fetched a URL from Pastebin
+        if [ -n "$w_url" ] && [ -n "$vw_url" ]; then
+            curl --connect-timeout 5 --max-time 15 -fsSL "$w_url" -o /tmp/wall.jpg &
+            curl --connect-timeout 5 --max-time 15 -fsSL "$vw_url" -o /tmp/vert_wall.jpg &
+            wait
+
+            # Safe handoff: Only kill old swaybg if new images successfully downloaded and are not empty
+            if [ -s /tmp/wall.jpg ] && [ -s /tmp/vert_wall.jpg ]; then
+                pkill -x swaybg
+                apply_swaybg /tmp/wall.jpg /tmp/vert_wall.jpg
+            fi
+        fi
+        ;;
+    swaybg-random)
+        w=$(find "$HOME/pictures/walls/" -maxdepth 1 -name "*.jpg" | shuf -n1)
+        vw=$(find "$HOME/pictures/walls/" -maxdepth 1 -name "vert-*.jpg" | shuf -n1)
+        apply_swaybg "${w:-$DWALL}" "${vw:-$DVWALL}"
+        ;;
+    mpvpaper-online)
+        apply_mpvpaper "$(fetch_url "$P_VID")" "$(fetch_url "$P_VVID")"
+        ;;
+    *)
+        apply_swaybg "$DWALL" "$DVWALL"
+        ;;
+esac
+
+# --- Theme Apply ---
+if [ "$THEME_MODE" = "auto" ] && [ -f /tmp/wall.jpg ]; then
+    flavours generate dark /tmp/wall.jpg && flavours apply generated
+elif [ "$THEME_MODE" = "fixed" ]; then
+    flavours apply "$THEME_NAME"
+fi
