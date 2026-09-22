@@ -3,14 +3,27 @@
 # Format rule: Max 720p video height + best audio
 MPV_FORMAT="bestvideo[height<=?720]+bestaudio/best[height<=?720]"
 
+# Helper to choose GUI menu program (fuzzel preferred on Wayland / if installed)
+get_gui_menu() {
+    if command -v fuzzel &>/dev/null && { [ -n "$WAYLAND_DISPLAY" ] || ! command -v dmenu &>/dev/null; }; then
+        echo "fuzzel"
+    elif command -v dmenu &>/dev/null; then
+        echo "dmenu"
+    fi
+}
+
+GUI_MENU=$(get_gui_menu)
+
 # Get query from argument if provided
 query="$*"
 
-# If no argument, prompt using TTY (read) or GUI (dmenu)
+# If no argument, prompt using TTY (read) or GUI (fuzzel/dmenu)
 if [ -z "$query" ]; then
     if [ -t 0 ]; then
         read -rp "Search YouTube: " query
-    else
+    elif [ "$GUI_MENU" = "fuzzel" ]; then
+        query=$(echo "" | fuzzel --dmenu --lines=0 --prompt="Search YouTube: ")
+    elif [ "$GUI_MENU" = "dmenu" ]; then
         query=$(echo "" | dmenu -p "Search YouTube:")
     fi
 fi
@@ -27,10 +40,12 @@ results=$(yt-dlp "ytsearch15:$query" \
 
 [ -z "$results" ] && exit 1
 
-# Select video using fzf in terminal, or dmenu in GUI
+# Select video depending on environment
 if [ -t 0 ]; then
     selected=$(echo "$results" | fzf --delimiter='\t' --with-nth=1 --header="Select a video")
-else
+elif [ "$GUI_MENU" = "fuzzel" ]; then
+    selected=$(echo "$results" | fuzzel --dmenu --lines=15 --prompt="Select video: ")
+elif [ "$GUI_MENU" = "dmenu" ]; then
     selected=$(echo "$results" | dmenu -l 15 -p "Select video:")
 fi
 

@@ -1,4 +1,4 @@
-#!/bin/sh
+#!/usr/bin/env bash
 # Hyper-optimized Fuzzel Launcher Menu
 # Stripped of heavy subshell overhead for instant execution
 
@@ -7,125 +7,107 @@ FONT="monospace:size=14"
 ALIGN="center"
 FUZZEL_CMD="fuzzel -d -f $FONT -a $ALIGN"
 
-CACHE_TODO="$HOME/.cache/todo.cache"
-CACHE_TODO_TMP="$HOME/.cache/todo2.cache"
-
 # --- Helper Functions ---
 show_menu() {
     printf "%b" "$1" | $FUZZEL_CMD -w "$2" -l "$3"
 }
 
-launch_app() {
-    if command -v "$1" >/dev/null 2>&1; then
-        exec "$@"
-    # If it's a flatpak command, pass it directly to exec without command -v check
-    elif [ "$1" = "flatpak" ]; then
+launch() {
+    if command -v "$1" >/dev/null 2>&1 || [ "$1" = "flatpak" ]; then
         exec "$@"
     else
-        echo "$1 not found" >&2
+        echo "Error: $1 not found" >&2
         exit 1
     fi
 }
 
 # --- Menu Handlers ---
-handle_conn_menu() {
-    case "$(show_menu "$conn_menu" 14 2)" in
-        "󰈀 Network")   exec alacritty -T "Network Manager" -e nmtui ;;
-        " Bluetooth") exec alacritty -T "Bluetooth Manager" -e bluetui ;;
+handle_conn() {
+    case "$(show_menu "󰈀 Network\n Bluetooth" 14 2)" in
+        "󰈀 Network")   launch alacritty -T "Network Manager" -e nmtui ;;
+        " Bluetooth") launch alacritty -T "Bluetooth Manager" -e bluetui ;;
     esac
 }
 
-handle_utils_menu() {
-    case "$(show_menu "$utils_menu" 13 5)" in
-        "📑 Todo")      exec_fuzzel_todo ;;
-        "💻 Streaming") exec_fuzzel_streaming ;;
-        "🔢 Calc")      exec_fuzzel_calc ;;
-        "⚙️ Run")       exec_fuzzel_run ;;
+handle_utils() {
+    case "$(show_menu "💻 Streaming\n🔢 Calc\n⚙️ Run\n⌨️ Keyboard" 13 4)" in
+        "💻 Streaming") exec_streaming ;;
+        "🔢 Calc")      exec_calc ;;
+        "⚙️ Run")       exec_run ;;
         "⌨️ Keyboard")  toggle_keyboard ;;
     esac
 }
 
-handle_power_menu() {
-    case "$(show_menu "$power_menu" 11 4)" in
-        " Shutdown") sudo poweroff ;;
-        " Suspend")  sudo systemctl suspend ;;
-        " Reboot")   sudo reboot ;;
-        " Lock")     hyprlock ;;
+handle_power() {
+    case "$(show_menu " Shutdown\n Suspend\n Reboot\n Lock" 11 4)" in
+        " Shutdown") exec sudo poweroff ;;
+        " Suspend")  exec sudo systemctl suspend ;;
+        " Reboot")   exec sudo reboot ;;
+        " Lock")     exec hyprlock ;;
     esac
 }
 
-exec_fuzzel_streaming() {
-    platform_choice=$(show_menu "$streaming_menu" 9 2)
-    [ -z "$platform_choice" ] && exit
+# --- Utility Functions ---
+exec_streaming() {
+    platform=$(show_menu " Media\n Twitch" 9 2)
+    [ -z "$platform" ] && exit 0
 
-    case "$platform_choice" in
-        " Media")  input_link=$(wl-paste) ;;
-        " Twitch")
-            channel_name=$(fuzzel -d -p "type twitch name: " -f "$FONT" -w 40 -l 0 -a "$ALIGN" /dev/null)
-            [ -z "$channel_name" ] && exit
-            input_link="https://twitch.tv/$channel_name"
-            ;;
-        *) exit 1 ;;
-    esac
+    if [ "$platform" = " Media" ]; then
+        link=$(wl-paste)
+    elif [ "$platform" = " Twitch" ]; then
+        channel=$(fuzzel -d -p "Twitch channel: " -f "$FONT" -w 40 -l 0 -a "$ALIGN" </dev/null)
+        [ -z "$channel" ] && exit 0
+        link="https://twitch.tv/$channel"
+    else
+        exit 1
+    fi
 
-    case "$(show_menu "$media_type_menu" 9 2)" in
-        " Video") mpv --pause=no "$input_link" ;;
-        " Audio") foot -T "MPV Terminal" -e mpv --pause=no --no-video --volume=100 "$input_link" ;;
+    case "$(show_menu " Video\n Audio" 9 2)" in
+        " Video") exec mpv --pause=no "$link" ;;
+        " Audio") exec foot -T "MPV Terminal" -e mpv --pause=no --no-video --volume=100 "$link" ;;
     esac
 }
 
-toggle_keyboard() {
-    pkill -x wvkbd-mobintl || wvkbd-mobintl -H 50 -R 5 --bg "#282828" --fg "#ffffff" --fn "monospace 12" --alpha 200 &
-}
-
-exec_fuzzel_calc() {
-    LAST=""
+exec_calc() {
+    last=""
     while :; do
-        NEXT=$(fuzzel -l 0 --dmenu -p "${LAST} ")
-        [ -z "$NEXT" ] && exit
-        [ "$NEXT" = "y" ] && printf "%s" "$LAST" | wl-copy && exit
+        next=$(fuzzel -l 0 --dmenu -p "${last} " </dev/null)
+        [ -z "$next" ] && exit 0
+        if [ "$next" = "y" ]; then
+            printf "%s" "$last" | wl-copy
+            exit 0
+        fi
 
-        LAST=$(echo "$LAST$NEXT" | bc -l)
-        case "$LAST" in *.*) LAST=${LAST%%0}; LAST=${LAST%.};; esac
+        # Calculate, strip trailing zeros and dot if whole number
+        last=$(echo "$last$next" | bc -l)
+        case "$last" in
+            *.*) last=${last%%0}; last=${last%.} ;;
+        esac
     done
 }
 
-exec_fuzzel_todo() {
-    touch "$CACHE_TODO"
-    cache_contents=$(cat "$CACHE_TODO")
-    cache_lines=$(printf "%s" "$cache_contents" | grep -c "^")
+exec_run() {
+    # compgen -c instantly grabs all binaries in $PATH for a true dmenu_run experience
+    cmd=$(compgen -c | sort -u | $FUZZEL_CMD -p "Run: " -l 15)
 
-    selection=$(printf "%s" "$cache_contents" | fuzzel --dmenu -l "${cache_lines:-0}")
-    [ -z "$selection" ] && exit
+    # Intentionally leaving $cmd unquoted here so you can pass arguments (e.g., "killall waybar")
+    [ -n "$cmd" ] && exec $cmd
+}
 
-    if grep -Fxq "$selection" "$CACHE_TODO"; then
-        grep -Fxv "$selection" "$CACHE_TODO" > "$CACHE_TODO_TMP" || true
-        mv "$CACHE_TODO_TMP" "$CACHE_TODO"
+toggle_keyboard() {
+    if pkill -x wvkbd-mobintl; then
+        exit 0
     else
-        printf "%s\n" "$selection" >> "$CACHE_TODO"
+        exec wvkbd-mobintl -H 50 -R 5 --bg "#282828" --fg "#ffffff" --fn "monospace 12" --alpha 200
     fi
 }
 
-exec_fuzzel_run() {
-    selected=$(fuzzel --dmenu < /dev/null)
-    [ -n "$selected" ] && exec "$selected"
-}
-
-# --- Menu Data Definitions ---
-main_menu="🖥️ Terminal\n🗃️ Explorer\n📦 Apps\n🌐 Network\n⚙️ Utils\n🔌 Power"
-conn_menu="󰈀 Network\n Bluetooth"
-utils_menu="📑 Todo\n💻 Streaming\n🔢 Calc\n⚙️ Run\n⌨️ Keyboard"
-power_menu=" Shutdown\n Suspend\n Reboot\n Lock"
-streaming_menu=" Media\n Twitch"
-media_type_menu=" Video\n Audio"
-
 # --- Main Logic Pipeline ---
-# Note: I bumped the layout lines count to 6 since we added a new option to the main list
-case "$(show_menu "$main_menu" 13 6)" in
-    "🖥️ Terminal") launch_app alacritty ;;
-    "🗃️ Explorer") launch_app pcmanfm-qt ;;
-    "📦 Apps")      launch_app fuzzel ;;
-    "🌐 Network")      handle_conn_menu ;;
-    "⚙️ Utils")    handle_utils_menu ;;
-    "🔌 Power")    handle_power_menu ;;
+case "$(show_menu "🖥️ Terminal\n🗃️ Explorer\n📺 Youtube\n🌐 Network\n⚙️ Utils\n🔌 Power" 13 6)" in
+    "🖥️ Terminal") launch alacritty ;;
+    "🗃️ Explorer") launch pcmanfm-qt ;;
+    "📺 Youtube") launch yt-search ;;
+    "🌐 Network") handle_conn ;;
+    "⚙️ Utils") handle_utils ;;
+    "🔌 Power") handle_power ;;
 esac
