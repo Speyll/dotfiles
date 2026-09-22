@@ -1,37 +1,41 @@
-#!/bin/sh
+#!/usr/bin/env bash
 
-if [ -z "$1" ]; then
-  printf "search query: "
-  read -r query
-else
-  query="$1"
+# Format rule: Max 720p video height + best audio
+MPV_FORMAT="bestvideo[height<=?720]+bestaudio/best[height<=?720]"
+
+# Get query from argument if provided
+query="$*"
+
+# If no argument, prompt using TTY (read) or GUI (dmenu)
+if [ -z "$query" ]; then
+    if [ -t 0 ]; then
+        read -rp "Search YouTube: " query
+    else
+        query=$(echo "" | dmenu -p "Search YouTube:")
+    fi
 fi
 
-query=$(echo "$query" | sed 's/ /+/g')
-echo "$query"
+# Exit if cancelled or empty
+[ -z "$query" ] && exit 0
 
-# yt_api_key location
-home="$HOME"  # Define home variable
-yt_api_key="$(cat "${home}/.local/share/apis/YT_API_KEY")"
-urlstring="https://www.googleapis.com/youtube/v3/search?part=snippet&q=${query}&type=video&maxResults=20&key=${yt_api_key}"
+# Fetch top 15 results via yt-dlp
+results=$(yt-dlp "ytsearch15:$query" \
+    --flat-playlist \
+    --dump-json \
+    2>/dev/null | \
+    jq -r '"\(.title)\t\(.url // "https://www.youtube.com/watch?v=" + .id)"')
 
-# Using a temporary file to hold the output
-tempfile=$(mktemp) || exit 1
+[ -z "$results" ] && exit 1
 
-# Fetching data and processing it
-curl -s "${urlstring}" | \
-  jq -r '.items[] | select(.id.videoId != null) | "\(.snippet.channelTitle) => \(.snippet.title) https://youtu.be/\(.id.videoId)"' > "$tempfile"
-
-# Using fzf to select a video
-selected_video=$(fzf --with-nth='1..-2' +m < "$tempfile")
-
-# Clean up temporary file
-rm -f "$tempfile"
-
-# Extracting the last field for the URL
-if [ -n "$selected_video" ]; then
-  video_url=$(echo "$selected_video" | awk '{print $NF}' | sed 's/[[:space:]]*//g')  # Remove any trailing spaces
-  mpv "$video_url"
+# Select video using fzf in terminal, or dmenu in GUI
+if [ -t 0 ]; then
+    selected=$(echo "$results" | fzf --delimiter='\t' --with-nth=1 --header="Select a video")
 else
-  echo "No video selected."
+    selected=$(echo "$results" | dmenu -l 15 -p "Select video:")
+fi
+
+# Extract URL and stream with 720p cap
+if [ -n "$selected" ]; then
+    url=$(echo "$selected" | cut -f2)
+    mpv --ytdl-format="$MPV_FORMAT" "$url"
 fi
