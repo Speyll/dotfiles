@@ -15,7 +15,7 @@ while [ -z "$WAYLAND_DISPLAY" ] && [ "$timeout" -gt 0 ]; do
 done
 
 # 2. Efficient Cleanup (One system call instead of a shell loop)
-killall -q flavours mpvpaper swaybg fnott wlsunset cliphist waybar mako hypridle openrgb sunshine #pipewire wireplumber pipewire-pulse
+killall -q flavours mpvpaper swaybg fnott wlsunset cliphist waybar mako hypridle openrgb sunshine lxqt-policykit-agent #pipewire wireplumber pipewire-pulse
 sleep 1
 
 # 3. Environment & Auth
@@ -24,15 +24,20 @@ if command -v gnome-keyring-daemon >/dev/null; then
     eval "$(gnome-keyring-daemon --start --components=secrets)"
 fi
 
-# Polkit Agent Handoff (Systemd + Non-Systemd Fallback)
-if ! pgrep -f "polkit.*agent" >/dev/null; then
-    if [ -d /run/systemd/system ]; then
-        # systemctl handles the backgrounding and lifecycle automatically
+# Polkit Agent Handoff
+if ! pgrep -f "(pol|policy)kit.*agent" >/dev/null; then
+    # 1. Direct binary execution for LXQt (no native systemd unit)
+    if command -v lxqt-policykit-agent >/dev/null 2>&1; then
+        lxqt-policykit-agent &
+
+    # 2. Systemd path for agents that ship unit files
+    elif [ -d /run/systemd/system ]; then
         systemctl --user start hyprpolkitagent.service 2>/dev/null || \
         systemctl --user start plasma-polkit-agent.service 2>/dev/null || \
         systemctl --user start polkit-gnome-authentication-agent-1.service 2>/dev/null
+
+    # 3. Non-systemd fallback path
     else
-        # --- NON-SYSTEMD PATH (Void Linux, Artix, etc.) ---
         for agent in \
             /usr/libexec/hyprpolkitagent \
             /usr/lib/polkit-kde-authentication-agent-1 \
