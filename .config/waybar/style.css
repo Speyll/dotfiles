@@ -1,0 +1,87 @@
+@import "colors.css";
+
+* {
+    font-family: sans-serif;
+    font-size: 14px;
+    min-height: 0;
+    border-radius: 0;
+    padding: 0;
+    margin: 0;
+}
+
+#waybar {
+    background-color: transparent;
+    color: @base05;
+}
+
+.modules-center {
+    background-color: @bg;
+    color: @base05;
+    border-radius: 0 0 10px 10px;
+    padding: 2px 10px;
+    margin-top: 0px;
+}
+
+button, button:hover {
+    box-shadow: none;
+    text-shadow: none;
+    background: none;
+    transition: none;
+    border: none;
+}
+
+tooltip {
+    padding: 4px 8px;
+    margin: 0;
+    background-color: @bg;
+    color: @base05;
+    border-width: 0px;
+    border-radius: 6px;
+}
+
+tooltip label {
+    padding: 0;
+    margin: 0;
+    background-color: inherit;
+    color: @base05;
+}
+
+#clock,
+#wireplumber,
+#battery,
+#tray,
+#custom-launcher {
+    margin: 0 4px;
+    padding: 0;
+    font-weight: 500;
+    color: @base05;
+}
+
+#wireplumber.muted {
+    color: @base08;
+}
+
+#battery.charging,
+#battery.plugged {
+    color: @base0C;
+}
+
+#battery.warning {
+    color: @base0A;
+}
+
+#battery.critical {
+    color: @base08;
+}
+
+#tray {
+    background-color: transparent;
+}
+
+#tray > .passive {
+    -gtk-icon-effect: dim;
+}
+
+#tray > .needs-attention {
+    -gtk-icon-effect: highlight;
+}

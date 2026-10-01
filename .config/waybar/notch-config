@@ -1,0 +1,51 @@
+{
+    "layer": "background",
+    "position": "top",
+    "height": 26,
+    "exclusive": false,
+    "reload_style_on_change": true,
+
+    "modules-center": [
+        "clock",
+        "tray"
+    ],
+
+    "custom/launcher": {
+        "format": "",
+        "on-click": "fuzzel",
+        "tooltip": false
+    },
+
+    "wireplumber": {
+        "format": " {volume}%",
+        "format-muted": "",
+        "on-click": "pavucontrol",
+        "scroll-step": 0.2,
+        "tooltip": false
+    },
+
+    "clock": {
+        "format": "{:%H:%M}",
+        "interval": 60,
+        "tooltip": true,
+        "on-click": "fuzzel",
+        "tooltip-format": "{:%A, %d %b}"
+    },
+
+    "battery": {
+        "states": {
+            "warning": 30,
+            "critical": 15
+        },
+        "format": "{icon} {capacity}%",
+        "format-charging": "⚡ {capacity}%",
+        "format-plugged": "🔌 {capacity}%",
+        "format-icons": ["", "", "", "", ""],
+        "tooltip": false
+    },
+
+    "tray": {
+        "icon-size": 14,
+        "spacing": 4
+    }
+}
