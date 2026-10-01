@@ -3,6 +3,12 @@
 CONFIG="$HOME/.config/autostart.env"
 [ -f "$CONFIG" ] && . "$CONFIG"
 
+# Respect XDG Base Directory Specification for cache
+CACHE_DIR="${XDG_CACHE_HOME:-$HOME/.cache}/autostart-wallpaper"
+mkdir -p "$CACHE_DIR"
+CACHE_WALL="$CACHE_DIR/wall.jpg"
+CACHE_VWALL="$CACHE_DIR/vert_wall.jpg"
+
 # --- Helper Functions ---
 get_orient() {
     wlr-randr | awk '/^[A-Za-z0-9-]+/ {o=$1} /Transform:/ {print o ":" ($2 ~ /90|270/ ? "portrait" : "landscape")}'
@@ -35,16 +41,26 @@ case "$MODE" in
         w_url=$(fetch_url "$P_WALL")
         vw_url=$(fetch_url "$P_VWALL")
 
-        # Only proceed if we actually fetched a URL from Pastebin
+        # Only proceed if we actually fetched URLs
         if [ -n "$w_url" ] && [ -n "$vw_url" ]; then
-            curl --connect-timeout 5 --max-time 15 -fsSL "$w_url" -o /tmp/wall.jpg &
-            curl --connect-timeout 5 --max-time 15 -fsSL "$vw_url" -o /tmp/vert_wall.jpg &
+            # Overwrite the files directly in ~/.cache/
+            curl --connect-timeout 5 --max-time 15 -fsSL "$w_url" -o "$CACHE_WALL" &
+            curl --connect-timeout 5 --max-time 15 -fsSL "$vw_url" -o "$CACHE_VWALL" &
             wait
 
-            # Safe handoff: Only kill old swaybg if new images successfully downloaded and are not empty
-            if [ -s /tmp/wall.jpg ] && [ -s /tmp/vert_wall.jpg ]; then
-                pkill -x swaybg
-                apply_swaybg /tmp/wall.jpg /tmp/vert_wall.jpg
+            # Safe handoff: Ensure files exist and are not empty (-s)
+            if [ -s "$CACHE_WALL" ] && [ -s "$CACHE_VWALL" ]; then
+                # Capture the process IDs of the fallback swaybg instances
+                OLD_PIDS=$(pgrep -x swaybg)
+
+                # Start the new wallpapers directly over the old ones
+                apply_swaybg "$CACHE_WALL" "$CACHE_VWALL"
+
+                # Give Wayland time to render the new layer, then silently kill the fallbacks
+                if [ -n "$OLD_PIDS" ]; then
+                    sleep 1
+                    kill $OLD_PIDS 2>/dev/null
+                fi
             fi
         fi
         ;;
@@ -62,8 +78,13 @@ case "$MODE" in
 esac
 
 # --- Theme Apply ---
-if [ "$THEME_MODE" = "auto" ] && [ -f /tmp/wall.jpg ]; then
-    flavours generate dark /tmp/wall.jpg && flavours apply generated
+# Use the cached wallpaper if mode is online, otherwise fall back to local for theme generation
+if [ "$THEME_MODE" = "auto" ]; then
+    if [ "$MODE" = "swaybg-random-online" ] && [ -f "$CACHE_WALL" ]; then
+        flavours generate dark "$CACHE_WALL" && flavours apply generated
+    else
+        flavours generate dark "$DWALL" && flavours apply generated
+    fi
 elif [ "$THEME_MODE" = "fixed" ]; then
     flavours apply "$THEME_NAME"
 fi
