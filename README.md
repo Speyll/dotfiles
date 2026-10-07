@@ -13,17 +13,17 @@ If you are here for my old bspwm, wayfire, sway or river setups you can find it 
 
   - mainly `niri` and somtimes `labwc` as window managers (compositors).
   - `foot` & `alacritty` Terminal emulator.
-  - ~~`yambar`~~ ~~`waybar`~~ `dms` Status bar.
-  - ~~`fuzzel` The application launcher menu.~~
+  - ~~`yambar`~~ ~~`waybar`~~ ~~`dms`~~ most of the time barless.
+  - `fuzzel` The application launcher menu.
   - `pipewire` Audio server.
-  - `grim` For taking screenshots.
-  - `slurp` To select regions for screenshot capture.
+  - ~~`grim` For taking screenshots.~~
+  - ~~`slurp` To select regions for screenshot capture.~~
   - `brightnessctl` Tool to control screen brightness.
   - `wlsunset` For managing night mode settings.
   - `wl-clipboard` For clipboard management.
   - `cliphist` To access clipboard history.
-  - ~~`imv`~~ `swayimg` My image viewer.
-  - ~~`fnott` Notification system.~~
+  - `imv` ~~`swayimg`~~ My image viewer.
+  - `fnott` Notification system.
   - `mpv` Video player.
   - `nvim` & `nano` Text editor
   - `noto-fonts-emoji`, `noto-fonts-ttf`, `noto-fonts-cjk`,`nerd-fonts-symbols-ttf`, `cascadia-mono` Fonts.
