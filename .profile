@@ -17,7 +17,7 @@ path_prepend "$HOME/.local/bin"            # Local user binaries
 export PATH
 
 # Core terminal environment
-export TERMINAL="alacritty"
+export TERMINAL="foot"
 export TERM="xterm-256color"
 export CLICOLOR=1
 export EDITOR="nvim"
@@ -63,5 +63,5 @@ export FZF_DEFAULT_OPTS="--color=fg:7,bg:-1,hl:1 --color=fg+:15,bg+:8,hl+:9 --co
 command -v nnn >/dev/null && export NNN_OPTS="dH"
 
 # Some "fixes"
-export GTK_USE_PORTAL=1
+#export GTK_USE_PORTAL=1
 export MESA_SHADER_CACHE_MAX_SIZE=100G
