@@ -3,6 +3,7 @@
 CONFIG="$HOME/.config/autostart.env"
 [ -f "$CONFIG" ] && . "$CONFIG"
 
+foot --server &
 wlsunset -l 36.7 -L 3.08 &
 mako &
 wl-paste --type text --watch cliphist store &

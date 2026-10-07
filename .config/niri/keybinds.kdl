@@ -1,6 +1,6 @@
 binds {
     // Personal
-    Mod+Return { spawn "alacritty"; }
+    Mod+Return { spawn "footclient"; }
     F10 { spawn "replay-save"; }
 
     // Niri Actions
@@ -109,6 +109,19 @@ binds {
     Mod+WheelScrollUp       { focus-column-left; }
     Mod+Shift+WheelScrollDown { move-column-right; }
     Mod+Shift+WheelScrollUp { move-column-left; }
+
+    // Media Keys
+    XF86AudioRaiseVolume allow-when-locked=true { spawn "wpctl" "set-volume" "-l" "1.0" "@DEFAULT_AUDIO_SINK@" "5%+"; }
+    XF86AudioLowerVolume allow-when-locked=true { spawn "wpctl" "set-volume" "@DEFAULT_AUDIO_SINK@" "5%-"; }
+    XF86AudioMute        allow-when-locked=true { spawn "wpctl" "set-mute" "@DEFAULT_AUDIO_SINK@" "toggle"; }
+    XF86AudioMicMute     allow-when-locked=true { spawn "wpctl" "set-mute" "@DEFAULT_AUDIO_SOURCE@" "toggle"; }
+
+    XF86MonBrightnessUp   allow-when-locked=true { spawn "brightnessctl" "set" "+5%"; }
+    XF86MonBrightnessDown allow-when-locked=true { spawn "brightnessctl" "set" "5%-"; }
+
+    XF86AudioPlay allow-when-locked=true { spawn "playerctl" "play-pause"; }
+    XF86AudioNext allow-when-locked=true { spawn "playerctl" "next"; }
+    XF86AudioPrev allow-when-locked=true { spawn "playerctl" "previous"; }
 
     // Screenshots
     Print        { screenshot; }
