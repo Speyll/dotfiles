@@ -10,7 +10,22 @@ include "keybinds.kdl"
 include "barless.kdl"
 include "fuzzel.kdl"
 
-// Input & Cursor (core, stay inline)
+gestures {
+    hot-corners {
+        top-left
+    }
+
+    // Drag window against monitor edge to scroll tiling columns
+    dnd-edge-view-scroll {
+        trigger-width 50
+    }
+
+    // Drag window against monitor edge in overview to switch workspaces
+    dnd-edge-workspace-switch {
+        trigger-height 50
+    }
+}
+
 input {
     keyboard {
         xkb {
@@ -29,6 +44,9 @@ input {
     }
     tablet {
         map-to-output "DP-2"
+    }
+    touch {
+        map-to-output "eDP-1"
     }
 }
 

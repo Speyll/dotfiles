@@ -1,6 +1,6 @@
 #!/bin/sh
 #
-# spefetch - precise system info display
+# spefetch - precise, insanely optimized system info display
 
 # Configuration
 : "${USE_NERD_FONTS:=1}"  # Set to 0 for emoji fallback
@@ -18,100 +18,149 @@ white=$(printf '\033[37m')
 # Symbol configuration with automatic fallback
 if [ "$USE_NERD_FONTS" -eq 1 ]; then
     os_icon="󰍹" ker_icon="󰌢" up_icon="󰔟" pkg_icon="󰏖"
-    sh_icon="󰆍" de_icon="󰖲" inst_icon="󰄾"
+    sh_icon="󰆍" de_icon="󰖲" inst_icon="󰄾" mem_icon="󰍛"
 else
     os_icon="🏠" ker_icon="💫" up_icon="⏳" pkg_icon="📦"
-    sh_icon="🐚" de_icon="🎨" inst_icon="📅"
+    sh_icon="🐚" de_icon="🎨" inst_icon="📅" mem_icon="🧠"
 fi
 
-# System info detection (with lowercase OS)
-get_hostname() {
-    (hostname -f || uname -n) 2>/dev/null | cut -d'.' -f1 | tr -d ' ' | head -c 15
-}
+# Utility to safely lowercase strings
+tolower() { printf '%s\n' "$1" | tr '[:upper:]' '[:lower:]'; }
 
-user=$(id -un | tr '[:upper:]' '[:lower:]')
-host=$(get_hostname | tr '[:upper:]' '[:lower:]')
-os=$( ( . /etc/os-release && echo "${PRETTY_NAME:-$NAME}" || uname -o || uname -s ) | tr '[:upper:]' '[:lower:]')
-kernel=$(uname -sr | tr '[:upper:]' '[:lower:]')
-uptime=$(uptime -p 2>/dev/null | sed 's/up //;s/ days\?/d/;s/ hours\?/h/;s/ minutes\?/m/' | tr -d ',')
-shell=$(basename "${SHELL:-unknown}" | tr '[:upper:]' '[:lower:]')
-
-# Estimate installation age using /lost+found directory
-install_days="unknown"
-if [ -d /lost+found ]; then
-    install_date=$(stat -c %W /lost+found 2>/dev/null)
-    if [ "$install_date" -gt 0 ] 2>/dev/null; then
-        install_days=$(( ( $(date +%s) - install_date ) / 86400 ))
-    fi
+# 1. User & Hostname
+user=$(tolower "${USER:-$(id -un)}")
+if [ -r /proc/sys/kernel/hostname ]; then
+    read -r host < /proc/sys/kernel/hostname
+else
+    host=$(hostname 2>/dev/null || uname -n)
 fi
+host=$(tolower "${host%%.*}")
 
-# Enhanced package detection
-detect_pkgs() {
-    if command -v xbps-query >/dev/null; then       # Void
-        xbps-query -l | wc -l
-    elif command -v dpkg >/dev/null; then          # Debian
-        dpkg -l | grep -c '^ii'
-    elif command -v pacman >/dev/null; then        # Arch
-        pacman -Qq | wc -l
-    elif command -v rpm >/dev/null; then           # RPM
-        rpm -qa | wc -l
-    elif command -v dnf >/dev/null; then           # Fedora
-        dnf list installed | wc -l
-    elif command -v zypper >/dev/null; then        # openSUSE
-        zypper se -i | wc -l
-    elif command -v apk >/dev/null; then           # Alpine
-        apk info | wc -l
-    else
-        echo 0
-    fi
-}
-
-# Fixed package manager detection
-detect_pkg_manager() {
-    for cmd in xbps-query dpkg pacman rpm dnf zypper apk; do
-        if command -v $cmd >/dev/null; then
-            case $cmd in
-                "xbps-query") echo "xbps" ;;
-                *) echo "${cmd}" ;;
-            esac
-            return
+# 2. OS Detection
+os="unknown"
+if [ -r /etc/os-release ]; then
+    while IFS='=' read -r k v; do
+        if [ "$k" = "PRETTY_NAME" ]; then
+            os="${v#\"}"; os="${os%\"}"
+            break
         fi
-    done
-    echo "unknown"
-}
+    done < /etc/os-release
+fi
+os=$(tolower "$os")
 
-pkg_count=$(detect_pkgs)
-pkg_manager=$(detect_pkg_manager)
-nix_pkgs=$(
-    (nix-store -q --references /run/current-system/sw 2>/dev/null
-     nix-store -q --references ~/.nix-profile 2>/dev/null
-    ) | sort -u | wc -l
-)
-flat_pkgs=$(flatpak list --columns=app 2>/dev/null | tail -n +1 | wc -l)
-snap_pkgs=$(snap list 2>/dev/null | tail -n +2 | wc -l)
+# 3. Kernel Detection
+if [ -r /proc/sys/kernel/osrelease ] && [ -r /proc/sys/kernel/ostype ]; then
+    read -r ostype < /proc/sys/kernel/ostype
+    read -r osrel < /proc/sys/kernel/osrelease
+    kernel=$(tolower "$ostype $osrel")
+else
+    kernel=$(tolower "$(uname -sr)")
+fi
 
-# DE/WM detection
-ui=$(echo "${XDG_CURRENT_DESKTOP:-$DESKTOP_SESSION}" | tr '[:upper:]' '[:lower:]')
+# 4. Uptime Calculation
+if [ -r /proc/uptime ]; then
+    read -r up _ < /proc/uptime
+    up=${up%%.*}
+    d=$((up / 86400))
+    h=$(( (up % 86400) / 3600 ))
+    m=$(( (up % 3600) / 60 ))
+    uptime=""
+    [ "$d" -gt 0 ] && uptime="${d}d "
+    [ "$h" -gt 0 ] && uptime="${uptime}${h}h "
+    uptime="${uptime}${m}m"
+else
+    uptime=$(uptime -p 2>/dev/null | sed 's/up //;s/ days\?/d/;s/ hours\?/h/;s/ minutes\?/m/' | tr -d ',')
+fi
 
-# Fixed color package string builder (blue count)
+# 5. Installation Age
+install_days="unknown"
+if cmd=$(command -v stat 2>/dev/null); then
+    inst_time=$("$cmd" -c %W / 2>/dev/null)
+    [ -z "$inst_time" ] || [ "$inst_time" = "0" ] && inst_time=$("$cmd" -c %Y /lost+found 2>/dev/null)
+    if [ -n "$inst_time" ] && [ "$inst_time" -gt 0 ] 2>/dev/null; then
+        install_days=$(( ( $(date +%s) - inst_time ) / 86400 ))
+    fi
+fi
+[ "$install_days" = "unknown" ] && inst_str="${install_days}" || inst_str="${install_days}d"
+
+# 6. Memory Information
+mem_info="unknown"
+if [ -r /proc/meminfo ]; then
+    while read -r key val _; do
+        case "$key" in
+            MemTotal:) mem_tot=$val ;;
+            MemAvailable:) mem_avail=$val ;;
+        esac
+    done < /proc/meminfo
+    if [ -n "$mem_tot" ] && [ -n "$mem_avail" ]; then
+        mem_used=$(( (mem_tot - mem_avail) / 1024 ))
+        mem_tot=$(( mem_tot / 1024 ))
+        mem_info="${mem_used}M / ${mem_tot}M"
+    fi
+fi
+
+# 7. Shell & UI
+shell=$(tolower "${SHELL##*/}")
+ui=$(tolower "${XDG_CURRENT_DESKTOP:-${DESKTOP_SESSION:-unknown}}")
+
+# 8. Package Detection
+pkg_count=0
+pkg_manager="unknown"
+
+if [ -d /var/lib/pacman/local ]; then
+    pkg_manager="pacman"
+    set -- /var/lib/pacman/local/*
+    pkg_count=$(( $# - 1 ))
+elif [ -f /var/lib/dpkg/status ]; then
+    pkg_manager="dpkg"
+    pkg_count=$(grep -c "^Status: install ok installed" /var/lib/dpkg/status 2>/dev/null)
+elif command -v rpm >/dev/null 2>&1; then
+    pkg_manager="rpm"
+    pkg_count=$(rpm -qa 2>/dev/null | wc -l)
+elif [ -f /lib/apk/db/installed ]; then
+    pkg_manager="apk"
+    pkg_count=$(grep -c "^C:" /lib/apk/db/installed 2>/dev/null)
+elif command -v xbps-query >/dev/null 2>&1; then
+    pkg_manager="xbps"
+    pkg_count=$(xbps-query -l 2>/dev/null | wc -l)
+fi
+
+flat_pkgs=0
+for d in /var/lib/flatpak/app "$HOME/.local/share/flatpak/app"; do
+    if [ -d "$d" ]; then
+        for p in "$d"/*; do [ -d "$p" ] && flat_pkgs=$((flat_pkgs + 1)); done
+    fi
+done
+
+nix_pkgs=0
+if command -v nix-store >/dev/null 2>&1; then
+    nix_pkgs=$( (nix-store -q --references /run/current-system/sw 2>/dev/null; nix-store -q --references ~/.nix-profile 2>/dev/null) | sort -u | wc -l )
+fi
+
+snap_pkgs=0
+if command -v snap >/dev/null 2>&1; then
+    snap_pkgs=$(snap list 2>/dev/null | wc -l)
+    [ "$snap_pkgs" -gt 0 ] && snap_pkgs=$((snap_pkgs - 1))
+fi
+
 build_pkg_string() {
-    printf "%s  %s%s (%s) %s%s (flatpak) %s%s (nix) %s%s (snap)" \
-        "${magenta}${pkg_icon}" \
-        "${blue}" "${pkg_count}" "${blue}${pkg_manager}" \
-        "${cyan}" "${flat_pkgs}" \
-        "${green}" "${nix_pkgs}" \
-        "${red}" "${snap_pkgs}"
+    out="${magenta}${pkg_icon}  ${blue}${pkg_count} ${blue}${pkg_manager}"
+    [ "$flat_pkgs" -gt 0 ] && out="${out} ${cyan}${flat_pkgs} flat"
+    [ "$nix_pkgs" -gt 0 ]  && out="${out} ${green}${nix_pkgs} nix"
+    [ "$snap_pkgs" -gt 0 ] && out="${out} ${red}${snap_pkgs} snap"
+    printf "%s" "$out"
 }
 
-# Perfectly aligned output
+# 9. Perfectly Aligned Output (8-Line Block Grid)
 cat <<EOF
 ${reset}
-${cyan}     /\_/\     ${green}${user}${yellow}@${magenta}${host}
-${cyan}    / ${white}o${blue} ${white}o${cyan} \    ${red}${os_icon}  ${white}${os}
-${cyan}    \   ^ /    ${yellow}${ker_icon}  ${white}${kernel}
-${cyan}     './ \     ${green}${up_icon} ${white} ${uptime} ${magenta}${inst_icon} ${white}${install_days}d
-${cyan}      |||      $(build_pkg_string)
-${cyan}     /   \     ${blue}${sh_icon}  ${white}${shell}
-${cyan}               ${yellow}${de_icon}  ${white}${ui:-unknown}
+${cyan}   /\_____/\    ${green}${user}${yellow}@${magenta}${host}
+${cyan}  /  o   o  \   ${red}${os_icon}  ${white}${os}
+${cyan} ( ==  ^  == )  ${yellow}${ker_icon}  ${white}${kernel}
+${cyan}  )  -----  (   ${green}${up_icon}  ${white}${uptime}  ${magenta}${inst_icon}  ${white}${inst_str}
+${cyan} /   /   \   \  $(build_pkg_string)
+${cyan}|   |     |   | ${blue}${sh_icon}  ${white}${shell}
+${cyan} \   \___/   /  ${yellow}${de_icon}  ${white}${ui}
+${cyan}  \_________/   ${cyan}${mem_icon}  ${white}${mem_info}
 ${reset}
 EOF
