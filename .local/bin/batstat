@@ -1,0 +1,26 @@
+#!/usr/bin/env bash
+
+BAT="/sys/class/power_supply/BAT0"
+[[ -d "$BAT" ]] || BAT="/sys/class/power_supply/BAT1"
+
+STATUS=$(cat "$BAT/status")
+CAPACITY=$(cat "$BAT/capacity")
+POWER_NOW=$(cat "$BAT/power_now" 2>/dev/null || echo 0)
+ENERGY_NOW=$(cat "$BAT/energy_now" 2>/dev/null || echo 0)
+
+# Convert to Watts and Watt-hours
+POWER_W=$(awk "BEGIN {printf \"%.2f\", $POWER_NOW / 1000000}")
+ENERGY_WH=$(awk "BEGIN {printf \"%.2f\", $ENERGY_NOW / 1000000}")
+
+# Format output labels with 12-character left padding
+printf "%-12s %s (%s%%)\n" "Status:" "$STATUS" "$CAPACITY"
+printf "%-12s %s W\n"      "Power Draw:" "$POWER_W"
+printf "%-12s %s Wh\n"     "Remaining:" "$ENERGY_WH"
+
+# Time remaining calculation
+if [[ "$STATUS" == "Discharging" && "$POWER_NOW" -gt 0 ]]; then
+    MINS=$(( (ENERGY_NOW * 60) / POWER_NOW ))
+    HOURS=$(( MINS / 60 ))
+    MINS_REM=$(( MINS % 60 ))
+    printf "%-12s %dh %dm remaining\n" "Time Left:" "$HOURS" "$MINS_REM"
+fi

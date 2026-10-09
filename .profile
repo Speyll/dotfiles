@@ -1,36 +1,41 @@
 # ~/.profile: executed by login shells
 
-# Source .bashrc if available
+# 1. Source .bashrc if available (POSIX compliant check)
 [ -n "$BASH_VERSION" ] && [ -f "$HOME/.bashrc" ] && . "$HOME/.bashrc"
 
-# Add directories to PATH without duplicates
+# 2. Pure POSIX path_prepend (No bashisms, zero subshells, lightning fast)
 path_prepend() {
-    [ -d "$1" ] && [[ ":$PATH:" != *":$1:"* ]] && PATH="$1:$PATH"
+    [ -d "$1" ] || return 0
+    case ":$PATH:" in
+        *":$1:"*) ;;
+        *) PATH="$1:$PATH" ;;
+    esac
 }
 
 # User binaries and Nix paths (priority order)
-path_prepend "$HOME/.nix-profile/bin"      # Nix user packages
-path_prepend "$HOME/.nix-profile/sbin"     # Nix user system utilities
-path_prepend "/nix/var/nix/profiles/default/bin"  # Default Nix profile
-path_prepend "$HOME/bin"                   # Personal scripts
-path_prepend "$HOME/.local/bin"            # Local user binaries
+path_prepend "$HOME/.nix-profile/bin"
+path_prepend "$HOME/.nix-profile/sbin"
+path_prepend "/nix/var/nix/profiles/default/bin"
+path_prepend "$HOME/bin"
+path_prepend "$HOME/.local/bin"
 export PATH
 
-# Core terminal environment
+# Environment hygiene: erase the function from memory so it doesn't pollute your shell
+unset -f path_prepend
+
+# 3. Core & XDG Base Directory Specification
 export TERMINAL="foot"
-export TERM="xterm-256color"
 export CLICOLOR=1
 export EDITOR="nvim"
 export PAGER="less"
 export FILE="nnn"
 
-# XDG Base Directory Specification
 export XDG_CONFIG_HOME="$HOME/.config"
 export XDG_DATA_HOME="$HOME/.local/share"
 export XDG_CACHE_HOME="$HOME/.cache"
-export XDG_RUNTIME_DIR="/run/user/$(id -u)"
+# Note: XDG_RUNTIME_DIR is deliberately omitted. Let systemd set it safely.
 
-# XDG-compliant application settings
+# 4. XDG-compliant & Application settings (Grouped for sequential parsing)
 export NOTMUCH_CONFIG="$XDG_CONFIG_HOME/notmuch-config"
 export GTK2_RC_FILES="$XDG_CONFIG_HOME/gtk-2.0/gtkrc-2.0"
 export WGETRC="$XDG_CONFIG_HOME/wget/wgetrc"
@@ -46,22 +51,16 @@ export MBSYNCRC="$XDG_CONFIG_HOME/mbsync/config"
 export ELECTRUMDIR="$XDG_DATA_HOME/electrum"
 export NPM_CONFIG_USERCONFIG="$XDG_CONFIG_HOME/npm/npmrc"
 
-# Application-specific settings
-export LESSHISTFILE="-"                     # Disable Less history
-export GTK_OVERLAY_SCROLLING=0             # Disable smooth scrolling
-export _JAVA_AWT_WM_NONREPARENTING=1       # Fix Java GUI apps
-export TMUX_TMPDIR="$XDG_RUNTIME_DIR"
+export LESSHISTFILE="-"
+export GTK_OVERLAY_SCROLLING=0
+export _JAVA_AWT_WM_NONREPARENTING=1
+export MESA_SHADER_CACHE_MAX_SIZE="100G"
 
-# Nix environment configuration
+# Dynamically export TMUX_TMPDIR only if systemd has already provided XDG_RUNTIME_DIR
+[ -n "$XDG_RUNTIME_DIR" ] && export TMUX_TMPDIR="$XDG_RUNTIME_DIR"
+
+# 5. Nix & App Environments
 export NIX_PATH="nixpkgs=$HOME/.nix-defexpr/channels/nixpkgs"
 export NIX_SSL_CERT_FILE="/etc/ssl/certs/ca-certificates.crt"
-
-# FZF theming (handled in .bashrc for key bindings)
+export NNN_OPTS="dH"
 export FZF_DEFAULT_OPTS="--color=fg:7,bg:-1,hl:1 --color=fg+:15,bg+:8,hl+:9 --color=info:14,prompt:13,pointer:12,marker:10,spinner:11"
-
-# NNN configuration (if installed)
-command -v nnn >/dev/null && export NNN_OPTS="dH"
-
-# Some "fixes"
-#export GTK_USE_PORTAL=1
-export MESA_SHADER_CACHE_MAX_SIZE=100G

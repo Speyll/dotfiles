@@ -15,14 +15,20 @@ if [ "$WAYBAR_STYLE" != "none" ]; then
     waybar -c "$HOME/.config/waybar/$WAYBAR_STYLE-config" -s "$HOME/.config/waybar/style.css" &
 fi
 
-if command -v openrgb >/dev/null; then
+if command -v openrgb >/dev/null 2>&1; then
     openrgb --server -p pureWhite &
 fi
 
-# 6. Audio
+# --- Audio Stack (Systemd-aware / Void Linux fallback) ---
 if [ "$AUDIO" = true ]; then
-    pipewire &
-    sleep 1
-    wireplumber &
-    pipewire-pulse &
+    # If systemd user session is active, ensure units are started; otherwise fallback to manual binary execution
+    if [ -d /run/systemd/system ] && systemctl --user --version >/dev/null 2>&1; then
+        systemctl --user start pipewire wireplumber pipewire-pulse 2>/dev/null
+    else
+        # Void Linux / Non-systemd fallback path
+        pgrep -x pipewire >/dev/null || pipewire &
+        sleep 0.5
+        pgrep -x wireplumber >/dev/null || wireplumber &
+        pgrep -x pipewire-pulse >/dev/null || pipewire-pulse &
+    fi
 fi

@@ -7,7 +7,7 @@ TMP_PLAYLIST=$(mktemp)
 trap 'rm -f "$TMP_PLAYLIST"' EXIT
 
 # Define supported extensions
-IMG_EXT="jpg|jpeg|png|gif|webp"
+IMG_EXT="jpg|jpeg|png|gif|webp|avif"
 VID_EXT="mp4|mkv|mov|avi|webm|flv|wmv|m4v|m4a"
 
 # find using extended regex to catch both images and videos

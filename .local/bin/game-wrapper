@@ -1,0 +1,55 @@
+#!/bin/sh
+# ~/.local/bin/game-wrapper
+# Clears mpvpaper, deploys cached static wallpapers via swaybg for clean alt-tabbing,
+# runs the game with performance wrappers, and restores the live feed on exit.
+
+CACHE_DIR="${XDG_CACHE_HOME:-$HOME/.cache}/autostart-wallpaper"
+CACHE_WALL="$CACHE_DIR/wall.jpg"
+CACHE_VWALL="$CACHE_DIR/vert_wall.jpg"
+
+CONFIG="$HOME/.config/autostart.env"
+[ -f "$CONFIG" ] && . "$CONFIG"
+
+# Use cache files as dummies, falling back to static env defaults if cache is empty
+FALL_W="${DWALL:-$HOME/pictures/walls/wall.jpg}"
+FALL_VW="${DVWALL:-$HOME/pictures/walls/vert-wall.jpg}"
+
+use_w="$([ -s "$CACHE_WALL" ] && echo "$CACHE_WALL" || echo "$FALL_W")"
+use_vw="$([ -s "$CACHE_VWALL" ] && echo "$CACHE_VWALL" || echo "$FALL_VW")"
+
+# 1. Completely kill mpvpaper to free up 100% of GPU/VRAM resources
+killall -q mpvpaper
+
+# 2. Deploy static swaybg using the cache dummies, respecting orientation via Niri if available
+if command -v swaybg >/dev/null 2>&1; then
+    if command -v niri >/dev/null 2>&1 && [ -n "$NIRI_SOCKET" ]; then
+        niri msg outputs 2>/dev/null | awk -v l="$use_w" -v v="$use_vw" '
+            /^Output "/ {
+                line = $0;
+                sub(/.*\(/, "", line);
+                sub(/\).*/, "", line);
+                name = line;
+            }
+            /Transform:/ {
+                trans = $2;
+                img = (trans ~ /90|270/) ? v : l;
+                system("setsid swaybg -o " name " -i " img " -m fill >/dev/null 2>&1 &");
+            }
+        '
+    else
+        # Fallback if niri socket isn't reachable
+        setsid swaybg -i "$use_w" -m fill >/dev/null 2>&1 &
+    fi
+fi
+
+# 3. Run the game using the best available performance wrapper (CachyOS -> GameMode -> Raw)
+if command -v game-performance >/dev/null 2>&1; then
+    game-performance "$@"
+elif command -v gamemoderun >/dev/null 2>&1; then
+    gamemoderun "$@"
+else
+    "$@"
+fi
+
+# 4. When the game exits, relaunch your wallpaper script (which automatically obliterates swaybg and boots fresh mpvpaper)
+~/.local/bin/autostart-wallpaper &

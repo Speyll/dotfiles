@@ -3,88 +3,153 @@
 CONFIG="$HOME/.config/autostart.env"
 [ -f "$CONFIG" ] && . "$CONFIG"
 
-# Respect XDG Base Directory Specification for cache
 CACHE_DIR="${XDG_CACHE_HOME:-$HOME/.cache}/autostart-wallpaper"
 mkdir -p "$CACHE_DIR"
 CACHE_WALL="$CACHE_DIR/wall.jpg"
 CACHE_VWALL="$CACHE_DIR/vert_wall.jpg"
 
-# --- Helper Functions ---
+# --- Robust Native Orientation Fetch (Niri & Wlroots support) ---
 get_orient() {
-    wlr-randr | awk '/^[A-Za-z0-9-]+/ {o=$1} /Transform:/ {print o ":" ($2 ~ /90|270/ ? "portrait" : "landscape")}'
+    _out=""
+
+    # 1. Try Niri native output inspection
+    if command -v niri >/dev/null 2>&1 && [ -n "$NIRI_SOCKET" ]; then
+        _out=$(niri msg outputs 2>/dev/null | awk '
+            /^Output "/ {
+                line = $0;
+                sub(/.*\(/, "", line);
+                sub(/\).*/, "", line);
+                name = line;
+            }
+            /Transform:/ {
+                trans = $2;
+                orient = (trans ~ /90|270/) ? "portrait" : "landscape";
+                print name ":" orient;
+            }
+        ')
+    fi
+
+    # 2. Fallback to wlr-randr if running a wlroots compositor
+    if [ -z "$_out" ] && command -v wlr-randr >/dev/null 2>&1; then
+        _out=$(wlr-randr 2>/dev/null | awk '/^[A-Za-z0-9-]+/ {o=$1} /Transform:/ {print o ":" ($2 ~ /90|270/ ? "portrait" : "landscape")}')
+    fi
+
+    # 3. Final catch-all fallback: apply globally as landscape
+    if [ -z "$_out" ]; then
+        echo "*:landscape"
+    else
+        echo "$_out"
+    fi
 }
 
 fetch_url() {
-    curl --connect-timeout 5 --max-time 10 -fsSL "$1" | shuf -n1 | tr -d '\r\n'
+    curl --connect-timeout 3 --max-time 6 -fsSL "$1" 2>/dev/null | shuf -n1 | tr -d '\r\n'
 }
 
 apply_swaybg() {
-    get_orient | while IFS=: read -r o or; do
-        img=$([ "$or" = "portrait" ] && echo "$2" || echo "$1")
-        swaybg -o "$o" -i "$img" -m fill &
+    landscape_img="$1"
+    portrait_img="$2"
+
+    get_orient | while IFS=: read -r out or; do
+        [ -z "$out" ] && continue
+
+        if [ "$or" = "portrait" ]; then
+            img="$portrait_img"
+        else
+            img="$landscape_img"
+        fi
+
+        setsid swaybg -o "$out" -i "$img" -m fill >/dev/null 2>&1 &
     done
 }
 
 apply_mpvpaper() {
-    get_orient | while IFS=: read -r o or; do
-        [ "$or" = "portrait" ] && fmt="bestvideo[width<=?1080]" vid="$2" || fmt="bestvideo[height<=?1080]" vid="$1"
-        mpvpaper -vsp -o "no-audio pause=no --loop --ytdl-format=$fmt" "$o" "$vid" &
+    landscape_vid="$1"
+    portrait_vid="$2"
+
+    # Kill any lingering swaybg instances so they don't block mpvpaper
+    killall -q swaybg
+
+    get_orient | while IFS=: read -r out or; do
+        [ -z "$out" ] && continue
+
+        if [ "$or" = "portrait" ]; then
+            vid="$portrait_vid"
+            fmt="bestvideo[width<=?1080]"
+        else
+            vid="$landscape_vid"
+            fmt="bestvideo[height<=?1080]"
+        fi
+
+        # --no-config ensures global mpv.conf settings don't force it to open as a regular window
+        setsid mpvpaper -vsp -o "--no-config --no-audio --no-pause --loop --ytdl-format=$fmt" "$out" "$vid" >/dev/null 2>&1 &
     done
 }
 
-# --- Aesthetics Logic ---
+# --- Handle Fixed Theme Globally if Set ---
+if [ "$THEME_MODE" = "fixed" ]; then
+    flavours apply "$THEME_NAME" >/dev/null 2>&1 &
+fi
+
+# --- Aesthetics & Auto-Theme Logic ---
 case "$MODE" in
     swaybg-random-online)
-        # Apply local fallback immediately
+        # 1. Instantly apply local fallback wallpaper & theme so desktop is ready immediately with zero lag
         apply_swaybg "$DWALL" "$DVWALL"
+        if [ "$THEME_MODE" = "auto" ]; then
+            flavours generate dark "$DWALL" && flavours apply generated 2>/dev/null &
+        fi
 
-        w_url=$(fetch_url "$P_WALL")
-        vw_url=$(fetch_url "$P_VWALL")
+        # 2. Fetch online walls, download, apply wallpaper AND update theme atomically in background
+        (
+            w_url=$(fetch_url "$P_WALL")
+            vw_url=$(fetch_url "$P_VWALL")
 
-        # Only proceed if we actually fetched URLs
-        if [ -n "$w_url" ] && [ -n "$vw_url" ]; then
-            # Overwrite the files directly in ~/.cache/
-            curl --connect-timeout 5 --max-time 15 -fsSL "$w_url" -o "$CACHE_WALL" &
-            curl --connect-timeout 5 --max-time 15 -fsSL "$vw_url" -o "$CACHE_VWALL" &
-            wait
+            if [ -n "$w_url" ] && [ -n "$vw_url" ]; then
+                curl --connect-timeout 3 --max-time 10 -fsSL "$w_url" -o "$CACHE_WALL" 2>/dev/null &
+                p1=$!
+                curl --connect-timeout 3 --max-time 10 -fsSL "$vw_url" -o "$CACHE_VWALL" 2>/dev/null &
+                p2=$!
+                wait "$p1" "$p2" 2>/dev/null
 
-            # Safe handoff: Ensure files exist and are not empty (-s)
-            if [ -s "$CACHE_WALL" ] && [ -s "$CACHE_VWALL" ]; then
-                # Capture the process IDs of the fallback swaybg instances
-                OLD_PIDS=$(pgrep -x swaybg)
+                if [ -s "$CACHE_WALL" ] && [ -s "$CACHE_VWALL" ]; then
+                    OLD_PIDS=$(pgrep -x swaybg)
+                    apply_swaybg "$CACHE_WALL" "$CACHE_VWALL"
 
-                # Start the new wallpapers directly over the old ones
-                apply_swaybg "$CACHE_WALL" "$CACHE_VWALL"
+                    # Generate and apply theme from the newly cached wall atomically
+                    if [ "$THEME_MODE" = "auto" ]; then
+                        flavours generate dark "$CACHE_WALL" && flavours apply generated 2>/dev/null
+                    fi
 
-                # Give Wayland time to render the new layer, then silently kill the fallbacks
-                if [ -n "$OLD_PIDS" ]; then
-                    sleep 1
-                    kill $OLD_PIDS 2>/dev/null
+                    if [ -n "$OLD_PIDS" ]; then
+                        sleep 1
+                        kill $OLD_PIDS 2>/dev/null
+                    fi
                 fi
             fi
-        fi
+        ) >/dev/null 2>&1 &
         ;;
     swaybg-random)
-        w=$(find "$HOME/pictures/walls/" -maxdepth 1 -name "*.jpg" | shuf -n1)
-        vw=$(find "$HOME/pictures/walls/" -maxdepth 1 -name "vert-*.jpg" | shuf -n1)
-        apply_swaybg "${w:-$DWALL}" "${vw:-$DVWALL}"
+        w=$(find "$HOME/pictures/walls/" -maxdepth 1 -name "*.jpg" 2>/dev/null | shuf -n1)
+        vw=$(find "$HOME/pictures/walls/" -maxdepth 1 -name "vert-*.jpg" 2>/dev/null | shuf -n1)
+        target_w="${w:-$DWALL}"
+        target_vw="${vw:-$DVWALL}"
+
+        apply_swaybg "$target_w" "$target_vw"
+        if [ "$THEME_MODE" = "auto" ]; then
+            flavours generate dark "$target_w" && flavours apply generated 2>/dev/null &
+        fi
         ;;
     mpvpaper-online)
         apply_mpvpaper "$(fetch_url "$P_VID")" "$(fetch_url "$P_VVID")"
+        if [ "$THEME_MODE" = "auto" ]; then
+            flavours generate dark "$DWALL" && flavours apply generated 2>/dev/null &
+        fi
         ;;
     *)
         apply_swaybg "$DWALL" "$DVWALL"
+        if [ "$THEME_MODE" = "auto" ]; then
+            flavours generate dark "$DWALL" && flavours apply generated 2>/dev/null &
+        fi
         ;;
 esac
-
-# --- Theme Apply ---
-# Use the cached wallpaper if mode is online, otherwise fall back to local for theme generation
-if [ "$THEME_MODE" = "auto" ]; then
-    if [ "$MODE" = "swaybg-random-online" ] && [ -f "$CACHE_WALL" ]; then
-        flavours generate dark "$CACHE_WALL" && flavours apply generated
-    else
-        flavours generate dark "$DWALL" && flavours apply generated
-    fi
-elif [ "$THEME_MODE" = "fixed" ]; then
-    flavours apply "$THEME_NAME"
-fi

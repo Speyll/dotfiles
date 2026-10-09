@@ -1,0 +1,18 @@
+#!/bin/bash
+
+for file in "$@"; do
+    if [ -f "$file" ]; then
+        dir=$(dirname "$file")
+        filename=$(basename "$file")
+        extension="${filename##*.}"
+        filename_noext="${filename%.*}"
+
+        output="${dir}/${filename_noext}_noaudio.${extension}"
+
+        # Remove audio without re-encoding video
+        ffmpeg -i "$file" -an -c:v copy "$output"
+    fi
+done
+
+# Send desktop notification when complete
+notify-send "FFmpeg" "Audio removed for selected video(s)!"

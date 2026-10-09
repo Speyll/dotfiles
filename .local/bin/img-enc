@@ -1,58 +1,128 @@
-#!/bin/sh
+#!/usr/bin/env bash
+set -euo pipefail
 
-target_format="${1:-webp}"  # Default to webp if not specified
+### CONFIGURATION ###
+target_format="${1:-avif}"  # Default to AVIF (King of file size/quality ratio)
 output_dir="opt_${target_format}"
-quality=82
 max_dimension=1920
 
-mkdir -p "$output_dir"
+# Safe concurrency limit for 8GB RAM (ImageMagick can use a few hundred MBs per thread)
+MAX_JOBS=4
 
-find . -maxdepth 1 -type f \( -iname "*.jpg" -o -iname "*.jpeg" -o -iname "*.png" -o -iname "*.webp" -o -iname "*.bmp" -o -iname "*.tiff" -o -iname "*.heic" -o -iname "*.avif" \) -print | while IFS= read -r file; do
-    [ -e "$file" ] || continue
-    base_name=$(basename "$file")
-    extension="${file##*.}"
-    clean_name=$(printf "%s" "${base_name%.*}" | tr -cd '[:alnum:]._-')
+### UTILITY FUNCTIONS ###
+
+# Cleanup handler: If you hit Ctrl+C, kill all background child processes cleanly
+cleanup() {
+    echo -e "\n[!] Script interrupted! Canceling background jobs..."
+    kill $(jobs -p) 2>/dev/null || true
+    exit 130
+}
+trap cleanup INT TERM
+
+get_image_files() {
+    local -n arr="$1" # Nameref to populate target array
+
+    # Read files natively into memory (ignores case, so .JPG and .jpg both work)
+    shopt -s nullglob nocaseglob
+    arr=(*.{jpg,jpeg,png,webp,bmp,tiff,heic,avif})
+    shopt -u nullglob nocaseglob
+}
+
+process_image() {
+    local file="$1"
+    local base_name="${file##*/}"
+    local extension="${base_name##*.}"
+    local clean_name output_file
+
+    # Clean the filename just like the original script (added || true for safety)
+    clean_name=$(printf "%s" "${base_name%.*}" | tr -cd '[:alnum:]._-' || true)
     output_file="$output_dir/${clean_name}_${extension}.$target_format"
 
-    if [ -f "$output_file" ]; then
-        printf "Skipping: %s (output exists)\n" "$base_name"
-        continue
+    if [[ -f "$output_file" ]]; then
+        echo "[$(date '+%H:%M:%S')] Skipping: $base_name (already exists)"
+        return 0
     fi
 
-    printf "Processing: %s -> %s\n" "$base_name" "$output_file"
+    echo "[$(date '+%H:%M:%S')] Optimizing: $base_name -> $target_format"
 
-    geometry=$(magick identify -format "%wx%h" "$file" 2>/dev/null)
-    if [ -z "$geometry" ]; then
-        printf "Error: Cannot read image file: %s\n" "$file" >&2
-        continue
-    fi
-    width=$(echo "$geometry" | cut -d 'x' -f1)
-    height=$(echo "$geometry" | cut -d 'x' -f2)
+    # Base arguments for all formats
+    # The '>' in resize means "only shrink if larger than these dimensions", entirely bypassing the need for 'identify'
+    local base_args=(-strip -resize "${max_dimension}x${max_dimension}>" -auto-orient -colorspace sRGB)
 
-    resize_arg=""
-    if [ "$width" -gt "$max_dimension" ] || [ "$height" -gt "$max_dimension" ]; then
-        resize_arg="-resize ${max_dimension}x${max_dimension}"
-    fi
-
-    # Choose format-specific options
+    # Note: AVIF quality 60 is visually comparable to WebP/JPEG 82
+    local success=false
     case "$target_format" in
+        avif)
+            if ionice -c3 nice -n 19 magick "$file" "${base_args[@]}" -quality 60 "$output_file"; then success=true; fi
+            ;;
         webp)
-            magick "$file" -strip $resize_arg -auto-orient -quality "$quality" -define webp:method=6,webp:auto-filter=true -colorspace sRGB "$output_file"
+            if ionice -c3 nice -n 19 magick "$file" "${base_args[@]}" -quality 82 -define webp:method=6,webp:auto-filter=true "$output_file"; then success=true; fi
             ;;
         jpg|jpeg)
-            magick "$file" -strip $resize_arg -auto-orient -quality "$quality" -sampling-factor 4:2:0 -interlace Plane -colorspace sRGB "$output_file"
+            if ionice -c3 nice -n 19 magick "$file" "${base_args[@]}" -quality 82 -sampling-factor 4:2:0 -interlace Plane -define jpeg:dct-method=float "$output_file"; then success=true; fi
             ;;
         png)
-            magick "$file" -strip $resize_arg -auto-orient -define png:compression-level=9 -colorspace sRGB "$output_file"
+            if ionice -c3 nice -n 19 magick "$file" "${base_args[@]}" -define png:compression-level=9 "$output_file"; then success=true; fi
             ;;
         *)
-            printf "Unsupported output format: %s\n" "$target_format" >&2
-            continue
+            echo "Error: Unsupported output format: $target_format" >&2
+            return 1
             ;;
     esac
 
-    # Preserve timestamp
-    touch -r "$file" "$output_file"
-done
+    # Preserve timestamp only if optimization succeeded
+    if [[ "$success" == true ]]; then
+        touch -r "$file" "$output_file" || true
+    else
+        echo "[$(date '+%H:%M:%S')] Failed: $base_name" >&2
+    fi
+}
 
-printf "Processing complete. Results in: %s\n" "$output_dir"
+### SMART PARALLEL JOB CONTROLLER ###
+process_batch() {
+    local -n files="$1"
+    local total_files="${#files[@]}"
+
+    if (( total_files == 0 )); then
+        echo "No images found in the current directory."
+        exit 0
+    fi
+
+    echo "Found $total_files images. Processing up to $MAX_JOBS at a time..."
+
+    local running_jobs=0
+    local completed_jobs=0
+
+    for file in "${files[@]}"; do
+        # Launch optimization task in the background
+        process_image "$file" &
+
+        # SAFE ARITHMETIC (prevents set -e from crashing the script)
+        running_jobs=$((running_jobs + 1))
+
+        # If we hit our RAM/CPU limit, wait for at least one job to finish
+        if (( running_jobs >= MAX_JOBS )); then
+            wait -n || true  # Added || true so a failing job doesn't kill the script
+            running_jobs=$((running_jobs - 1))
+            completed_jobs=$((completed_jobs + 1))
+            echo "--- Progress: $completed_jobs / $total_files images completed ---"
+        fi
+    done
+
+    # Wait for the remaining active background jobs to finish
+    while (( running_jobs > 0 )); do
+        wait -n || true
+        running_jobs=$((running_jobs - 1))
+        completed_jobs=$((completed_jobs + 1))
+        echo "--- Progress: $completed_jobs / $total_files images completed ---"
+    done
+}
+
+### MAIN EXECUTION ###
+mkdir -p "$output_dir"
+image_files_array=()
+
+get_image_files image_files_array
+process_batch image_files_array
+
+echo "Processing complete. Results are in: $output_dir"

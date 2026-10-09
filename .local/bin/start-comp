@@ -1,82 +1,54 @@
 #!/bin/sh
-# Unified compositor launcher with optional PipeWire support
+# Unified Wayland compositor launcher
 
-# --- Parse Arguments ---
-START_PIPEWIRE=false
-COMPOSITOR=""
-
-while [ $# -gt 0 ]; do
-  case "$1" in
-    -p) START_PIPEWIRE=true ;;
-    -*) echo "Unknown option: $1" >&2; exit 1 ;;
-    *) COMPOSITOR="$1" ;;
-  esac
-  shift
-done
-
-[ -z "$COMPOSITOR" ] && {
-  echo "Usage: $(basename "$0") [-p] <compositor>" >&2
+# --- Parse Arguments (0 forks, pure POSIX) ---
+[ -z "$1" ] || [ "${1#-}" != "$1" ] && {
+  echo "Usage: ${0##*/} <compositor>" >&2
   exit 1
 }
+COMPOSITOR="$1"
+
+if ! command -v "$COMPOSITOR" >/dev/null 2>&1; then
+  echo "Error: Compositor '$COMPOSITOR' not found in PATH." >&2
+  exit 1
+fi
+
+# --- Dynamically set XDG_CURRENT_DESKTOP based on the compositor ---
+case "$COMPOSITOR" in
+    *niri*)     XDG_CURRENT_DESKTOP="niri" ;;
+    *hyprland*) XDG_CURRENT_DESKTOP="Hyprland" ;;
+    *sway*)     XDG_CURRENT_DESKTOP="sway" ;;
+    *)          XDG_CURRENT_DESKTOP="${COMPOSITOR%-session}" ;;
+esac
 
 # --- Setup Logging ---
 mkdir -p "$HOME/.cache"
 LOGFILE="$HOME/.cache/wsession-errors"
-echo "$COMPOSITOR session started: $(date)" >> "$LOGFILE"
+echo "=== $COMPOSITOR session started: $(date) ===" >> "$LOGFILE"
 exec >> "$LOGFILE" 2>&1
 
-# --- Environment Variables (Flexible Fallbacks) ---
+# --- Environment Variables ---
+export XDG_SESSION_TYPE="wayland"
+export XDG_CURRENT_DESKTOP
+
 export QT_QPA_PLATFORM="wayland;xcb"
 export SDL_VIDEODRIVER="wayland,x11"
-export CLUTTER_BACKEND="wayland,x11"
-export QT_QPA_PLATFORMTHEME=qt6ct
-export QT_QPA_PLATFORMTHEME_QT6=qt6ct
+export CLUTTER_BACKEND="wayland"
+export QT_QPA_PLATFORMTHEME="qt6ct"
 export QT_WAYLAND_DISABLE_WINDOWDECORATION=1
-export ELM_DISPLAY=wl
 export GTK_USE_PORTAL=1
-export MOZ_ENABLE_WAYLAND=1
-export XCURSOR_THEME=Kaela-Kovalskia-v2
-export XCURSOR_SIZE=24
-export XDG_SESSION_TYPE=wayland
-export XDG_SESSION_DESKTOP="$COMPOSITOR"
-export XDG_CURRENT_DESKTOP="$COMPOSITOR"
-export XDG_DATA_DIRS="$HOME/.local/share/flatpak/exports/share:/var/lib/flatpak/exports/share:/usr/local/share:/usr/share"
 export NO_AT_BRIDGE=1
-export XKB_DEFAULT_LAYOUT=us,fr
-export XKB_DEFAULT_OPTIONS=grp:rctrl_rshift_toggle
 
-# --- D-Bus Session ---
-export XDG_RUNTIME_DIR="/run/user/$(id -u)"
-export DBUS_SESSION_BUS_ADDRESS="unix:path=${XDG_RUNTIME_DIR}/bus"
+export XCURSOR_THEME="Kaela-Kovalskia-v2"
+export XCURSOR_SIZE=24
+export XKB_DEFAULT_LAYOUT="us,fr"
+export XKB_DEFAULT_OPTIONS="grp:rctrl_rshift_toggle"
 
-# Ensure desktop services see the updated environment
-dbus-update-activation-environment --all &
+export XDG_DATA_DIRS="$HOME/.local/share/flatpak/exports/share:/var/lib/flatpak/exports/share:/usr/local/share:/usr/share"
 
-# --- Clean Previous Session ---
-rm -f "$HOME"/.cache/*.wob
-
-# --- PipeWire Stack ---
-if [ "$START_PIPEWIRE" = true ]; then
-  echo "Launching PipeWire stack..."
-
-  if ! pgrep -x pipewire >/dev/null; then
-    pipewire &
-    sleep 1
-  fi
-
-  if ! pgrep -x wireplumber >/dev/null; then
-    wireplumber &
-  fi
-
-  if ! pgrep -x pipewire-pulse >/dev/null; then
-    pipewire-pulse &
-  fi
-fi
+# --- Push Static Environment to Systemd & D-Bus BEFORE starting compositor ---
+dbus-update-activation-environment --systemd XDG_CURRENT_DESKTOP XDG_SESSION_TYPE
+systemctl --user import-environment XDG_CURRENT_DESKTOP XDG_SESSION_TYPE
 
 # --- Launch Compositor ---
-command -v "$COMPOSITOR" >/dev/null 2>&1 || {
-  echo "Compositor not found: $COMPOSITOR" >&2
-  exit 1
-}
-
 exec "$COMPOSITOR"
