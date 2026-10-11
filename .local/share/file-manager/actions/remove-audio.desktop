@@ -1,0 +1,9 @@
+[Desktop Entry]
+Type=Action
+Name=Remove Audio (FFmpeg)
+Icon=audio-volume-muted
+Profiles=remove_audio_profile;
+
+[X-Action-Profile remove_audio_profile]
+MimeTypes=video/*;
+Exec=remove-audio %F
