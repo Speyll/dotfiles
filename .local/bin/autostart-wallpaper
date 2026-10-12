@@ -5,8 +5,11 @@ CONFIG="$HOME/.config/autostart.env"
 
 CACHE_DIR="${XDG_CACHE_HOME:-$HOME/.cache}/autostart-wallpaper"
 mkdir -p "$CACHE_DIR"
-CACHE_WALL="$CACHE_DIR/wall.jpg"
-CACHE_VWALL="$CACHE_DIR/vert_wall.jpg"
+
+CACHE_LANDSCAPE="$CACHE_DIR/landscape"
+CACHE_PORTRAIT="$CACHE_DIR/portrait"
+CACHE_VID_LANDSCAPE="$CACHE_DIR/landscape_vid.mp4"
+CACHE_VID_PORTRAIT="$CACHE_DIR/portrait_vid.mp4"
 
 # --- Robust Native Orientation Fetch (Niri & Wlroots support) ---
 get_orient() {
@@ -34,7 +37,7 @@ get_orient() {
         _out=$(wlr-randr 2>/dev/null | awk '/^[A-Za-z0-9-]+/ {o=$1} /Transform:/ {print o ":" ($2 ~ /90|270/ ? "portrait" : "landscape")}')
     fi
 
-    # 3. Final catch-all fallback: apply globally as landscape
+    # 3. Final catch-all fallback
     if [ -z "$_out" ]; then
         echo "*:landscape"
     else
@@ -46,19 +49,29 @@ fetch_url() {
     curl --connect-timeout 3 --max-time 6 -fsSL "$1" 2>/dev/null | shuf -n1 | tr -d '\r\n'
 }
 
+# --- Precision Cleanup (Per-monitor or Global) ---
+clean_wallpaper() {
+    target_mon="$1"
+    if [ -n "$target_mon" ]; then
+        # Kill only swaybg or mpvpaper running on this specific monitor output
+        pkill -f "swaybg.*-o[[:space:]]*$target_mon" 2>/dev/null
+        pkill -f "mpvpaper.*[[:space:]]$target_mon([[:space:]]|$)" 2>/dev/null
+    else
+        # Global fallback for full system startup
+        killall -q swaybg mpvpaper
+    fi
+}
+
 apply_swaybg() {
     landscape_img="$1"
     portrait_img="$2"
+    target_mon="$3"
 
     get_orient | while IFS=: read -r out or; do
         [ -z "$out" ] && continue
+        [ -n "$target_mon" ] && [ "$out" != "$target_mon" ] && continue
 
-        if [ "$or" = "portrait" ]; then
-            img="$portrait_img"
-        else
-            img="$landscape_img"
-        fi
-
+        img="$([ "$or" = "portrait" ] && echo "$portrait_img" || echo "$landscape_img")"
         setsid swaybg -o "$out" -i "$img" -m fill >/dev/null 2>&1 &
     done
 }
@@ -66,90 +79,132 @@ apply_swaybg() {
 apply_mpvpaper() {
     landscape_vid="$1"
     portrait_vid="$2"
-
-    # Kill any lingering swaybg instances so they don't block mpvpaper
-    killall -q swaybg
+    target_mon="$3"
 
     get_orient | while IFS=: read -r out or; do
         [ -z "$out" ] && continue
+        [ -n "$target_mon" ] && [ "$out" != "$target_mon" ] && continue
 
-        if [ "$or" = "portrait" ]; then
-            vid="$portrait_vid"
-            fmt="bestvideo[width<=?1080]"
-        else
-            vid="$landscape_vid"
-            fmt="bestvideo[height<=?1080]"
-        fi
-
-        # --no-config ensures global mpv.conf settings don't force it to open as a regular window
-        setsid mpvpaper -vsp -o "--no-config --no-audio --no-pause --loop --ytdl-format=$fmt" "$out" "$vid" >/dev/null 2>&1 &
+        vid="$([ "$or" = "portrait" ] && echo "$portrait_vid" || echo "$landscape_vid")"
+        setsid mpvpaper -vsp -o "--no-config --no-audio --no-pause --loop" "$out" "$vid" >/dev/null 2>&1 &
     done
 }
+
+# --- MANUAL CLI OVERRIDE (e.g., autostart-wallpaper file.mp4 [monitor]) ---
+if [ "$#" -gt 0 ]; then
+    TARGET="$1"
+    MONITOR="$2"
+
+    [ ! -f "$TARGET" ] && { echo "Error: File '$TARGET' not found." >&2; exit 1; }
+
+    # Clean ONLY the targeted monitor (leaves other monitors completely untouched)
+    clean_wallpaper "$MONITOR"
+
+    case "$TARGET" in
+        *.mp4|*.mkv|*.webm|*.avi|*.mov)
+            cp "$TARGET" "$CACHE_VID_LANDSCAPE"
+            apply_mpvpaper "$CACHE_VID_LANDSCAPE" "$CACHE_VID_PORTRAIT" "$MONITOR"
+            ;;
+        *)
+            cp "$TARGET" "$CACHE_LANDSCAPE"
+            apply_swaybg "$CACHE_LANDSCAPE" "$CACHE_LANDSCAPE" "$MONITOR"
+            if [ "$THEME_MODE" = "auto" ]; then
+                flavours generate dark "$CACHE_LANDSCAPE" && flavours apply generated 2>/dev/null &
+            fi
+            ;;
+    esac
+    exit 0
+fi
 
 # --- Handle Fixed Theme Globally if Set ---
 if [ "$THEME_MODE" = "fixed" ]; then
     flavours apply "$THEME_NAME" >/dev/null 2>&1 &
 fi
 
-# --- Aesthetics & Auto-Theme Logic ---
+# --- Daemon / Startup Logic ---
+clean_wallpaper # Global cleanup on full session boot
+
 case "$MODE" in
     swaybg-random-online)
-        # 1. Instantly apply local fallback wallpaper & theme so desktop is ready immediately with zero lag
-        apply_swaybg "$DWALL" "$DVWALL"
+        apply_swaybg "$WALL_LANDSCAPE" "$WALL_PORTRAIT"
         if [ "$THEME_MODE" = "auto" ]; then
-            flavours generate dark "$DWALL" && flavours apply generated 2>/dev/null &
+            flavours generate dark "$WALL_LANDSCAPE" && flavours apply generated 2>/dev/null &
         fi
 
-        # 2. Fetch online walls, download, apply wallpaper AND update theme atomically in background
         (
-            w_url=$(fetch_url "$P_WALL")
-            vw_url=$(fetch_url "$P_VWALL")
+            landscape_url=$(fetch_url "$ONLINE_WALL_LANDSCAPE")
+            portrait_url=$(fetch_url "$ONLINE_WALL_PORTRAIT")
 
-            if [ -n "$w_url" ] && [ -n "$vw_url" ]; then
-                curl --connect-timeout 3 --max-time 10 -fsSL "$w_url" -o "$CACHE_WALL" 2>/dev/null &
+            if [ -n "$landscape_url" ] && [ -n "$portrait_url" ]; then
+                curl --connect-timeout 3 --max-time 10 -fsSL "$landscape_url" -o "$CACHE_LANDSCAPE" 2>/dev/null &
                 p1=$!
-                curl --connect-timeout 3 --max-time 10 -fsSL "$vw_url" -o "$CACHE_VWALL" 2>/dev/null &
+                curl --connect-timeout 3 --max-time 10 -fsSL "$portrait_url" -o "$CACHE_PORTRAIT" 2>/dev/null &
                 p2=$!
                 wait "$p1" "$p2" 2>/dev/null
 
-                if [ -s "$CACHE_WALL" ] && [ -s "$CACHE_VWALL" ]; then
-                    OLD_PIDS=$(pgrep -x swaybg)
-                    apply_swaybg "$CACHE_WALL" "$CACHE_VWALL"
+                if [ -s "$CACHE_LANDSCAPE" ] && [ -s "$CACHE_PORTRAIT" ]; then
+                    clean_wallpaper
+                    apply_swaybg "$CACHE_LANDSCAPE" "$CACHE_PORTRAIT"
 
-                    # Generate and apply theme from the newly cached wall atomically
                     if [ "$THEME_MODE" = "auto" ]; then
-                        flavours generate dark "$CACHE_WALL" && flavours apply generated 2>/dev/null
-                    fi
-
-                    if [ -n "$OLD_PIDS" ]; then
-                        sleep 1
-                        kill $OLD_PIDS 2>/dev/null
+                        flavours generate dark "$CACHE_LANDSCAPE" && flavours apply generated 2>/dev/null
                     fi
                 fi
             fi
         ) >/dev/null 2>&1 &
         ;;
-    swaybg-random)
-        w=$(find "$HOME/pictures/walls/" -maxdepth 1 -name "*.jpg" 2>/dev/null | shuf -n1)
-        vw=$(find "$HOME/pictures/walls/" -maxdepth 1 -name "vert-*.jpg" 2>/dev/null | shuf -n1)
-        target_w="${w:-$DWALL}"
-        target_vw="${vw:-$DVWALL}"
 
-        apply_swaybg "$target_w" "$target_vw"
+    swaybg-random)
+        w=$(find "$HOME/pictures/walls/" -maxdepth 1 \( -name "*.jpg" -o -name "*.png" -o -name "*.webp" \) 2>/dev/null | shuf -n1)
+        vw=$(find "$HOME/pictures/walls/" -maxdepth 1 \( -name "vert-*.jpg" -o -name "vert-*.png" -o -name "vert-*.webp" \) 2>/dev/null | shuf -n1)
+        target_landscape="${w:-$WALL_LANDSCAPE}"
+        target_portrait="${vw:-$WALL_PORTRAIT}"
+
+        [ -f "$target_landscape" ] && cp "$target_landscape" "$CACHE_LANDSCAPE"
+        [ -f "$target_portrait" ] && cp "$target_portrait" "$CACHE_PORTRAIT"
+
+        apply_swaybg "$CACHE_LANDSCAPE" "$CACHE_PORTRAIT"
         if [ "$THEME_MODE" = "auto" ]; then
-            flavours generate dark "$target_w" && flavours apply generated 2>/dev/null &
+            flavours generate dark "$CACHE_LANDSCAPE" && flavours apply generated 2>/dev/null &
         fi
         ;;
+
     mpvpaper-online)
-        apply_mpvpaper "$(fetch_url "$P_VID")" "$(fetch_url "$P_VVID")"
+        (
+            landscape_vid_url=$(fetch_url "$ONLINE_VID_LANDSCAPE")
+            portrait_vid_url=$(fetch_url "$ONLINE_VID_PORTRAIT")
+
+            if [ -n "$landscape_vid_url" ]; then
+                if command -v yt-dlp >/dev/null 2>&1; then
+                    yt-dlp -o "$CACHE_VID_LANDSCAPE" --no-playlist "$landscape_vid_url" >/dev/null 2>&1
+                else
+                    curl --connect-timeout 5 --max-time 30 -fsSL "$landscape_vid_url" -o "$CACHE_VID_LANDSCAPE" 2>/dev/null
+                fi
+            fi
+
+            if [ -n "$portrait_vid_url" ]; then
+                if command -v yt-dlp >/dev/null 2>&1; then
+                    yt-dlp -o "$CACHE_VID_PORTRAIT" --no-playlist "$portrait_vid_url" >/dev/null 2>&1
+                else
+                    curl --connect-timeout 5 --max-time 30 -fsSL "$portrait_vid_url" -o "$CACHE_VID_PORTRAIT" 2>/dev/null
+                fi
+            fi
+
+            if [ -s "$CACHE_VID_LANDSCAPE" ]; then
+                clean_wallpaper
+                apply_mpvpaper "$CACHE_VID_LANDSCAPE" "$CACHE_VID_PORTRAIT"
+            fi
+        ) >/dev/null 2>&1 &
+
         if [ "$THEME_MODE" = "auto" ]; then
-            flavours generate dark "$DWALL" && flavours apply generated 2>/dev/null &
+            flavours generate dark "$WALL_LANDSCAPE" && flavours apply generated 2>/dev/null &
         fi
         ;;
+
     *)
-        apply_swaybg "$DWALL" "$DVWALL"
+        apply_swaybg "$WALL_LANDSCAPE" "$WALL_PORTRAIT"
         if [ "$THEME_MODE" = "auto" ]; then
-            flavours generate dark "$DWALL" && flavours apply generated 2>/dev/null &
+            flavours generate dark "$WALL_LANDSCAPE" && flavours apply generated 2>/dev/null &
         fi
         ;;
 esac
