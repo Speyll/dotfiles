@@ -1,35 +1,67 @@
 [Added Associations]
-image/gif=video.desktop;
-application/zip=lxqt-archiver.desktop;
-application/x-zerosize=text.desktop;
-application/x-trash=text.desktop;
-inode/symlink=text.desktop;
-application/xml=nvim.desktop;
-application/x-executable=nvim.desktop;
-image/webp=img.desktop;
-image/png=img.desktop;
-image/jpg=img.desktop;
-image/jpeg=img.desktop;
+application/x-bittorrent=torrent.desktop;
+x-scheme-handler/magnet=torrent.desktop;
 
 [Default Applications]
+# --- Core Proxy Routers (Wildcards) ---
+inode/directory=file.desktop;
 text/*=text.desktop;
-application/x-shellscript=text.desktop;
-application/octet-stream=text.desktop;
-application/x-wine-extension-ini=text.desktop;
 image/*=img.desktop;
 video/*=video.desktop;
 audio/*=video.desktop;
-x-scheme-handler/magnet=torrent.desktop;
-application/x-bittorrent=torrent.desktop;
-x-scheme-handler/mailto=mail.desktop;
-application/postscript=pdf.desktop;
-application/pdf=pdf.desktop;
-application/rss+xml=rss.desktop;
-x-scheme-handler/lbry=lbry.desktop;
-inode/directory=file.desktop;
-application/xml=nvim.desktop;
-x-scheme-handler/http=browser.desktop
-x-scheme-handler/https=browser.desktop
+
+# --- Explicit Image Overrides (Bulletproofing AVIF, WEBP, HEIC, etc. against Firefox/Browsers) ---
+image/avif=img.desktop;
+image/webp=img.desktop;
+image/heic=img.desktop;
+image/heif=img.desktop;
+image/png=img.desktop;
+image/jpeg=img.desktop;
+image/jpg=img.desktop;
+image/gif=img.desktop;
+image/svg+xml=img.desktop;
+image/bmp=img.desktop;
+image/tiff=img.desktop;
+image/vnd.microsoft.icon=img.desktop;
+
+# --- Web & Schemes ---
+x-scheme-handler/http=browser.desktop;
+x-scheme-handler/https=browser.desktop;
+x-scheme-handler/chrome=browser.desktop;
 x-scheme-handler/about=browser.desktop;
 x-scheme-handler/unknown=browser.desktop;
-text/html=browser.desktop
+text/html=browser.desktop;
+
+# --- Archives & Utilities ---
+application/zip=lxqt-archiver.desktop;
+application/x-tar=lxqt-archiver.desktop;
+application/x-compressed-tar=lxqt-archiver.desktop;
+application/x-bzip-compressed-tar=lxqt-archiver.desktop;
+application/x-xz-compressed-tar=lxqt-archiver.desktop;
+application/x-7z-compressed=lxqt-archiver.desktop;
+application/vnd.rar=lxqt-archiver.desktop;
+application/x-rar=lxqt-archiver.desktop;
+application/x-bzip=lxqt-archiver.desktop;
+application/x-bzip2=lxqt-archiver.desktop;
+application/x-gzip=lxqt-archiver.desktop;
+application/x-lzma=lxqt-archiver.desktop;
+application/x-xz=lxqt-archiver.desktop;
+application/x-iso9660-image=lxqt-archiver.desktop;
+application/x-bittorrent=torrent.desktop;
+x-scheme-handler/magnet=torrent.desktop;
+
+# --- Fallbacks & Misc Bindings ---
+application/octet-stream=text.desktop;
+application/x-shellscript=text.desktop;
+application/x-wine-extension-ini=text.desktop;
+application/x-zerosize=text.desktop;
+application/x-trash=text.desktop;
+inode/symlink=text.desktop;
+
+# --- Web Browsing Extensions ---
+application/x-extension-htm=browser.desktop;
+application/x-extension-html=browser.desktop;
+application/x-extension-shtml=browser.desktop;
+application/xhtml+xml=browser.desktop;
+application/x-extension-xhtml=browser.desktop;
+application/x-extension-xht=browser.desktop;

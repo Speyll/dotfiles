@@ -40,7 +40,7 @@ get_media_files() {
     shopt -s nullglob nocaseglob
     case "$mode" in
         video) arr=(*.{mp4,mkv,ts,mov,avi,webm,gif,m4v}) ;;
-        audio) arr=(*.{mp4,mkv,avi,mov,webm,flv,wmv,mpg,mpeg}) ;;
+        audio|extract) arr=(*.{mp4,mkv,avi,mov,webm,flv,wmv,mpg,mpeg}) ;;
         audio_files) arr=(*.{mp3,wav,flac,aac,m4a,opus}) ;;
         *) die "Invalid media type: $mode" ;;
     esac
@@ -106,13 +106,14 @@ extract_audio_file() {
     local file="$1"
     local timestamp="$2"
     local base_name="${file##*/}"
-    local prefix hash clean_name output_file audio_codec
+    local prefix hash clean_name output_file temp_cover audio_codec
     local a_codec_args=()
 
     prefix=$(echo "${base_name%.*}" | iconv -f UTF-8 -t ASCII//TRANSLIT 2>/dev/null | tr -cd '[:alnum:]' || true)
     hash=$(echo -n "$base_name" | sha1sum | cut -c1-6)
     clean_name="${prefix}_${hash}"
     output_file="$audio_output_dir/${clean_name}.m4a"
+    temp_cover="$audio_output_dir/.cover_${hash}.jpg"
 
     if [[ -f "$output_file" ]]; then
         echo "[$(date '+%H:%M:%S')] Skipping Extract: $base_name (already exists)"
@@ -120,6 +121,9 @@ extract_audio_file() {
     fi
 
     echo "[$(date '+%H:%M:%S')] Extracting Audio: $base_name (Cover at: $timestamp)"
+
+    # 1. Extract cover frame quickly using input seeking
+    ffmpeg -nostdin -y -hide_banner -ss "$timestamp" -i "$file" -vframes 1 -q:v 2 "$temp_cover" >/dev/null 2>&1 || true
 
     # Detect existing audio codec for smart fallback
     audio_codec=$(ffprobe -v error -select_streams a:0 -show_entries stream=codec_name -of default=noprint_wrappers=1:nokey=1 "$file" 2>/dev/null | head -n 1 || true)
@@ -130,15 +134,25 @@ extract_audio_file() {
         a_codec_args=(-c:a aac -b:a 192k)
     fi
 
-    # Single-pass magic: input 0 is fast-seeked for the image frame, input 1 is standard for audio
-    ionice -c3 nice -n 19 ffmpeg -nostdin -y -hide_banner \
-        -ss "$timestamp" -i "$file" \
-        -i "$file" \
-        -map 1:a:0 -map 0:v:0 \
-        "${a_codec_args[@]}" \
-        -c:v mjpeg -frames:v 1 -disposition:v:0 attached_pic \
-        -metadata:s:v:0 title="Album cover" -metadata:s:v:0 comment="Cover (front)" \
-        "$output_file" >/dev/null 2>&1
+    # 2. Mux full audio and the extracted cover image cleanly together
+    if [[ -f "$temp_cover" ]]; then
+        ionice -c3 nice -n 19 ffmpeg -nostdin -y -hide_banner \
+            -i "$file" \
+            -i "$temp_cover" \
+            -map 0:a:0 -map 1:0 \
+            "${a_codec_args[@]}" \
+            -c:v mjpeg -disposition:v:0 attached_pic \
+            -metadata:s:v:0 title="Album cover" -metadata:s:v:0 comment="Cover (front)" \
+            "$output_file" >/dev/null 2>&1
+        rm -f "$temp_cover"
+    else
+        # Fallback if cover frame extraction failed (e.g. video shorter than timestamp)
+        ionice -c3 nice -n 19 ffmpeg -nostdin -y -hide_banner \
+            -i "$file" \
+            -map 0:a:0 \
+            "${a_codec_args[@]}" \
+            "$output_file" >/dev/null 2>&1
+    fi
 
     echo "[$(date '+%H:%M:%S')] Finished Extract: $base_name"
 }

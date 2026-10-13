@@ -6,8 +6,8 @@ CONFIG="$HOME/.config/autostart.env"
 foot --server &
 wlsunset -l 36.7 -L 3.08 &
 fnott &
-wl-paste --type text --watch cliphist store &
-wl-paste --type image --watch cliphist store &
+wl-paste --type text --watch cliphist -max-items 500 store &
+wl-paste --type image --watch cliphist -max-items 100 store &
 hypridle &
 #sunshine &
 
