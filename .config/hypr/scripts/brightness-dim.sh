@@ -1,8 +1,8 @@
 #!/usr/bin/env bash
 
-# 1. Dim laptop/internal display (if present)
+# Dim laptop/internal display, if present
 brightnessctl -s set 10%
 
-# 2. Dim all connected external DDC/CI monitors sequentially
-# Running 'ddcutil setvcp 10 5' without --bus targets all detected DDC displays safely
-ddcutil setvcp 10 5 >/dev/null 2>&1
+# Dim both external monitors
+ddcutil --display 1 setvcp 10 5 >/dev/null 2>&1
+ddcutil --display 2 setvcp 10 5 >/dev/null 2>&1

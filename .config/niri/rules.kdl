@@ -6,6 +6,8 @@ window-rule {
 
 window-rule {
     match app-id="^Alacritty$"
+    match app-id="^foot$"
+    match app-id="^footclient$"
     default-column-width {
         proportion 0.5
     }
