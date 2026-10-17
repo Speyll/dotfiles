@@ -59,6 +59,3 @@ fi
 # 7. Launch Fragments
 ~/.local/bin/autostart-services &
 ~/.local/bin/autostart-wallpaper &
-
-# 8. Delayed Tasks
-[ "$UPDATE_SCAN" = true ] && (sleep 10; "$HOME/.local/bin/updtscan") &

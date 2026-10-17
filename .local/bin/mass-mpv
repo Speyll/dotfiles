@@ -20,7 +20,7 @@ if [ ! -s "$TMP_PLAYLIST" ]; then
   exit 1
 fi
 
-# We let mpv use your global mpv.conf, autoprofile.lua, and media-tools.lua!
+# We let mpv use your global mpv.conf, auto-profile.lua, and media-tools.lua!
 mpv --playlist="$TMP_PLAYLIST" \
     --image-display-duration=5 \
     --loop-playlist=inf \

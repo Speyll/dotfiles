@@ -1,6 +1,8 @@
 #!/bin/sh
-for CODE in $@; do
-	/usr/bin/printf "%s - \u$CODE\n" $CODE
+for CODE in "$@"; do
+	hex=$(/usr/bin/printf '%08x' "$(/usr/bin/printf '%d' "0x$CODE")") || continue
+	/usr/bin/printf '%s - ' "$CODE"
+	/usr/bin/printf "\U${hex}\n"
 done
 
-exit $?
+exit 0

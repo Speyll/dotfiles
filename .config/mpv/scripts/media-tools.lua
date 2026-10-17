@@ -11,7 +11,7 @@ end
 mp.add_key_binding("F12", "shuffle_action", do_shuffle)
 
 -- ==========================================
--- 2. SAVE PLAYLIST (Key: Shift+P)
+-- 2. SAVE PLAYLIST (Key: Shift+W)
 -- ==========================================
 function do_save()
     local playlist = mp.get_property_native("playlist")
@@ -33,7 +33,7 @@ function do_save()
         mp.osd_message("Save Error: " .. tostring(err))
     end
 end
-mp.add_key_binding("P", "save_action", do_save)
+mp.add_key_binding("W", "save_action", do_save)
 
 -- ==========================================
 -- 3. DELETE FILE AND SKIP (Key: Shift+D)

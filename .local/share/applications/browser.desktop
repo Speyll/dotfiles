@@ -2,8 +2,8 @@
 Name=Web Browser
 Icon=internet-web-browser
 #Exec=flatpak run io.gitlab.librewolf-community -new-tab %U
-#Exec=firefox -new-tab %U
-Exec=helium-browser -new-tab %U
+Exec=firefox -new-tab %U
+#Exec=helium-browser -new-tab %U
 Terminal=false
 Type=Application
 StartupWMClass=browser

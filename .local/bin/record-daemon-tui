@@ -19,11 +19,12 @@ GSR_PID=""
 
 # Cleanup function
 cleanup() {
+    trap - INT TERM EXIT
     if [ -n "$GSR_PID" ]; then
         kill -SIGINT "$GSR_PID" 2>/dev/null
     fi
     stty sane
-    tput cnorm
+    tput cnorm 2>/dev/null || true
     clear
     echo "[+] Recording daemon stopped cleanly."
     exit 0
@@ -31,7 +32,7 @@ cleanup() {
 trap cleanup INT TERM EXIT
 
 # Hide terminal cursor and clear screen
-tput civvis
+tput civis 2>/dev/null || true
 clear
 stty -icanon -echo min 0 time 0
 
@@ -39,14 +40,12 @@ stty -icanon -echo min 0 time 0
 while true; do
     # 1. Status Check
     status_text="[ IDLE ]"
-    if [ -n "$GSR_PID" ]; then
-        if kill -0 "$GSR_PID" 2>/dev/null; then
-            status_text="[ RECORDING... ]"
-            IS_RECORDING=true
-        else
-            IS_RECORDING=false
-            GSR_PID=""
-        fi
+    if [ -n "$GSR_PID" ] && kill -0 "$GSR_PID" 2>/dev/null; then
+        status_text="[ RECORDING... ]"
+        IS_RECORDING=true
+    else
+        IS_RECORDING=false
+        GSR_PID=""
     fi
 
     # 2. Render Interface

@@ -1,9 +1,12 @@
 #!/bin/sh
-# Send the exact 60-second dump signal to the recorder
-
-if pkill -SIGRTMIN+3 -f gpu-screen-recorder; then
+# Ask the running recorder to save its current replay buffer.
+# Match the recorder itself, not unrelated processes whose command line merely
+# contains the string (e.g. "tail -f gpu-screen-recorder.log"). The comm field
+# is truncated to 15 chars, so pgrep/pkill without -f cannot match it, and a
+# plain -f match is too broad.
+if pkill -SIGRTMIN+3 -f '(^|/)gpu-screen-recorder( |$)'; then
     # Lightweight desktop notification if you have mako/dunst
-    notify-send -t 2000 "Replay Captured" "Last 60 seconds saved straight to your Replays folder!"
+    notify-send -t 2000 "Replay Captured" "Replay buffer saved to your Replays folder!"
 else
     notify-send -t 2000 "Replay Error" "The background recording daemon isn't running."
 fi

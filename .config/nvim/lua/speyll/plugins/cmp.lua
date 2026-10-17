@@ -2,6 +2,7 @@ return {
     "hrsh7th/nvim-cmp",
     event = "InsertEnter",
     dependencies = {
+        "hrsh7th/cmp-nvim-lsp", -- source integration for LSP completions (nvim_lsp)
         "hrsh7th/cmp-buffer", -- source for text in buffer
         "hrsh7th/cmp-path", -- source for file system paths
         {
@@ -10,6 +11,7 @@ return {
             -- install jsregexp (optional!).
             build = "make install_jsregexp",
         },
+        "saadparwaiz1/cmp_luasnip", -- source integration for LuaSnip snippets (luasnip)
         "rafamadriz/friendly-snippets",
         "onsails/lspkind.nvim", -- vs-code like pictograms
     },

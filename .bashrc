@@ -10,13 +10,13 @@ export HISTSIZE=5000
 export HISTFILESIZE=5000
 shopt -s histappend checkwinsize
 
-# Natively deduplicate and sync history across all footclients instantly.
-# Appends new commands, clears memory, and reloads from disk.
-# This forces `erasedups` to apply globally without any slow awk scripts or .tmp files.
+# Pull in commands appended by other shells. Using `history -n` (rather than
+# appending every command with `history -a`) keeps `erasedups` effective, so
+# repeated commands are collapsed before the list is written out at shell exit.
+# Trade-off: a command becomes visible to other running shells when this shell
+# exits (via histappend), not the instant it is typed.
 _sync_history() {
-    history -a
-    history -c
-    history -r
+    history -n
 }
 
 # PROMPT & GIT

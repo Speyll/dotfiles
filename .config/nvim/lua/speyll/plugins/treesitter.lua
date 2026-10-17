@@ -1,20 +1,28 @@
 return {
     "nvim-treesitter/nvim-treesitter",
-    branch = "main", -- The new rewrite branch
+    branch = "main", -- rewrite branch; requires Neovim >= 0.12
+    lazy = false, -- the 'main' branch does not support lazy-loading
     build = ":TSUpdate",
-    event = { "BufReadPre", "BufNewFile" },
-    -- Configuration now happens directly in 'opts'
-    opts = {
-        ensure_installed = {
+    config = function()
+        require("nvim-treesitter").setup()
+
+        -- Parser set declared via the 'main' branch API (replaces ensure_installed).
+        require("nvim-treesitter").install({
             "json", "javascript", "typescript", "tsx", "yaml",
             "html", "css", "markdown", "markdown_inline", "bash",
             "lua", "vim", "dockerfile", "gitignore", "c", "rust",
-        },
-        highlight = { enable = true },
-        indent = { enable = true },
-    },
-    config = function(_, opts)
-        -- In the 'main' branch, use the core module directly
-        require("nvim-treesitter").setup(opts)
+        })
+
+        -- Highlighting is provided by Neovim; enable it per filetype where a
+        -- parser is available, and turn on Treesitter indentation for that buffer.
+        vim.api.nvim_create_autocmd("FileType", {
+            callback = function(args)
+                local lang = vim.treesitter.language.get_lang(vim.bo[args.buf].filetype)
+                if lang and vim.treesitter.language.add(lang) then
+                    vim.treesitter.start(args.buf, lang)
+                    vim.bo[args.buf].indentexpr = "v:lua.require'nvim-treesitter'.indentexpr()"
+                end
+            end,
+        })
     end,
 }

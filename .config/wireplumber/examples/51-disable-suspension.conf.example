@@ -1,0 +1,71 @@
+# Optional: keep ALSA/Bluetooth devices from being suspended when idle.
+#
+# This file is NOT active. It lives outside wireplumber.conf.d/ on purpose, so
+# it has no effect until you copy it there yourself.
+#
+# When to use:
+#   - Some USB DACs/amps pop or click when they power down after the
+#     session.suspend-timeout-seconds idle timeout, and you would rather they
+#     stay powered.
+#   - A Bluetooth headset misbehaves when it is suspended while idle.
+#   Suspending idle devices normally SAVES POWER (especially on a laptop), so
+#   do not enable this unless you actually hear a problem.
+#
+# When NOT to use:
+#   - As a generic fix for crackling/under-runs. Crackle is a scheduling /
+#     quantum / realtime issue, not a suspend issue. Disabling suspend here
+#     does not fix under-runs and costs battery.
+#   - As a way to keep an amplifier quiet: do NOT add a continuous
+#     noise/keep-alive stream as a workaround.
+#
+# To enable:
+#   cp ~/.config/wireplumber/examples/51-disable-suspension.conf.example \
+#      ~/.config/wireplumber/wireplumber.conf.d/51-disable-suspension.conf
+#   systemctl --user restart wireplumber
+# To disable: delete the copied file and restart WirePlumber.
+
+# Disable idle suspend for all ALSA sources and sinks.
+monitor.alsa.rules = [
+  {
+    matches = [
+      {
+        # Matches all sources
+        node.name = "~alsa_input.*"
+      },
+      {
+        # Matches all sinks
+        node.name = "~alsa_output.*"
+      }
+    ]
+    actions = {
+      update-props = {
+        session.suspend-timeout-seconds = 0
+        # Dither only matters when the output bit depth is reduced below
+        # 24-bit. It does NOT fix under-runs, so it is left off by default.
+        #dither.method = "wannamaker3"
+        #dither.noise = 2
+      }
+    }
+  }
+]
+
+# Disable idle suspend for all Bluetooth sources and sinks.
+monitor.bluez.rules = [
+  {
+    matches = [
+      {
+        # Matches all sources
+        node.name = "~bluez_input.*"
+      },
+      {
+        # Matches all sinks
+        node.name = "~bluez_output.*"
+      }
+    ]
+    actions = {
+      update-props = {
+        session.suspend-timeout-seconds = 0
+      }
+    }
+  }
+]

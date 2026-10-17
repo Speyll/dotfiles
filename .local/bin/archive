@@ -38,6 +38,13 @@ check_dependency() {
   fi
 }
 
+is_supported_format() {
+  case "$1" in
+    *.tar.bz2|*.tbz2|*.tar.xz|*.tar.gz|*.tgz|*.tar.zst|*.lzma|*.bz2|*.rar|*.gz|*.tar|*.zip|*.Z|*.7z|*.xz|*.exe) return 0 ;;
+    *) return 1 ;;
+  esac
+}
+
 sanitize_name() {
   echo "$1" | sed -e 's/[^[:alnum:].*-]/*/g'
 }
@@ -47,7 +54,7 @@ sanitize_dir_contents() {
     dir=$(dirname "$path")
     name=$(basename "$path")
     newname=$(echo "$name" | sed -e 's/[[:space:]]/*/g' -e 's/[^[:alnum:].*-]/_/g')
-    [ "$name" != "$newname" ] && mv -- "$path" "$dir/$newname"
+    [ "$name" != "$newname" ] && [ ! -e "$dir/$newname" ] && mv -- "$path" "$dir/$newname"
   done
 }
 
@@ -82,6 +89,14 @@ extract() {
     [ -f "$archive_path" ] || { echo "Warning: File '$archive_path' not found, skipping." >&2; continue; }
 
     archive="$(cd "$(dirname "$archive_path")" && pwd)/$(basename "$archive_path")"
+
+    # Validate the format before creating any extraction directory, so an
+    # unsupported input never leaves an empty directory (or a sanitized rename) behind.
+    if ! is_supported_format "$archive"; then
+      echo "Warning: Unsupported archive format: $archive_path, skipping." >&2
+      continue
+    fi
+
     original_name=$(basename "$archive")
     safe_name=$(sanitize_name "$original_name")
 
@@ -92,7 +107,8 @@ extract() {
     fi
 
     if ! $extracthere; then
-      dir="${archive%.*}"
+      base="$(basename "$archive")"
+      dir="$(dirname "$archive")/${base%.*}"
       mkdir -p "$dir" && cd "$dir" || exit_err "Failed to create directory."
     fi
 
@@ -163,7 +179,12 @@ extract() {
         ;;
     esac
 
-    sanitize_dir_contents
+    # Only sanitize files inside the dedicated extraction directory. With -c
+    # the current directory also holds unrelated pre-existing files that must
+    # not be renamed.
+    if ! $extracthere; then
+      sanitize_dir_contents
+    fi
 
     [ "$original_name" != "$safe_name" ] && mv "$archive" "${archive%/*}/$original_name"
     trap - EXIT

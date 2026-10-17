@@ -26,7 +26,7 @@ alias \
     xbq="xbps-query -Rs" \
     pac="sudo pacman" \
     prm="sudo pacman -Rns" \
-    pror="sudo pacman -Rns $(pacman -Qtdq)" \
+    pror='sudo pacman -Rns $(pacman -Qtdq)' \
     apti="sudo apt-get install --no-install-recommends" \
     aptr="sudo apt-get --purge autoremove" \
     zyi="sudo zypper install --no-recommends" \
@@ -56,8 +56,7 @@ alias \
 alias \
     pyserv="python3 -m http.server" \
     pyenv="python -m venv" \
-    cleanup-gamescope='pkill -9 -f "wine|wineserver|winedevice.exe|explorer.exe|gamescope-wl"' \
-    reset="tput reset"
+    cleanup-gamescope='pkill -9 -f "wine|wineserver|winedevice.exe|explorer.exe|gamescope-wl"'
 
 # Version control
 alias gcl='git clone --depth 1'

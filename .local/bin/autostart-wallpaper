@@ -155,8 +155,8 @@ case "$MODE" in
         ;;
 
     swaybg-random)
-        w=$(find "$HOME/pictures/walls/" -maxdepth 1 \( -name "*.jpg" -o -name "*.png" -o -name "*.webp" \) 2>/dev/null | shuf -n1)
-        vw=$(find "$HOME/pictures/walls/" -maxdepth 1 \( -name "vert-*.jpg" -o -name "vert-*.png" -o -name "vert-*.webp" \) 2>/dev/null | shuf -n1)
+        w=$(find "${XDG_PICTURES_DIR:-$HOME/Pictures}/walls/" -maxdepth 1 \( -name "*.jpg" -o -name "*.png" -o -name "*.webp" \) 2>/dev/null | shuf -n1)
+        vw=$(find "${XDG_PICTURES_DIR:-$HOME/Pictures}/walls/" -maxdepth 1 \( -name "vert-*.jpg" -o -name "vert-*.png" -o -name "vert-*.webp" \) 2>/dev/null | shuf -n1)
         target_landscape="${w:-$WALL_LANDSCAPE}"
         target_portrait="${vw:-$WALL_PORTRAIT}"
 

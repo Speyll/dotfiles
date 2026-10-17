@@ -16,7 +16,7 @@ if [ "$WAYBAR_STYLE" != "none" ]; then
 fi
 
 if command -v openrgb >/dev/null 2>&1; then
-    openrgb --server -p pureWhite &
+    openrgb --profile pureWhite &
 fi
 
 # --- Audio Stack (Systemd-aware / Void Linux fallback) ---

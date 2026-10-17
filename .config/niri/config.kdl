@@ -56,19 +56,14 @@ cursor {
 }
 
 // Core spawns & globals
-spawn-at-startup "xwayland-satellite"
-    environment {
-        DISPLAY ":0"
-    }
-
 spawn-at-startup "autostart"
 screenshot-path "~/Pictures/grim/%Y-%m-%d %H-%M-%S.png"
 
 blur {
-  passes 2        // more passes = stronger blur (default: 3)
-  offset 3.0      // sample distance per pass (default: 3.0)
-  noise 0.03      // grain overlay (default: 0.02)
-  saturation 1.0  // color saturation boost (default: 1.5)
+  passes 1
+  offset 3.0
+  noise 0.0
+  saturation 1.0
 }
 
 hotkey-overlay {

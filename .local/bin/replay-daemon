@@ -13,7 +13,7 @@ EXCLUDE_APP="Helium"
 
 # Ensure output directory exists
 mkdir -p "$OUTPUT_DIR"
-[ -d "$OUTPUT_DIR/replay.mp4" ] && rmdir "$OUTPUT_DIR/replay.mp4"
+[ -f "$OUTPUT_DIR/replay.mp4" ] && rm -f "$OUTPUT_DIR/replay.mp4"
 
 # Kill any existing instances first to avoid conflicts
 killall gpu-screen-recorder 2>/dev/null

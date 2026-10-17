@@ -1,18 +1,35 @@
 #!/bin/bash
 
+processed=0
+failed=false
+
 for file in "$@"; do
-    if [ -f "$file" ]; then
-        dir=$(dirname "$file")
-        filename=$(basename "$file")
-        extension="${filename##*.}"
-        filename_noext="${filename%.*}"
+    if [ ! -f "$file" ]; then
+        echo "remove-audio: not a file, skipping: $file" >&2
+        failed=true
+        continue
+    fi
 
-        output="${dir}/${filename_noext}_noaudio.${extension}"
+    dir=$(dirname -- "$file")
+    filename=$(basename -- "$file")
+    extension="${filename##*.}"
+    filename_noext="${filename%.*}"
 
-        # Remove audio without re-encoding video
-        ffmpeg -i "$file" -an -c:v copy "$output"
+    output="${dir}/${filename_noext}_noaudio.${extension}"
+
+    # Remove audio without re-encoding video. -nostdin avoids blocking on a
+    # prompt when launched without a controlling terminal (file manager).
+    if ffmpeg -nostdin -y -i "$file" -an -c:v copy "$output" && [ -s "$output" ]; then
+        processed=$((processed + 1))
+    else
+        echo "remove-audio: ffmpeg failed for: $file" >&2
+        failed=true
     fi
 done
 
-# Send desktop notification when complete
-notify-send "FFmpeg" "Audio removed for selected video(s)!"
+# Notify based on the actual outcome instead of always reporting success.
+if [ "$failed" = true ]; then
+    notify-send "FFmpeg" "Audio removal failed for one or more file(s)."
+elif [ "$processed" -gt 0 ]; then
+    notify-send "FFmpeg" "Audio removed for selected video(s)!"
+fi

@@ -1,2 +1,0 @@
-game-performance
-PROTON_USE_NTSYNC=1

@@ -13,24 +13,24 @@ EXCLUDE_APP="firefox"
 
 # Ensure output directory exists
 mkdir -p "$OUTPUT_DIR"
-[ -d "$OUTPUT_DIR/replay.mp4" ] && rmdir "$OUTPUT_DIR/replay.mp4"
-
-# Kill any existing instances first to avoid conflicts
-killall gpu-screen-recorder 2>/dev/null
 
 # Clean up and restore terminal state on exit
 cleanup() {
-    kill "$GSR_PID" 2>/dev/null
-    stty sane             # Restore normal terminal settings
-    tput cnorm            # Restore cursor visibility
+    status=$1
+    trap - INT TERM EXIT               # Avoid recursive traps
+    [ -n "$GSR_PID" ] && kill "$GSR_PID" 2>/dev/null
+    stty sane                          # Restore normal terminal settings
+    tput cnorm 2>/dev/null || true     # Restore cursor visibility
     clear
-    echo "[+] Replay daemon stopped cleanly."
-    exit 0
+    [ "$status" -eq 0 ] && echo "[+] Replay daemon stopped cleanly."
+    exit "$status"
 }
-trap cleanup INT TERM EXIT
+trap 'cleanup $?' EXIT
+trap 'cleanup 130' INT
+trap 'cleanup 143' TERM
 
 # Hide terminal cursor and clear screen
-tput civvis
+tput civis 2>/dev/null || true
 clear
 
 # Start your verified replay command in the background
@@ -50,7 +50,7 @@ GSR_PID=$!
 # Ensure the process actually initialized
 sleep 0.5
 if ! kill -0 "$GSR_PID" 2>/dev/null; then
-    tput cnorm
+    tput cnorm 2>/dev/null || true
     echo "[-] Error: gpu-screen-recorder failed to start."
     exit 1
 fi
@@ -90,15 +90,21 @@ while kill -0 "$GSR_PID" 2>/dev/null; do
     # 3. Handle Key Interactions
     key=$(dd bs=1 count=1 2>/dev/null)
     if [ "$key" = " " ]; then
-        # Use your verified working signal method to dump the 60 second buffer
-        if pkill -SIGRTMIN+3 -f gpu-screen-recorder; then
+        # Save the last 60s of replay by signalling ONLY the recorder launched
+        # by this script (gpu-screen-recorder uses SIGRTMIN+3 in replay mode).
+        # Guard against an unset PID or a recorder that already exited.
+        if [ -n "$GSR_PID" ] && kill -0 "$GSR_PID" 2>/dev/null \
+            && kill -s SIGRTMIN+3 "$GSR_PID" 2>/dev/null; then
             last_save_status="$(date +%H:%M:%S) - Replay Saved! ✅"
         else
             last_save_status="$(date +%H:%M:%S) - Save Failed ❌"
         fi
     elif [ "$key" = "q" ]; then
-        break
+        exit 0
     fi
 
     sleep 0.2
 done
+
+# Recorder exited on its own rather than via an explicit quit
+exit 1

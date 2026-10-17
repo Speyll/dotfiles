@@ -17,12 +17,12 @@ for src_file in "$src_dir"/*; do
 
     ext="${src_file##*.}"
     case "$ext" in
-        mp4|mkv|ts|mov|avi|webm|gif) ;;
+        mp4|mkv|ts|mov|avi|webm|gif|m4v) ;;
         *) continue ;;
     esac
 
     base_name=$(basename -- "$src_file")
-    prefix=$(echo "$base_name" | iconv -f UTF-8 -t ASCII//TRANSLIT | tr -cd '[:alnum:]')
+    prefix=$(echo "${base_name%.*}" | iconv -f UTF-8 -t ASCII//TRANSLIT 2>/dev/null | tr -cd '[:alnum:]')
     hash=$(echo -n "$base_name" | sha1sum | cut -c1-6)
     clean_name="${prefix}_${hash}"
 
