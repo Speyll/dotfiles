@@ -23,7 +23,7 @@ _sync_history() {
 _git_branch() {
     local branch
     branch=$(git branch --show-current 2>/dev/null)
-    [[ -n "$branch" ]] && printf '\[\e[35m\]%s\[\e[0m\] ' "$branch"
+    [[ -n $branch ]] && printf '\[\e[35m\]%s\[\e[0m\] ' "$branch"
 }
 
 # Evaluate terminal color capability ONCE at startup, not every prompt
@@ -50,6 +50,10 @@ if ! shopt -oq posix; then
 fi
 
 # FZF INTEGRATION
+# Keep the native fzf history widget's deduplication, exact matching, and
+# newest-first history order while retaining the preferred full-height UI.
+export FZF_CTRL_R_OPTS='--height 100% --tiebreak=index --no-sort --exact --bind=ctrl-d:page-down,ctrl-u:page-up'
+
 for _fzf_script in \
     /usr/share/doc/fzf/examples/key-bindings.bash \
     "$HOME/.fzf.bash" \
@@ -62,25 +66,19 @@ for _fzf_script in \
 done
 unset _fzf_script
 
+# Keep cross-shell history synchronization before Ctrl+R. The fzf-provided
+# __fzf_history__ widget deduplicates identical commands for display.
+if declare -F __fzf_history__ >/dev/null; then
+    __fzf_history_with_sync__() {
+        _sync_history
+        __fzf_history__
+    }
+    bind -x '"\C-r": __fzf_history_with_sync__'
+fi
+
 # Set FZF previewer ONCE at startup
 if command -v bat >/dev/null 2>&1; then
     export FZF_CTRL_T_OPTS="--preview 'bat --color=always --line-range :500 {}'"
 else
     export FZF_CTRL_T_OPTS="--preview 'cat {}'"
 fi
-
-# Enhanced history search (CTRL-R)
-__fzf_history__() {
-    _sync_history
-    local line
-    line=$(HISTTIMEFORMAT= history | fzf --height 100% --tac --tiebreak=index --no-sort --exact \
-            --bind 'ctrl-d:page-down,ctrl-u:page-up')
-
-    if [[ -n "$line" ]]; then
-        if [[ "$line" =~ ^[[:space:]]*[0-9]+[[:space:]]+(.*)$ ]]; then
-            READLINE_LINE="${BASH_REMATCH[1]}"
-            READLINE_POINT=${#READLINE_LINE}
-        fi
-    fi
-}
-bind -x '"\C-r": __fzf_history__'
