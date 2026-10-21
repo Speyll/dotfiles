@@ -2,131 +2,344 @@
 set -euo pipefail
 
 ### CONFIGURATION ###
+
 video_output_dir="encVids"
 audio_output_dir="extAudios"
 optimized_audio_dir="optAudios"
 
 target_height=900
 target_fps=30
+
+# Normal video encoding
 crf=26
 preset="medium"
-audio_bitrate="128k"
-cover_timestamp="00:10:00" # Default value
 
-# SMART PARALLEL LIMITS (Safe for 8GB RAM)
+# GIF → H.265 encoding
+gif_crf=24
+
+audio_bitrate="128k"
+cover_timestamp="00:10:00"
+
+# Parallel limits
 MAX_VIDEO_JOBS=2
+MAX_GIF_JOBS=2
 MAX_AUDIO_JOBS=4
+
 
 ### UTILITY FUNCTIONS ###
 
-# Cleanup handler: If you hit Ctrl+C, kill all background child processes cleanly
 cleanup() {
     echo -e "\n[!] Script interrupted! Canceling background jobs..."
-    kill $(jobs -p) 2>/dev/null || true
+    jobs -pr | xargs -r kill 2>/dev/null || true
     exit 130
 }
+
 trap cleanup INT TERM
 
+
 die() {
-    echo -e "Error: $1" >&2
+    echo "Error: $1" >&2
     exit 1
 }
 
-# Fetch files instantly using native Bash globbing
+
+timestamp() {
+    date '+%H:%M:%S'
+}
+
+
+make_output_name() {
+    local base_name="$1"
+    local stem="${base_name%.*}"
+    local hash
+
+    hash=$(printf '%s' "$base_name" | sha1sum | cut -c1-6)
+
+    stem=$(
+        printf '%s' "$stem" |
+            iconv -f UTF-8 -t ASCII//TRANSLIT 2>/dev/null |
+            tr -cd '[:alnum:]_-'
+    ) || true
+
+    [[ -n "$stem" ]] || stem="media"
+
+    printf '%s_%s' "$stem" "$hash"
+}
+
+
 get_media_files() {
     local mode="$1"
-    local -n arr="$2" # Nameref to populate the target array
+    local -n arr="$2"
 
     shopt -s nullglob nocaseglob
+
     case "$mode" in
-        video) arr=(*.{mp4,mkv,ts,mov,avi,webm,gif,m4v}) ;;
-        audio|extract) arr=(*.{mp4,mkv,avi,mov,webm,flv,wmv,mpg,mpeg}) ;;
-        audio_files) arr=(*.{mp3,wav,flac,aac,m4a,opus}) ;;
-        *) die "Invalid media type: $mode" ;;
+        video)
+            arr=(
+                *.mp4
+                *.mkv
+                *.ts
+                *.mov
+                *.avi
+                *.webm
+                *.m4v
+            )
+            ;;
+
+        gif)
+            arr=(
+                *.gif
+            )
+            ;;
+
+        audio|extract)
+            arr=(
+                *.mp4
+                *.mkv
+                *.avi
+                *.mov
+                *.webm
+                *.flv
+                *.wmv
+                *.mpg
+                *.mpeg
+            )
+            ;;
+
+        audio_files)
+            arr=(
+                *.mp3
+                *.wav
+                *.flac
+                *.aac
+                *.m4a
+                *.opus
+            )
+            ;;
+
+        *)
+            shopt -u nullglob nocaseglob
+            die "Invalid media type: $mode"
+            ;;
     esac
+
     shopt -u nullglob nocaseglob
 }
 
+
 ### VIDEO ENCODING ###
+
 encode_video_file() {
     local file="$1"
     local base_name="${file##*/}"
-    local prefix hash clean_name output_file height fps fps_int vf_string
+    local clean_name output_file temp_file
+    local height fps fps_int vf_string
 
-    # Strip extension for cleaner prefixing (Added || true for safety on weird encodings)
-    prefix=$(echo "${base_name%.*}" | iconv -f UTF-8 -t ASCII//TRANSLIT 2>/dev/null | tr -cd '[:alnum:]' || true)
-    hash=$(echo -n "$base_name" | sha1sum | cut -c1-6)
-    clean_name="${prefix}_${hash}"
+    clean_name=$(make_output_name "$base_name")
     output_file="$video_output_dir/${clean_name}.mp4"
+    temp_file="${output_file}.tmp.$$"
 
-    if [[ -f "$output_file" ]]; then
-        echo "[$(date '+%H:%M:%S')] Skipping Video: $base_name (already exists)"
+    if [[ -f "$output_file" && -s "$output_file" ]]; then
+        echo "[$(timestamp)] Skipping Video: $base_name (already exists)"
         return 0
     fi
 
-    # Extract height and fps cleanly (Added || true to prevent set -e crashes)
-    read -r height fps < <(ffprobe -v error -select_streams v:0 -show_entries stream=height,r_frame_rate -of csv=p=0 "$file" 2>/dev/null | awk -F',' '{
-        split($2, a, "/");
-        fps = (a[2] == 0 || a[2] == "") ? a[1] : a[1] / a[2];
-        printf "%d %.3f\n", $1, fps
-    }' || true)
+    rm -f "$output_file" "$temp_file"
 
-    # Safety fallback if ffprobe fails to read streams
-    if [[ -z "$height" || -z "$fps" ]]; then
+    if ! read -r height fps < <(
+        ffprobe \
+            -v error \
+            -select_streams v:0 \
+            -show_entries stream=height,r_frame_rate \
+            -of csv=p=0 \
+            "$file" 2>/dev/null |
+            awk -F',' '{
+                split($2, a, "/")
+                fps = (a[2] == 0 || a[2] == "") ? a[1] : a[1] / a[2]
+                printf "%d %.3f\n", $1, fps
+            }'
+    ); then
         echo "[!] Error reading streams for $base_name. Skipping."
-        return 0
+        return 1
+    fi
+
+    if [[ -z "${height:-}" || -z "${fps:-}" ]]; then
+        echo "[!] Error reading streams for $base_name. Skipping."
+        return 1
     fi
 
     fps_int=${fps%.*}
 
     if (( height > target_height )); then
-        vf_string="scale=-2:$target_height"
+        vf_string="scale=-2:${target_height}"
     else
         vf_string="scale=iw:ih"
     fi
 
     if (( fps_int > target_fps )); then
-        vf_string="$vf_string,fps=$target_fps"
+        vf_string="${vf_string},fps=${target_fps}"
     fi
 
-    echo "[$(date '+%H:%M:%S')] Started Video: $base_name"
-    ionice -c3 nice -n 19 ffmpeg -nostdin -y -hide_banner -hwaccel auto \
+    echo "[$(timestamp)] Started Video: $base_name"
+
+    if ionice -c3 nice -n 19 ffmpeg \
+        -nostdin \
+        -y \
+        -hide_banner \
+        -loglevel error \
         -i "$file" \
-        -c:v libx265 -preset "$preset" -crf "$crf" -x265-params no-sao=1:bframes=8 \
+        -map 0:v:0 \
+        -map 0:a? \
+        -c:v libx265 \
+        -preset "$preset" \
+        -crf "$crf" \
+        -x265-params "no-sao=1:bframes=8" \
         -vf "$vf_string" \
-        -c:a libopus -b:a "$audio_bitrate" -vbr on \
-        -movflags +faststart -tag:v hvc1 \
-        -map_metadata 0 -map_chapters 0 \
-        "$output_file" >/dev/null 2>&1
-    echo "[$(date '+%H:%M:%S')] Finished Video: $base_name"
+        -c:a libopus \
+        -b:a "$audio_bitrate" \
+        -vbr on \
+        -movflags +faststart \
+        -tag:v hvc1 \
+        -map_metadata 0 \
+        -map_chapters 0 \
+        "$temp_file"
+    then
+        mv -f "$temp_file" "$output_file"
+        echo "[$(timestamp)] Finished Video: $base_name"
+    else
+        rm -f "$temp_file" "$output_file"
+        echo "[!] Failed Video: $base_name" >&2
+        return 1
+    fi
 }
 
-### AUDIO EXTRACTION ###
-extract_audio_file() {
+
+### GIF → VIDEO ENCODING ###
+
+encode_gif_file() {
     local file="$1"
-    local timestamp="$2"
     local base_name="${file##*/}"
-    local prefix hash clean_name output_file temp_cover audio_codec
-    local a_codec_args=()
+    local clean_name output_file temp_file
+    local height fps vf_string
 
-    prefix=$(echo "${base_name%.*}" | iconv -f UTF-8 -t ASCII//TRANSLIT 2>/dev/null | tr -cd '[:alnum:]' || true)
-    hash=$(echo -n "$base_name" | sha1sum | cut -c1-6)
-    clean_name="${prefix}_${hash}"
-    output_file="$audio_output_dir/${clean_name}.m4a"
-    temp_cover="$audio_output_dir/.cover_${hash}.jpg"
+    clean_name=$(make_output_name "$base_name")
+    output_file="$video_output_dir/${clean_name}.mp4"
+    temp_file="${output_file}.tmp.$$"
 
-    if [[ -f "$output_file" ]]; then
-        echo "[$(date '+%H:%M:%S')] Skipping Extract: $base_name (already exists)"
+    if [[ -f "$output_file" && -s "$output_file" ]]; then
+        echo "[$(timestamp)] Skipping GIF: $base_name (already exists)"
         return 0
     fi
 
-    echo "[$(date '+%H:%M:%S')] Extracting Audio: $base_name (Cover at: $timestamp)"
+    rm -f "$output_file" "$temp_file"
 
-    # 1. Extract cover frame quickly using input seeking
-    ffmpeg -nostdin -y -hide_banner -ss "$timestamp" -i "$file" -vframes 1 -q:v 2 "$temp_cover" >/dev/null 2>&1 || true
+    # Read GIF dimensions.
+    if ! read -r height fps < <(
+        ffprobe \
+            -v error \
+            -select_streams v:0 \
+            -show_entries stream=height,r_frame_rate \
+            -of csv=p=0 \
+            "$file" 2>/dev/null |
+            awk -F',' '{
+                split($2, a, "/")
+                fps = (a[2] == 0 || a[2] == "") ? a[1] : a[1] / a[2]
+                printf "%d %.3f\n", $1, fps
+            }'
+    ); then
+        echo "[!] Error reading GIF stream for $base_name. Skipping."
+        return 1
+    fi
 
-    # Detect existing audio codec for smart fallback
-    audio_codec=$(ffprobe -v error -select_streams a:0 -show_entries stream=codec_name -of default=noprint_wrappers=1:nokey=1 "$file" 2>/dev/null | head -n 1 || true)
+    if [[ -z "${height:-}" || -z "${fps:-}" ]]; then
+        echo "[!] Error reading GIF stream for $base_name. Skipping."
+        return 1
+    fi
+
+    # Downscale GIFs above 900p, just like normal videos.
+    # Do not upscale smaller GIFs.
+    if (( height > target_height )); then
+        vf_string="scale=-2:${target_height}"
+    else
+        vf_string="scale=iw:ih"
+    fi
+
+    echo "[$(timestamp)] Started GIF: $base_name"
+
+    # Preserve the GIF's original frame timing.
+    # Do not force 30 FPS: low-FPS GIFs would become unnecessarily larger.
+    if ionice -c3 nice -n 19 ffmpeg \
+        -nostdin \
+        -y \
+        -hide_banner \
+        -loglevel error \
+        -i "$file" \
+        -map 0:v:0 \
+        -vf "$vf_string" \
+        -fps_mode passthrough \
+        -c:v libx265 \
+        -preset "$preset" \
+        -crf "$gif_crf" \
+        -x265-params "no-sao=1:bframes=8" \
+        -pix_fmt yuv420p \
+        -an \
+        -movflags +faststart \
+        -tag:v hvc1 \
+        "$temp_file"
+    then
+        mv -f "$temp_file" "$output_file"
+        echo "[$(timestamp)] Finished GIF: $base_name"
+    else
+        rm -f "$temp_file" "$output_file"
+        echo "[!] Failed GIF: $base_name" >&2
+        return 1
+    fi
+}
+
+
+### AUDIO EXTRACTION ###
+
+extract_audio_file() {
+    local file="$1"
+    local timestamp_value="$2"
+    local base_name="${file##*/}"
+    local clean_name output_file temp_cover
+    local audio_codec
+    local a_codec_args=()
+
+    clean_name=$(make_output_name "$base_name")
+    output_file="$audio_output_dir/${clean_name}.m4a"
+    temp_cover="$audio_output_dir/.cover_${clean_name}.jpg"
+
+    if [[ -f "$output_file" && -s "$output_file" ]]; then
+        echo "[$(timestamp)] Skipping Extract: $base_name (already exists)"
+        return 0
+    fi
+
+    rm -f "$output_file" "$temp_cover"
+
+    echo "[$(timestamp)] Extracting Audio: $base_name (Cover at: $timestamp_value)"
+
+    ffmpeg \
+        -nostdin \
+        -y \
+        -hide_banner \
+        -loglevel error \
+        -ss "$timestamp_value" \
+        -i "$file" \
+        -vframes 1 \
+        -q:v 2 \
+        "$temp_cover" 2>/dev/null || true
+
+    audio_codec=$(
+        ffprobe \
+            -v error \
+            -select_streams a:0 \
+            -show_entries stream=codec_name \
+            -of default=noprint_wrappers=1:nokey=1 \
+            "$file" 2>/dev/null |
+            head -n 1
+    ) || true
 
     if [[ "$audio_codec" == "aac" || "$audio_codec" == "alac" ]]; then
         a_codec_args=(-c:a copy)
@@ -134,56 +347,99 @@ extract_audio_file() {
         a_codec_args=(-c:a aac -b:a 192k)
     fi
 
-    # 2. Mux full audio and the extracted cover image cleanly together
-    if [[ -f "$temp_cover" ]]; then
-        ionice -c3 nice -n 19 ffmpeg -nostdin -y -hide_banner \
+    if [[ -f "$temp_cover" && -s "$temp_cover" ]]; then
+        if ionice -c3 nice -n 19 ffmpeg \
+            -nostdin \
+            -y \
+            -hide_banner \
+            -loglevel error \
             -i "$file" \
             -i "$temp_cover" \
-            -map 0:a:0 -map 1:0 \
+            -map 0:a:0 \
+            -map 1:0 \
             "${a_codec_args[@]}" \
-            -c:v mjpeg -disposition:v:0 attached_pic \
-            -metadata:s:v:0 title="Album cover" -metadata:s:v:0 comment="Cover (front)" \
-            "$output_file" >/dev/null 2>&1
-        rm -f "$temp_cover"
+            -c:v mjpeg \
+            -disposition:v:0 attached_pic \
+            -metadata:s:v:0 title="Album cover" \
+            -metadata:s:v:0 comment="Cover (front)" \
+            "$output_file"
+        then
+            rm -f "$temp_cover"
+            echo "[$(timestamp)] Finished Extract: $base_name"
+        else
+            rm -f "$temp_cover" "$output_file"
+            echo "[!] Failed Extract: $base_name" >&2
+            return 1
+        fi
     else
-        # Fallback if cover frame extraction failed (e.g. video shorter than timestamp)
-        ionice -c3 nice -n 19 ffmpeg -nostdin -y -hide_banner \
+        if ionice -c3 nice -n 19 ffmpeg \
+            -nostdin \
+            -y \
+            -hide_banner \
+            -loglevel error \
             -i "$file" \
             -map 0:a:0 \
             "${a_codec_args[@]}" \
-            "$output_file" >/dev/null 2>&1
+            "$output_file"
+        then
+            echo "[$(timestamp)] Finished Extract: $base_name"
+        else
+            rm -f "$output_file"
+            echo "[!] Failed Extract: $base_name" >&2
+            return 1
+        fi
     fi
-
-    echo "[$(date '+%H:%M:%S')] Finished Extract: $base_name"
 }
 
+
 ### AUDIO OPTIMIZATION ###
+
 optimize_audio_file() {
     local file="$1"
     local base_name="${file##*/}"
-    local clean_name output_file
+    local clean_name output_file temp_file
 
-    clean_name=$(echo "${base_name%.*}" | tr -cd '[:alnum:]._-')
+    clean_name=$(make_output_name "$base_name")
     output_file="$optimized_audio_dir/${clean_name}.opus"
+    temp_file="${output_file}.tmp.$$"
 
-    if [[ -f "$output_file" ]]; then
-        echo "[$(date '+%H:%M:%S')] Skipping Opus: $base_name (already exists)"
+    if [[ -f "$output_file" && -s "$output_file" ]]; then
+        echo "[$(timestamp)] Skipping Opus: $base_name (already exists)"
         return 0
     fi
 
-    echo "[$(date '+%H:%M:%S')] Optimizing Audio: $base_name"
-    ionice -c3 nice -n 19 ffmpeg -nostdin -y -hide_banner \
+    rm -f "$output_file" "$temp_file"
+
+    echo "[$(timestamp)] Optimizing Audio: $base_name"
+
+    if ionice -c3 nice -n 19 ffmpeg \
+        -nostdin \
+        -y \
+        -hide_banner \
+        -loglevel error \
         -i "$file" \
-        -c:a libopus -b:a "$audio_bitrate" -vbr on \
-        "$output_file" >/dev/null 2>&1
-    echo "[$(date '+%H:%M:%S')] Finished Opus: $base_name"
+        -map 0:a:0 \
+        -c:a libopus \
+        -b:a "$audio_bitrate" \
+        -vbr on \
+        "$temp_file"
+    then
+        mv -f "$temp_file" "$output_file"
+        echo "[$(timestamp)] Finished Opus: $base_name"
+    else
+        rm -f "$temp_file" "$output_file"
+        echo "[!] Failed Opus: $base_name" >&2
+        return 1
+    fi
 }
 
+
 ### SMART PARALLEL JOB CONTROLLER ###
+
 process_batch() {
     local mode="$1"
     local max_jobs="$2"
-    local -n files="$3" # Array reference
+    local -n files="$3"
     local total_files="${#files[@]}"
 
     if (( total_files == 0 )); then
@@ -195,37 +451,65 @@ process_batch() {
 
     local running_jobs=0
     local completed_jobs=0
+    local failed_jobs=0
 
     for file in "${files[@]}"; do
-        # Launch task in the background
         case "$mode" in
-            video) encode_video_file "$file" & ;;
-            extract) extract_audio_file "$file" "$cover_timestamp" & ;;
-            audio_files) optimize_audio_file "$file" & ;;
+            video)
+                encode_video_file "$file" &
+                ;;
+
+            gif)
+                encode_gif_file "$file" &
+                ;;
+
+            extract)
+                extract_audio_file "$file" "$cover_timestamp" &
+                ;;
+
+            audio_files)
+                optimize_audio_file "$file" &
+                ;;
         esac
 
-        # Use safe arithmetic to avoid set -e triggering an exit on 0 evaluation
         running_jobs=$((running_jobs + 1))
 
-        # If we hit our limit, wait for at least one job to finish
         if (( running_jobs >= max_jobs )); then
-            wait -n || true
+            if wait -n; then
+                :
+            else
+                failed_jobs=$((failed_jobs + 1))
+            fi
+
             running_jobs=$((running_jobs - 1))
             completed_jobs=$((completed_jobs + 1))
+
             echo "--- Progress: $completed_jobs / $total_files files completed ---"
         fi
     done
 
-    # Wait for the remaining active background jobs to finish
     while (( running_jobs > 0 )); do
-        wait -n || true
+        if wait -n; then
+            :
+        else
+            failed_jobs=$((failed_jobs + 1))
+        fi
+
         running_jobs=$((running_jobs - 1))
         completed_jobs=$((completed_jobs + 1))
+
         echo "--- Progress: $completed_jobs / $total_files files completed ---"
     done
+
+    if (( failed_jobs > 0 )); then
+        echo "[!] $failed_jobs job(s) failed."
+        return 1
+    fi
 }
 
+
 ### MAIN PIPELINE ###
+
 setup_and_run() {
     local mode="$1"
     local dir="$2"
@@ -233,61 +517,110 @@ setup_and_run() {
     local files_array=()
 
     mkdir -p "$dir"
+
     get_media_files "$mode" files_array
     process_batch "$mode" "$max_jobs" files_array
 }
 
+
+### HELP ###
+
 show_help() {
-cat <<EOF
+    cat <<EOF
 Batch Media Processor - Smart Parallel
 
 Usage: $0 [option]
+
 Options:
   -v, --video           Batch encode videos to 900p H.265/Opus
-  -x, --extract [time]  Batch extract audio from videos. Optional: Provide timestamp for cover art (e.g., 00:01:00). Defaults to 00:10:00.
+  -g, --gif             Batch encode animated GIFs to 900p H.265 MP4
+  -x, --extract [time]  Batch extract audio from videos.
+                        Optional cover timestamp.
+                        Default: 00:10:00
   -a, --audio           Batch optimize audio files to Opus
   -h, --help            Show this help
+
+Examples:
+  $0 -v
+  $0 -g
+  $0 -x
+  $0 -x 00:01:30
+  $0 -a
 EOF
 }
 
-[ $# -eq 0 ] && { show_help; exit 0; }
+
+### ARGUMENT PARSER ###
+
+[[ $# -eq 0 ]] && {
+    show_help
+    exit 0
+}
 
 mode=""
 
-# Argument Parser
 while [[ $# -gt 0 ]]; do
     case "$1" in
         -v|--video)
             mode="video"
             shift
             ;;
+
+        -g|--gif)
+            mode="gif"
+            shift
+            ;;
+
         -x|--extract)
             mode="extract"
+
             if [[ $# -gt 1 && ! "$2" == -* ]]; then
                 cover_timestamp="$2"
                 shift
             fi
+
             shift
             ;;
+
         -a|--audio)
             mode="audio_files"
             shift
             ;;
+
         -h|--help)
             show_help
             exit 0
             ;;
+
         *)
             die "Unknown option: $1"
             ;;
     esac
 done
 
+
+### EXECUTE ###
+
 case "$mode" in
-    video)       setup_and_run "video" "$video_output_dir" "$MAX_VIDEO_JOBS" ;;
-    extract)     setup_and_run "extract" "$audio_output_dir" "$MAX_AUDIO_JOBS" ;;
-    audio_files) setup_and_run "audio_files" "$optimized_audio_dir" "$MAX_AUDIO_JOBS" ;;
-    *)           die "No valid operation specified. Use -h for help." ;;
+    video)
+        setup_and_run "video" "$video_output_dir" "$MAX_VIDEO_JOBS"
+        ;;
+
+    gif)
+        setup_and_run "gif" "$video_output_dir" "$MAX_GIF_JOBS"
+        ;;
+
+    extract)
+        setup_and_run "extract" "$audio_output_dir" "$MAX_AUDIO_JOBS"
+        ;;
+
+    audio_files)
+        setup_and_run "audio_files" "$optimized_audio_dir" "$MAX_AUDIO_JOBS"
+        ;;
+
+    *)
+        die "No valid operation specified. Use -h for help."
+        ;;
 esac
 
 echo "All tasks complete."
