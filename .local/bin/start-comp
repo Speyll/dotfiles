@@ -24,6 +24,8 @@ esac
 # --- Setup Logging ---
 mkdir -p "$HOME/.cache"
 LOGFILE="$HOME/.cache/wsession-errors"
+# Keep the log from growing forever
+[ -f "$LOGFILE" ] && [ "$(wc -c < "$LOGFILE")" -gt 1048576 ] && mv -f "$LOGFILE" "$LOGFILE.old"
 echo "=== $COMPOSITOR session started: $(date) ===" >> "$LOGFILE"
 exec >> "$LOGFILE" 2>&1
 
@@ -44,7 +46,10 @@ export XCURSOR_SIZE=24
 export XKB_DEFAULT_LAYOUT="us,fr"
 export XKB_DEFAULT_OPTIONS="grp:rctrl_rshift_toggle"
 
-export XDG_DATA_DIRS="$HOME/.local/share/flatpak/exports/share:/var/lib/flatpak/exports/share:/usr/local/share:/usr/share"
+XDG_DATA_DIRS="$HOME/.local/share/flatpak/exports/share:/var/lib/flatpak/exports/share:/usr/local/share:/usr/share"
+# Nix profile entries (.desktop files, portals, icons) are otherwise invisible
+[ -d "$HOME/.nix-profile/share" ] && XDG_DATA_DIRS="$XDG_DATA_DIRS:$HOME/.nix-profile/share"
+export XDG_DATA_DIRS
 
 # --- Push Static Environment to Systemd & D-Bus BEFORE starting compositor ---
 dbus-update-activation-environment --systemd XDG_CURRENT_DESKTOP XDG_SESSION_TYPE

@@ -1,29 +1,24 @@
 #!/bin/sh
+# List files that exist (top level) in <dir1> but not in <dir2>.
 
-# Check if directories are provided
 if [ -z "$1" ] || [ -z "$2" ]; then
-    echo "Usage: $0 <dir1> <dir2>"
+    echo "Usage: $0 <dir1> <dir2>" >&2
     exit 1
 fi
 
 dir1="$1"
 dir2="$2"
 
-# Ensure both directories exist
 if [ ! -d "$dir1" ] || [ ! -d "$dir2" ]; then
-    echo "Error: One or both directories do not exist."
+    echo "Error: One or both directories do not exist." >&2
     exit 1
 fi
 
-# Create named pipes
-mkfifo fifo1 fifo2
+tmp=$(mktemp -d) || exit 1
+trap 'rm -rf "$tmp"' EXIT INT TERM
 
-# List files in the top-level of both directories, sort, and write to named pipes
-(find "$dir1" -maxdepth 1 -type f -exec basename {} \; | sort > fifo1) &
-(find "$dir2" -maxdepth 1 -type f -exec basename {} \; | sort > fifo2) &
+list() { find "$1" -maxdepth 1 -type f -printf '%f\n' | sort; }
 
-# Compare file lists using comm
-comm -23 fifo1 fifo2
-
-# Clean up named pipes
-rm fifo1 fifo2
+list "$dir1" > "$tmp/a"
+list "$dir2" > "$tmp/b"
+comm -23 "$tmp/a" "$tmp/b"

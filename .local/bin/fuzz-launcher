@@ -24,8 +24,8 @@ launch() {
 # --- Menu Handlers ---
 handle_conn() {
     case "$(show_menu "󰈀 Network\n Bluetooth" 14 2)" in
-        "󰈀 Network")   launch alacritty -T "Network Manager" -e nmtui ;;
-        " Bluetooth") launch alacritty -T "Bluetooth Manager" -e bluetui ;;
+        "󰈀 Network")   launch foot -T "Network Manager" -e nmtui ;;
+        " Bluetooth") launch foot -T "Bluetooth Manager" -e bluetui ;;
     esac
 }
 
@@ -40,10 +40,10 @@ handle_utils() {
 
 handle_power() {
     case "$(show_menu " Shutdown\n Suspend\n Reboot\n Lock" 11 4)" in
-        " Shutdown") exec sudo poweroff ;;
-        " Suspend")  exec sudo systemctl suspend ;;
-        " Reboot")   exec sudo reboot ;;
-        " Lock")     exec hyprlock ;;
+        " Shutdown") exec systemctl poweroff ;;
+        " Suspend")  exec systemctl suspend ;;
+        " Reboot")   exec systemctl reboot ;;
+        " Lock")     exec loginctl lock-session ;;
     esac
 }
 
@@ -104,7 +104,7 @@ toggle_keyboard() {
 
 # --- Main Logic Pipeline ---
 case "$(show_menu "🖥️ Terminal\n🗃️ Explorer\n📺 Youtube\n🌐 Network\n⚙️ Utils\n🔌 Power" 13 6)" in
-    "🖥️ Terminal") launch alacritty ;;
+    "🖥️ Terminal") launch footclient ;;
     "🗃️ Explorer") launch pcmanfm-qt ;;
     "📺 Youtube") launch yt-search ;;
     "🌐 Network") handle_conn ;;

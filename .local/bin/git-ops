@@ -63,6 +63,10 @@ clean_repo() {
 }
 
 # Main execution
+case "$1" in
+  push|clean) ;;
+  *) printf '%s\n' "Usage: $0 {push|clean}"; exit 1 ;;
+esac
 get_commit_message
 
 case "$1" in

@@ -18,7 +18,7 @@ These are hand-maintained dotfiles with **no installer or dotfiles manager** —
 | Path | Contents |
 | --- | --- |
 | `.config/niri/` | Niri config, keybinds, layout, rules, outputs |
-| `.local/bin/` | Session helpers and utility scripts (`start-comp`, `autostart*`, …) |
+| `.local/bin/` | Session helpers and utility scripts (`start-comp`, `autostart*`, `keyring-doctor`, …) |
 | `.config/autostart.env` | Autostart options (wallpaper mode, theme, cursor) |
 | `.bashrc`, `.profile`, `.config/aliasrc` | Shell, history, aliases, PATH |
 | `.config/pipewire/`, `.config/wireplumber/` | Audio drop-ins (clock, ROC mic, ATH-M40x EQ) |
@@ -50,7 +50,19 @@ The fonts and cursor theme referenced by the configs are assumed to be installed
 
 ## Session and startup
 
-`start-comp <compositor>` (for example `start-comp niri-session`) sets the Wayland/XDG environment and `exec`s the compositor. Niri spawns `autostart` at startup, which waits for the compositor, clears stale daemons, starts the keyring, imports the environment into systemd and D-Bus, launches a polkit agent, and then runs `autostart-services` and `autostart-wallpaper`. Wallpaper mode, theme mode and cursor are set in `.config/autostart.env`.
+`start-comp <compositor>` (for example `start-comp niri-session`) sets the Wayland/XDG environment and `exec`s the compositor. Niri spawns `autostart` at startup, which waits for the compositor, clears stale daemons, imports the environment into systemd and D-Bus first, starts the keyring (systemd unit if available, waits for `org.freedesktop.secrets`), launches a polkit agent (systemd unit, then plain binaries), and then runs `autostart-services` and `autostart-wallpaper`. Wallpaper mode, theme mode and cursor are set in `.config/autostart.env`.
+
+## Keyring
+
+Apps such as Proton VPN keep their login in the Secret Service (`gnome-keyring`). For it to survive reboots without prompting, the **login keyring must be unlocked at login**. Best option: add the PAM module so it unlocks with your tty1 password (it only works when you type the password, not with autologin):
+
+```
+# /etc/pam.d/login  (end of the auth block, and end of the session block)
+auth       optional     pam_gnome_keyring.so
+session    optional     pam_gnome_keyring.so auto_start
+```
+
+The login keyring's password must equal your user password (change it once in Seahorse if it is not). `.local/bin/keyring-doctor` prints what is wrong (owner of the Secret Service, keyring files, default alias, PAM, apps started by xdg-autostart).
 
 ## Audio
 
@@ -64,7 +76,7 @@ Audio uses small PipeWire drop-ins under `.config/pipewire/pipewire.conf.d/`:
 
 ## Applications and integrations
 
-- **Portals** — `niri-portals.conf` sets `default=gnome;gtk;` (GNOME preferred, then GTK) for every interface without an explicit override; Access, Notification and FileChooser are pinned to GTK, while Secret tries `oo7-portal` then `gnome-keyring`. Requires `xdg-desktop-portal` with the GTK and GNOME backends.
+- **Portals** — `niri-portals.conf` sets `default=gnome;gtk;` (GNOME preferred, then GTK) for every interface without an explicit override; Access, Notification and FileChooser are pinned to GTK, while Secret is pinned to `gnome-keyring` (one Secret Service provider only). Requires `xdg-desktop-portal` with the GTK and GNOME backends.
 - **Default apps** — `mimeapps.list` maps common types to desktop entries in `.local/share/applications/`. Archive (`lxqt-archiver.desktop`) and torrent (`torrent.desktop`) associations are not shipped here and rely on an installed archiver/client.
 - **mpv** — a `modern-hardware` profile enables GPU decoding and shader sharpening (bundled `FSRCNNX` plus external `CAS-scaled.glsl`); automatic profile selection lives in `.config/mpv/scripts/auto-profile.lua`.
 - **Neovim** — `nvim-treesitter` tracks the `main` branch (Neovim ≥ 0.12); parsers are installed asynchronously on first launch.

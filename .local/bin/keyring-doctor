@@ -1,0 +1,53 @@
+#!/bin/sh
+# keyring-doctor - show why the keyring keeps prompting / apps (Proton VPN) log out.
+# Read-only: it only inspects state, never changes anything.
+
+DATA="${XDG_DATA_HOME:-$HOME/.local/share}/keyrings"
+ok()   { printf '  [ok]   %s\n' "$*"; }
+bad()  { printf '  [FAIL] %s\n' "$*"; }
+info() { printf '  [..]   %s\n' "$*"; }
+
+echo "1. Who owns org.freedesktop.secrets?"
+if busctl --user status org.freedesktop.secrets >/dev/null 2>&1; then
+    pid=$(busctl --user status org.freedesktop.secrets 2>/dev/null | sed -n 's/^PID=//p')
+    ok "owned by: $(ps -o comm= -p "$pid" 2>/dev/null) (pid $pid)"
+    [ "$(ps -o comm= -p "$pid" 2>/dev/null)" = "gnome-keyring-d" ] || info "not gnome-keyring: another provider (oo7, kwallet, keepassxc...) is answering"
+else
+    bad "nobody - no Secret Service is running"
+fi
+n=$(pgrep -c -f gnome-keyring-daemon 2>/dev/null)
+[ "${n:-0}" -le 1 ] && ok "gnome-keyring-daemon instances: ${n:-0}" || bad "$n gnome-keyring-daemon instances (should be 1)"
+
+echo "2. Keyring files in $DATA"
+if [ -d "$DATA" ]; then
+    ls -l "$DATA" | sed 's/^/         /'
+    [ -f "$DATA/default" ] && info "default alias -> $(cat "$DATA/default")" || bad "no 'default' alias file (apps will ask to CREATE a keyring every time)"
+    for f in "$DATA"/*.keyring; do
+        [ -f "$f" ] || continue
+        case "$(head -c 12 "$f")" in
+            GnomeKeyring) info "$(basename "$f"): encrypted" ;;
+            *)            info "$(basename "$f"): plaintext/other format" ;;
+        esac
+    done
+else
+    bad "$DATA does not exist - keyrings are not being saved here (different HOME/XDG_DATA_HOME, or wiped at boot?)"
+fi
+[ -d "$DATA/v1" ] && info "v1/ directory present: an oo7-based provider has created its own keyrings too"
+
+echo "3. Collections as the Secret Service sees them"
+busctl --user get-property org.freedesktop.secrets /org/freedesktop/secrets org.freedesktop.Secret.Service Collections 2>/dev/null | sed 's/^/         /'
+for a in default login; do
+    c=$(busctl --user call org.freedesktop.secrets /org/freedesktop/secrets org.freedesktop.Secret.Service ReadAlias s "$a" 2>/dev/null)
+    info "alias '$a' -> ${c:-<none>}"
+done
+
+echo "4. PAM auto-unlock at tty login"
+if grep -qs pam_gnome_keyring /etc/pam.d/login; then ok "/etc/pam.d/login has pam_gnome_keyring"
+else bad "/etc/pam.d/login has no pam_gnome_keyring (nothing unlocks the login keyring at boot)"; fi
+
+echo "5. Things that start before the keyring is ready (xdg-autostart)"
+systemctl --user list-units --no-legend 'app-*@autostart.service' 2>/dev/null | sed 's/^/         /'
+ls "${XDG_CONFIG_HOME:-$HOME/.config}/autostart" 2>/dev/null | sed 's/^/         ~\/.config\/autostart\//'
+
+echo "6. Portal backend for Secret"
+grep -hs Secret "${XDG_CONFIG_HOME:-$HOME/.config}"/xdg-desktop-portal/*portals.conf | sed 's/^/         /'

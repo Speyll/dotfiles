@@ -29,7 +29,7 @@ for file in *; do
 
         # Ensure we actually got a URL back before trying to open it
         if [[ "$IMG_URL" == http* ]]; then
-            ENCODED_URL=$(python3 -c "import urllib.parse; print(urllib.parse.quote('$IMG_URL'))")
+            ENCODED_URL=$(python3 -c 'import sys, urllib.parse; print(urllib.parse.quote(sys.argv[1]))' "$IMG_URL")
             LENS_URL="https://lens.google.com/uploadbyurl?url=${ENCODED_URL}&hl=en-DZ"
 
             "$BROWSER" "$LENS_URL" 2>/dev/null &

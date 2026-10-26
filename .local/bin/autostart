@@ -7,6 +7,9 @@ CONFIG="$HOME/.config/autostart.env"
 exec >> "$LOG" 2>&1
 echo "=== Autostart: $(date) ==="
 
+have() { command -v "$1" >/dev/null 2>&1; }
+has_systemd() { [ -d /run/systemd/system ] && have systemctl; }
+
 # 1. Wait for Compositor (Efficiently)
 timeout=40 # 20 seconds at 0.5s intervals
 while [ -z "$WAYLAND_DISPLAY" ] && [ "$timeout" -gt 0 ]; do
@@ -14,47 +17,93 @@ while [ -z "$WAYLAND_DISPLAY" ] && [ "$timeout" -gt 0 ]; do
     timeout=$((timeout - 1))
 done
 
-# 2. Clean Previous Session Daemons
+# 2. Environment FIRST.
+# Everything that gets D-Bus/systemd-activated from here on (keyring, portals,
+# polkit agent, apps started by xdg-autostart) must already see
+# WAYLAND_DISPLAY, XDG_CURRENT_DESKTOP, ... so this has to happen before any
+# service below is started.
+if have dbus-update-activation-environment; then
+    if has_systemd; then
+        dbus-update-activation-environment --systemd --all
+    else
+        dbus-update-activation-environment --all
+    fi
+fi
+
+# 3. Clean Previous Session Daemons
 killall -q flavours mpvpaper swaybg fnott wlsunset cliphist waybar mako hypridle openrgb sunshine lxqt-policykit-agent
 sleep 0.5
 
-# 3. Core Environment & Auth
-if command -v gnome-keyring-daemon >/dev/null 2>&1; then
-    eval "$(gnome-keyring-daemon --start --components=secrets)"
-    export SSH_AUTH_SOCK
-fi
+# 4. Secret Service (gnome-keyring)
+# Exactly ONE daemon must own org.freedesktop.secrets. If the systemd unit
+# shipped by gnome-keyring exists we use it (this is also what D-Bus/socket
+# activation uses, so nothing can race us and start a second, different
+# instance); otherwise fall back to the classic --start.
+start_keyring() {
+    have gnome-keyring-daemon || return 0
 
-# 4. Interface Settings
-gsettings set org.gnome.desktop.interface cursor-theme "$CURSOR"
-gsettings set org.gnome.desktop.interface color-scheme 'prefer-dark'
-[ -n "$SWAYSOCK" ] && command -v swaymsg >/dev/null 2>&1 && swaymsg seat seat0 xcursor_theme "$CURSOR"
-
-# 5. DBus Update
-dbus-update-activation-environment --all
-dbus-update-activation-environment --systemd WAYLAND_DISPLAY XDG_CURRENT_DESKTOP XDG_SESSION_TYPE
-systemctl --user import-environment WAYLAND_DISPLAY XDG_CURRENT_DESKTOP XDG_SESSION_TYPE
-
-# 6. Polkit Agent Handoff (Prioritize systemd over detached binaries)
-if ! pgrep -f "(pol|policy)kit.*agent" >/dev/null; then
-    if [ -d /run/systemd/system ]; then
-        systemctl --user start hyprpolkitagent.service 2>/dev/null || \
-        systemctl --user start plasma-polkit-agent.service 2>/dev/null || \
-        systemctl --user start polkit-gnome-authentication-agent-1.service 2>/dev/null
-    elif command -v lxqt-policykit-agent >/dev/null 2>&1; then
-        lxqt-policykit-agent &
+    if has_systemd && systemctl --user cat gnome-keyring-daemon.service >/dev/null 2>&1; then
+        systemctl --user start gnome-keyring-daemon.service ||
+            echo "autostart: gnome-keyring-daemon.service failed to start"
     else
-        for agent in \
-            /usr/libexec/hyprpolkitagent \
-            /usr/lib/polkit-kde-authentication-agent-1 \
-            /usr/lib/polkit-gnome/polkit-gnome-authentication-agent-1 \
-            /usr/libexec/polkit-gnome-authentication-agent-1; do
-            if [ -x "$agent" ]; then
-                "$agent" &
-                break
-            fi
+        eval "$(gnome-keyring-daemon --start --components=secrets)"
+    fi
+
+    # Block (max ~5s) until the Secret Service really is on the bus, so the
+    # first app that asks for it does not hit a half-started daemon.
+    if have busctl; then
+        i=0
+        while [ "$i" -lt 25 ]; do
+            busctl --user status org.freedesktop.secrets >/dev/null 2>&1 && return 0
+            sleep 0.2
+            i=$((i + 1))
+        done
+        echo "autostart: org.freedesktop.secrets did not appear on the session bus"
+    fi
+}
+start_keyring
+
+# 5. Interface Settings
+if have gsettings; then
+    gsettings set org.gnome.desktop.interface cursor-theme "$CURSOR"
+    gsettings set org.gnome.desktop.interface color-scheme 'prefer-dark'
+fi
+[ -n "$SWAYSOCK" ] && have swaymsg && swaymsg seat seat0 xcursor_theme "$CURSOR"
+
+# 6. Polkit Agent Handoff
+# Try systemd units first, then fall through to plain binaries. (Previously the
+# binary fallback only ran on systems *without* systemd, so a systemd machine
+# with e.g. only lxqt-policykit-agent installed never got an agent at all.)
+start_polkit_agent() {
+    pgrep -f "(pol|policy)kit.*agent" >/dev/null 2>&1 && return 0
+
+    if has_systemd; then
+        for unit in hyprpolkitagent plasma-polkit-agent polkit-gnome-authentication-agent-1; do
+            systemctl --user cat "$unit.service" >/dev/null 2>&1 || continue
+            systemctl --user start "$unit.service" 2>/dev/null && return 0
         done
     fi
-fi
+
+    if have lxqt-policykit-agent; then
+        lxqt-policykit-agent &
+        return 0
+    fi
+
+    for agent in \
+        /usr/libexec/hyprpolkitagent \
+        /usr/lib/hyprpolkitagent/hyprpolkitagent \
+        /usr/lib/polkit-kde-authentication-agent-1 \
+        /usr/lib/polkit-gnome/polkit-gnome-authentication-agent-1 \
+        /usr/libexec/polkit-gnome-authentication-agent-1; do
+        if [ -x "$agent" ]; then
+            "$agent" &
+            return 0
+        fi
+    done
+
+    echo "autostart: no polkit agent found (VPN/NetworkManager auth prompts will fail)"
+}
+start_polkit_agent
 
 # 7. Launch Fragments
 ~/.local/bin/autostart-services &

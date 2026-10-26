@@ -5,8 +5,8 @@ alias \
     dir="dir --color=auto" \
     vdir="vdir --color=auto" \
     grep="grep --color=auto" \
-    fgrep="fgrep --color=auto" \
-    egrep="egrep --color=auto" \
+    fgrep="grep -F --color=auto" \
+    egrep="grep -E --color=auto" \
     diff="diff --color=auto" \
     ccat="highlight --out-format=ansi" \
     dfg="df -BG" \
