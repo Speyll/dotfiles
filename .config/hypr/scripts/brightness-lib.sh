@@ -21,6 +21,13 @@ ddc_set() { # selector value brightness
     esac
 }
 
+# Brightness the monitors are dimmed to. Shared so dim/resume agree.
+DIM_LEVEL=5
+
+# Where the last *real* (non-dimmed) brightness of each monitor is remembered
+# across reboots, so a monitor stranded at the dim level can still be restored.
+persist_dir() { printf '%s\n' "${XDG_STATE_HOME:-$HOME/.local/state}/hypridle-brightness"; }
+
 # Validate a single `getvcp 10 --terse` continuous response. Accept only exactly
 # one line in the "VCP 10 C cur max" form whose current value is a decimal
 # integer in 0..100. Prints the validated value, or nothing.
@@ -98,4 +105,12 @@ discover_monitors() {
             }
         }
     '
+}
+
+# Write brightness, then read it back. Succeeds only if the monitor really took
+# the value (ddcutil can exit 0 while a waking monitor ignores the write).
+ddc_set_verified() { # selector value brightness
+    ddc_set "$1" "$2" "$3" || return 1
+    sleep 0.3
+    [ "$(parse_ddc_brightness "$1" "$2")" = "$3" ]
 }

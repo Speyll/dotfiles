@@ -45,8 +45,15 @@ while IFS='|' read -r identity selector sel_val serial connector bus; do
     if [ ! -f "$state_file" ]; then
         current="$(parse_ddc_brightness "$selector" "$sel_val")"
         [ -n "$current" ] || continue
+        # Already at (or below) the dim level and nothing saved: the monitor is
+        # already dimmed. Never record the dimmed value as the "original",
+        # otherwise resume would "restore" it to the dim level forever.
+        [ "$current" -le "$DIM_LEVEL" ] && continue
         printf '%s\t%s\t%s\n' "$selector" "$sel_val" "$current" > "$state_file"
+        # Remember it across reboots too (used to rescue a stranded monitor).
+        mkdir -p "$(persist_dir)" 2>/dev/null &&
+            printf '%s\n' "$current" > "$(persist_dir)/$identity"
     fi
 
-    ddc_set "$selector" "$sel_val" 5
+    ddc_set "$selector" "$sel_val" "$DIM_LEVEL"
 done < <(discover_monitors)

@@ -19,13 +19,29 @@ if [ -n "${XDG_RUNTIME_DIR:-}" ] && [ -d "$XDG_RUNTIME_DIR" ] && [ -w "$XDG_RUNT
     state_dir="$XDG_RUNTIME_DIR/hypridle-brightness"
 fi
 if [ -z "$state_dir" ] || [ ! -d "$state_dir" ]; then
-    printf '%s: XDG_RUNTIME_DIR is unset, empty, or unusable; cannot restore saved brightness\n' "${0##*/}" >&2
-    exit 0
+    # No runtime state (e.g. dim state was lost): still try the rescue below.
+    state_dir=""
 fi
+
+# Rescue: a monitor sitting at the dim level with no saved runtime state is
+# stranded (dim state lost, or an earlier restore failed). Put it back to the
+# last real brightness remembered by brightness-dim.sh.
+rescue_stranded() {
+    [ -d "$(persist_dir)" ] || return 0
+    discover_monitors 2>/dev/null | while IFS='|' read -r cid csel csv _ _ _; do
+        [ -n "$cid" ] || continue
+        [ -n "$state_dir" ] && [ -f "$state_dir/monitors/$cid" ] && continue
+        [ -f "$(persist_dir)/$cid" ] || continue
+        IFS= read -r want < "$(persist_dir)/$cid"
+        case "${want:-}" in ''|*[!0-9]*) continue;; esac
+        now="$(parse_ddc_brightness "$csel" "$csv")"
+        [ -n "$now" ] && [ "$now" -le "$DIM_LEVEL" ] && ddc_set_verified "$csel" "$csv" "$want"
+    done
+}
 
 # Restore the laptop/internal panel from the saved raw value.
 internal_state="$state_dir/internal"
-if [ -f "$internal_state" ]; then
+if [ -n "$state_dir" ] && [ -f "$internal_state" ]; then
     IFS= read -r internal < "$internal_state"
     case "${internal:-}" in
         ''|*[!0-9]*) ;;
@@ -34,7 +50,11 @@ if [ -f "$internal_state" ]; then
 fi
 
 monitors_dir="$state_dir/monitors"
-[ -d "$monitors_dir" ] || exit 0
+if [ -z "$state_dir" ] || [ ! -d "$monitors_dir" ]; then
+    sleep 1
+    rescue_stranded
+    exit 0
+fi
 
 # Give the monitors a moment to become DDC/CI responsive, then rediscover and
 # restore. A saved state is only applied when its identity still matches a
@@ -83,7 +103,7 @@ while [ "$attempts" -lt 8 ]; do
         if [ -z "$msel" ] || [ -z "$msv" ]; then
             continue
         fi
-        ddc_set "$msel" "$msv" "$value" && rm -f "$state_file"
+        ddc_set_verified "$msel" "$msv" "$value" && rm -f "$state_file"
     done
 
     left=0
@@ -100,3 +120,5 @@ for state_file in "$monitors_dir"/*; do
     [ -f "$state_file" ] || continue
     printf '%s: could not restore saved state %s (monitor absent, changed, or unresponsive); keeping it\n' "${0##*/}" "${state_file##*/}" >&2
 done
+
+rescue_stranded
