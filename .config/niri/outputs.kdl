@@ -1,5 +1,5 @@
 output "DP-2" {
-    mode "1920x1080@120.000"
+    mode "1920x1080@180.003"
     scale 1.0
     transform "normal"
     position x=1080 y=840
@@ -8,7 +8,7 @@ output "DP-2" {
 }
 
 output "HDMI-A-1" {
-    mode "1920x1080@60.000"
+    mode "1920x1080@74.973"
     scale 1.0
     transform "270"
     position x=-0 y=0

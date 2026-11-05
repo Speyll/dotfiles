@@ -92,7 +92,7 @@ get_media_files() {
             )
             ;;
 
-        audio|extract)
+        extract)
             arr=(
                 *.mp4
                 *.mkv
@@ -137,7 +137,7 @@ encode_video_file() {
 
     clean_name=$(make_output_name "$base_name")
     output_file="$video_output_dir/${clean_name}.mp4"
-    temp_file="${output_file}.tmp.$$"
+    temp_file="${output_file%.mp4}.tmp.$$.mp4"
 
     if [[ -f "$output_file" && -s "$output_file" ]]; then
         echo "[$(timestamp)] Skipping Video: $base_name (already exists)"
@@ -224,7 +224,7 @@ encode_gif_file() {
 
     clean_name=$(make_output_name "$base_name")
     output_file="$video_output_dir/${clean_name}.mp4"
-    temp_file="${output_file}.tmp.$$"
+    temp_file="${output_file%.mp4}.tmp.$$.mp4"
 
     if [[ -f "$output_file" && -s "$output_file" ]]; then
         echo "[$(timestamp)] Skipping GIF: $base_name (already exists)"
@@ -233,7 +233,6 @@ encode_gif_file() {
 
     rm -f "$output_file" "$temp_file"
 
-    # Read GIF dimensions.
     if ! read -r height fps < <(
         ffprobe \
             -v error \
@@ -256,8 +255,8 @@ encode_gif_file() {
         return 1
     fi
 
-    # Downscale GIFs above 900p, just like normal videos.
-    # Do not upscale smaller GIFs.
+    # Downscale GIFs above 900p.
+    # Never upscale smaller GIFs.
     if (( height > target_height )); then
         vf_string="scale=-2:${target_height}"
     else
@@ -267,7 +266,7 @@ encode_gif_file() {
     echo "[$(timestamp)] Started GIF: $base_name"
 
     # Preserve the GIF's original frame timing.
-    # Do not force 30 FPS: low-FPS GIFs would become unnecessarily larger.
+    # Do not force 30 FPS.
     if ionice -c3 nice -n 19 ffmpeg \
         -nostdin \
         -y \
@@ -303,12 +302,13 @@ extract_audio_file() {
     local file="$1"
     local timestamp_value="$2"
     local base_name="${file##*/}"
-    local clean_name output_file temp_cover
+    local clean_name output_file temp_cover temp_output
     local audio_codec
     local a_codec_args=()
 
     clean_name=$(make_output_name "$base_name")
     output_file="$audio_output_dir/${clean_name}.m4a"
+    temp_output="${output_file%.m4a}.tmp.$$.m4a"
     temp_cover="$audio_output_dir/.cover_${clean_name}.jpg"
 
     if [[ -f "$output_file" && -s "$output_file" ]]; then
@@ -316,7 +316,7 @@ extract_audio_file() {
         return 0
     fi
 
-    rm -f "$output_file" "$temp_cover"
+    rm -f "$output_file" "$temp_output" "$temp_cover"
 
     echo "[$(timestamp)] Extracting Audio: $base_name (Cover at: $timestamp_value)"
 
@@ -362,12 +362,13 @@ extract_audio_file() {
             -disposition:v:0 attached_pic \
             -metadata:s:v:0 title="Album cover" \
             -metadata:s:v:0 comment="Cover (front)" \
-            "$output_file"
+            "$temp_output"
         then
+            mv -f "$temp_output" "$output_file"
             rm -f "$temp_cover"
             echo "[$(timestamp)] Finished Extract: $base_name"
         else
-            rm -f "$temp_cover" "$output_file"
+            rm -f "$temp_output" "$output_file" "$temp_cover"
             echo "[!] Failed Extract: $base_name" >&2
             return 1
         fi
@@ -380,11 +381,12 @@ extract_audio_file() {
             -i "$file" \
             -map 0:a:0 \
             "${a_codec_args[@]}" \
-            "$output_file"
+            "$temp_output"
         then
+            mv -f "$temp_output" "$output_file"
             echo "[$(timestamp)] Finished Extract: $base_name"
         else
-            rm -f "$output_file"
+            rm -f "$temp_output" "$output_file"
             echo "[!] Failed Extract: $base_name" >&2
             return 1
         fi
@@ -401,7 +403,7 @@ optimize_audio_file() {
 
     clean_name=$(make_output_name "$base_name")
     output_file="$optimized_audio_dir/${clean_name}.opus"
-    temp_file="${output_file}.tmp.$$"
+    temp_file="${output_file%.opus}.tmp.$$.opus"
 
     if [[ -f "$output_file" && -s "$output_file" ]]; then
         echo "[$(timestamp)] Skipping Opus: $base_name (already exists)"
@@ -469,6 +471,10 @@ process_batch() {
 
             audio_files)
                 optimize_audio_file "$file" &
+                ;;
+
+            *)
+                die "Invalid processing mode: $mode"
                 ;;
         esac
 
