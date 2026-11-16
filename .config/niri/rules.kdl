@@ -49,6 +49,14 @@ window-rule {
     opacity 1.0;
 }
 
+window-rule {
+    match app-id="^pcmanfm-qt$"
+    opacity 0.97;
+    background-effect {
+        blur true
+        xray true
+    }
+}
 
 window-rule {
     match app-id="^firefox$" title="^Picture-in-Picture$"
